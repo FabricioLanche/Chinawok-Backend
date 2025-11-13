@@ -1,0 +1,117 @@
+org: flanche
+service: chinawok-empleados
+
+provider:
+  name: aws
+  runtime: python3.13
+  memorySize: 256
+  timeout: 20
+  iam:
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+  environment:
+    TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
+    TABLE_RESENAS: ${env:TABLE_RESENAS}
+    TABLE_LOCALES: ${env:TABLE_LOCALES}
+    TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+
+functions:
+  # ========== EMPLEADOS ==========
+  crearEmpleado:
+    handler: empleados/crearEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados
+          method: post
+          cors: true
+          integration: lambda-proxy
+
+  obtenerEmpleado:
+    handler: empleados/obtenerEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
+  listarEmpleadosPorLocal:
+    handler: empleados/listarEmpleadosPorLocal.lambda_handler
+    events:
+      - http:
+          path: /empleados/local/{local_id}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
+  listarEmpleadosPorRol:
+    handler: empleados/listarEmpleadosPorRol.lambda_handler
+    events:
+      - http:
+          path: /empleados/local/{local_id}/rol/{role}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
+  actualizarEmpleado:
+    handler: empleados/actualizarEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}
+          method: put
+          cors: true
+          integration: lambda-proxy
+
+  eliminarEmpleado:
+    handler: empleados/eliminarEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}
+          method: delete
+          cors: true
+          integration: lambda-proxy
+
+  # ========== RESENHAS ==========
+  registrarResena:
+    handler: resenhas/registrarResena.lambda_handler
+    events:
+      - http:
+          path: /resenas
+          method: post
+          cors: true
+          integration: lambda-proxy
+
+  obtenerResenasPorLocal:
+    handler: resenhas/obtenerResenasPorLocal.lambda_handler
+    events:
+      - http:
+          path: /resenas/local/{local_id}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
+  obtenerResenasPorEmpleado:
+    handler: resenhas/obtenerResenasPorEmpleado.lambda_handler
+    events:
+      - http:
+          path: /resenas/empleado/{local_id}/{dni}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
+  actualizarResena:
+    handler: resenhas/actualizarResena.lambda_handler
+    events:
+      - http:
+          path: /resenas/{local_id}/{resena_id}
+          method: put
+          cors: true
+          integration: lambda-proxy
+
+  eliminarResena:
+    handler: resenhas/eliminarResena.lambda_handler
+    events:
+      - http:
+          path: /resenas/{local_id}/{resena_id}
+          method: delete
+          cors: true
+          integration: lambda-proxy

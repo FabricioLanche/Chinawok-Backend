@@ -1,0 +1,54 @@
+org: flanche
+service: chinawok-locales
+
+
+provider:
+  name: aws
+  runtime: python3.13
+  stage: dev
+  timeout: 20
+  memorySize: 256
+  iam:
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+  environment:
+    TABLE_LOCALES: ChinaWok-Locales
+    TABLE_USUARIOS: ChinaWok-Usuarios
+
+functions:
+  # -------- LOCAL --------
+  localListar:
+    handler: lambdas/getLocales.lambda_handler
+    events:
+      - http:
+          path: /local/listar
+          method: get
+          cors: true
+  localCrear:
+    handler: lambdas/crearLocal.lambda_handler
+    events:
+      - http:
+          path: /local/crear
+          method: post
+          cors: true
+  localObtener:
+    handler: lambdas/getLocalById.lambda_handler
+    events:
+      - http:
+          path: /local/obtener/{local_id}
+          method: get
+          cors: true
+  localActualizar:
+    handler: lambdas/editarLocal.lambda_handler
+    events:
+      - http:
+          path: /local/actualizar/{local_id}
+          method: put
+          cors: true
+  localEliminar:
+    handler: lambdas/eliminarLocal.lambda_handler
+    events:
+      - http:
+          path: /local/eliminar/{local_id}
+          method: delete
+          cors: true
+

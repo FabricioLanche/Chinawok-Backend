@@ -1,0 +1,109 @@
+org: flanche
+service: chinawok-usuarios
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
+    strip: false
+    usePipenv: false
+    usePoetry: false
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 512
+  timeout: 300
+  region: us-east-1
+  
+  environment:
+    TABLE_USUARIOS: ${env:TABLE_USUARIOS, 'ChinaWok-Usuarios'}
+    JWT_SECRET: ${env:JWT_SECRET, 'tu-clave-secreta-super-segura-cambiar-en-produccion'}
+    JWT_EXPIRATION_HOURS: ${env:JWT_EXPIRATION_HOURS, '24'}
+
+  iam:
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+
+package:
+  patterns:
+    - '!.git/**'
+    - '!.vscode/**'
+    - '!node_modules/**'
+    - '!__pycache__/**'
+    - '!*.pyc'
+    - 'personas/**'
+
+functions:
+  # 🔐 Authorizer centralizado
+  authorizer:
+    handler: personas/Authorizer.lambda_handler
+
+  crear:
+    handler: personas/Crear_usuario_ChinaWok.lambda_handler
+    events:
+      - http:
+          path: usuario/crear
+          method: post
+          cors: true
+          # Sin authorizer - endpoint público
+
+  login:
+    handler: personas/Login_usuario_ChinaWok.lambda_handler
+    events:
+      - http:
+          path: usuario/login
+          method: post
+          cors: true
+          # Sin authorizer - endpoint público
+
+  listar:
+    handler: personas/Listar_usuario_ChinaWok.lambda_handler
+    events:
+      - http:
+          path: usuario/listar
+          method: get
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: token
+
+  obtenerMiInfo:
+    handler: personas/Obtener_Mi_Info_ChinaWok.lambda_handler
+    events:
+      - http:
+          path: usuario/mi-info
+          method: get
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: token
+
+  modificar:
+    handler: personas/Modificar_Usuario_ChinaWok.lambda_handler
+    events:
+      - http:
+          path: usuario/modificar
+          method: put
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: token
+
+  eliminar:
+    handler: personas/Eliminar_usuario_ChinaWok.lambda_handler
+    events:
+      - http:
+          path: usuario/eliminar
+          method: delete
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: token
