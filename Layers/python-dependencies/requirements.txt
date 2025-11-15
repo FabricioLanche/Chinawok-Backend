@@ -8,7 +8,7 @@ boto3==1.34.34
 # Variables de entorno
 python-dotenv==1.0.0
 
-# JWT para autenticación (Usuarios)
+# JWT para autenticación (Usuarios) - IMPORTANTE: Se importa como 'jwt'
 PyJWT==2.8.0
 
 # Validación de schemas (Pedidos)

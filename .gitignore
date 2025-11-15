@@ -58,3 +58,7 @@ package-lock.json
 
 # Endpoints generados
 endpoints.txt
+
+# Lambda Layer build
+Layers/python-dependencies/python/
+Layers/python-dependencies-layer.zip

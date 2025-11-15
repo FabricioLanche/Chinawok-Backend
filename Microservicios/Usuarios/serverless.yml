@@ -16,7 +16,7 @@ provider:
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
   
-
+  # 🔥 USAR LAYER COMPARTIDO
   layers:
     - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
 

@@ -74,7 +74,6 @@ build_layer() {
     
     # Limpiar build anterior
     rm -rf python-dependencies/python
-    rm -f python-dependencies-layer.zip
     
     # Crear estructura
     mkdir -p python-dependencies/python
@@ -92,13 +91,8 @@ build_layer() {
         exit 1
     fi
     
-    # Crear ZIP
-    cd python-dependencies
-    zip -r ../python-dependencies-layer.zip python/ -q
-    cd ..
-    
-    # Limpiar temporal
-    rm -rf python-dependencies/python
+    # ⚠️ NO eliminar la carpeta python/ - Serverless la necesita para el despliegue
+    # La carpeta python-dependencies/python/ debe existir cuando serverless deploy se ejecute
     
     cd ..
     log_success "Lambda Layer construido correctamente"
