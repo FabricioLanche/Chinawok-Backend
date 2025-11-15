@@ -40,6 +40,44 @@ if ! aws sts get-caller-identity &> /dev/null; then
 fi
 log_success "Credenciales AWS verificadas"
 
+# Función para construir Lambda Layer
+build_layer() {
+    log "🔧 Construyendo Lambda Layer compartido..."
+    
+    cd Layers || exit 1
+    
+    # Limpiar build anterior
+    rm -rf python-dependencies/python
+    rm -f python-dependencies-layer.zip
+    
+    # Crear estructura
+    mkdir -p python-dependencies/python
+    
+    # Instalar dependencias
+    log "📦 Instalando dependencias en el layer..."
+    pip install -r python-dependencies/requirements.txt \
+        -t python-dependencies/python/ \
+        --quiet \
+        --upgrade \
+        --no-cache-dir
+    
+    if [ $? -ne 0 ]; then
+        log_error "Error al instalar dependencias del layer"
+        exit 1
+    fi
+    
+    # Crear ZIP
+    cd python-dependencies
+    zip -r ../python-dependencies-layer.zip python/ -q
+    cd ..
+    
+    # Limpiar temporal
+    rm -rf python-dependencies/python
+    
+    cd ..
+    log_success "Lambda Layer construido correctamente"
+}
+
 # Menú de opciones
 echo ""
 echo "┌─────────────────────────────────────────────────────────┐"
@@ -49,44 +87,38 @@ echo "│  1) 🚀 Despliegue completo (datos + microservicios)     │"
 echo "│  2) 📊 Solo poblar datos (DataGenerator)               │"
 echo "│  3) ⚙️  Solo desplegar microservicios                   │"
 echo "│  4) 🗑️  Eliminar todo (remove)                          │"
-echo "│  5) 🔄 Repoblar datos (limpia y recrea)                │"
 echo "└─────────────────────────────────────────────────────────┘"
 echo ""
-read -p "Selecciona una opción (1-5): " opcion
+read -p "Selecciona una opción (1-4): " opcion
 
 case $opcion in
     1)
         log_info "Iniciando despliegue completo..."
         
-        # Paso 0: Construir Lambda Layer
-        log "═══════════════════════════════════════════════════════"
-        log "🔧 PASO 0/3: Construyendo Lambda Layer compartido"
-        log "═══════════════════════════════════════════════════════"
-        cd layers || exit 1
-        bash build-layer.sh
-        if [ $? -ne 0 ]; then
-            log_error "Error al construir Lambda Layer"
-            exit 1
-        fi
-        cd ..
-        
-        # Paso 1: DataGenerator
+        # Paso 1: Construir Lambda Layer
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "📊 PASO 1/3: Población de datos"
+        log "🔧 PASO 1/3: Construyendo Lambda Layer compartido"
         log "═══════════════════════════════════════════════════════"
-        cd DataGenerator || exit 1
+        build_layer
+        
+        # Paso 2: Poblar datos
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "📊 PASO 2/3: Población de datos"
+        log "═══════════════════════════════════════════════════════"
+        cd Microservicios/DataGenerator || exit 1
         bash setup_and_run.sh
         if [ $? -ne 0 ]; then
             log_error "Error en DataGenerator"
             exit 1
         fi
-        cd ..
+        cd ../..
         
-        # Paso 2: Microservicios
+        # Paso 3: Despliegue de microservicios
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "⚙️  PASO 2/3: Despliegue de microservicios"
+        log "⚙️  PASO 3/3: Despliegue de microservicios"
         log "═══════════════════════════════════════════════════════"
         serverless deploy
         
@@ -100,50 +132,51 @@ case $opcion in
         
     2)
         log_info "Poblando datos..."
-        cd DataGenerator || exit 1
+        cd Microservicios/DataGenerator || exit 1
         bash setup_and_run.sh
-        cd ..
-        log_success "Datos poblados"
+        if [ $? -ne 0 ]; then
+            log_error "Error en DataGenerator"
+            exit 1
+        fi
+        cd ../..
+        log_success "Datos poblados exitosamente"
         ;;
         
     3)
         log_info "Desplegando microservicios..."
         
         # Construir layer primero
-        log "Construyendo Lambda Layer..."
-        cd layers && bash build-layer.sh && cd ..
+        build_layer
         
         # Desplegar todo
+        log ""
+        log "Desplegando servicios..."
         serverless deploy
-        log_success "Microservicios desplegados"
+        
+        if [ $? -eq 0 ]; then
+            log_success "Microservicios desplegados exitosamente"
+        else
+            log_error "Error en despliegue"
+            exit 1
+        fi
         ;;
         
     4)
         log_warning "⚠️  ADVERTENCIA: Esto eliminará TODOS los recursos"
         read -p "¿Estás seguro? (s/n): " confirmar
         if [ "$confirmar" = "s" ] || [ "$confirmar" = "S" ]; then
+            log "Eliminando recursos..."
             serverless remove
-            log_success "Recursos eliminados"
+            
+            if [ $? -eq 0 ]; then
+                log_success "Recursos eliminados exitosamente"
+            else
+                log_error "Error al eliminar recursos"
+                exit 1
+            fi
         else
             log_info "Operación cancelada"
         fi
-        ;;
-        
-    5)
-        log_info "Repoblando datos..."
-        cd DataGenerator || exit 1
-        
-        # Forzar regeneración
-        if [ -d "dynamodb_data" ]; then
-            log "Eliminando datos anteriores..."
-            rm -rf dynamodb_data
-        fi
-        
-        # Configurar modo replace automático
-        export AUTO_REPLACE=true
-        bash setup_and_run.sh
-        cd ..
-        log_success "Datos repoblados"
         ;;
         
     *)

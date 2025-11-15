@@ -1,9 +1,6 @@
 # ============================================================
 # LAMBDA LAYER - DEPENDENCIAS PYTHON COMPARTIDAS
 # ============================================================
-# Estas dependencias se empaquetan en un Lambda Layer
-# y se comparten entre todos los microservicios
-# ============================================================
 
 # AWS SDK (común en todos los servicios)
 boto3==1.34.34

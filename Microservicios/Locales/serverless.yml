@@ -11,8 +11,11 @@ provider:
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
   environment:
-    TABLE_LOCALES: ChinaWok-Locales
-    TABLE_USUARIOS: ChinaWok-Usuarios
+    TABLE_LOCALES: ${env:TABLE_LOCALES, 'ChinaWok-Locales'}
+    TABLE_USUARIOS: ${env:TABLE_USUARIOS, 'ChinaWok-Usuarios'}
+  
+  layers:
+    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
 
 functions:
   # -------- LOCAL --------

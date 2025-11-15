@@ -19,8 +19,7 @@ provider:
     CHINAWOK_REGION: ${self:provider.region}
     STEP_FUNCTION_PEDIDOS_NAME: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
     EVENT_BUS_NAME: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
-  
-  # 🔥 USAR LAYER COMPARTIDO
+
   layers:
     - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
 

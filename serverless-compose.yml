@@ -17,7 +17,7 @@ services:
   # ------------------------------------------------------------
   # Layer con todas las dependencias Python comunes
   shared-layer:
-    path: layers
+    path: Layers
     params:
       default:
         AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
@@ -27,7 +27,7 @@ services:
   # ------------------------------------------------------------
   # Gestión de usuarios, autenticación y autorización
   usuarios:
-    path: Usuarios
+    path: Microservicios/Usuarios
     dependsOn:
       - shared-layer  # Depende del layer compartido
     params:
@@ -42,7 +42,7 @@ services:
   # ------------------------------------------------------------
   # Gestión de locales/restaurantes
   locales:
-    path: Locales
+    path: Microservicios/Locales
     dependsOn:
       - shared-layer
       - usuarios  # Depende de usuarios para validaciones
@@ -57,7 +57,7 @@ services:
   # ------------------------------------------------------------
   # Gestión de empleados y reseñas
   empleados:
-    path: Empleados
+    path: Microservicios/Empleados
     dependsOn:
       - shared-layer
       - locales  # Depende de locales para asignación
@@ -74,7 +74,7 @@ services:
   # ------------------------------------------------------------
   # Gestión de pedidos, productos, combos y ofertas
   pedidos:
-    path: Pedidos
+    path: Microservicios/Pedidos
     dependsOn:
       - shared-layer
       - locales
@@ -97,7 +97,7 @@ services:
   # ------------------------------------------------------------
   # Orquestación del flujo de pedidos
   stepfunctions:
-    path: Stepfunctions
+    path: Microservicios/Stepfunctions
     dependsOn:
       - shared-layer
       - pedidos

@@ -66,9 +66,10 @@ fi
 # 2. Instalar dependencias
 log "📦 Paso 2/4: Instalando dependencias de Python..."
 
-if [ -f requirements.txt ]; then
-    log "Instalando paquetes desde requirements.txt..."
-    pip install -r requirements.txt --quiet
+# Usar requirements.txt del directorio raíz del proyecto (dos niveles arriba)
+if [ -f ../../requirements.txt ]; then
+    log "Instalando paquetes desde ../../requirements.txt..."
+    pip install -r ../../requirements.txt --quiet
     
     if [ $? -eq 0 ]; then
         log_success "Dependencias instaladas correctamente"
@@ -77,7 +78,7 @@ if [ -f requirements.txt ]; then
         exit 1
     fi
 else
-    log_error "Archivo requirements.txt no encontrado"
+    log_error "Archivo requirements.txt no encontrado en el directorio raíz"
     exit 1
 fi
 

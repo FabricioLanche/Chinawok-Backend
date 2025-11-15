@@ -8,7 +8,6 @@ Backend completo para la plataforma ChinaWok usando arquitectura de microservici
 - [Requisitos](#requisitos)
 - [Configuración Inicial](#configuración-inicial)
 - [Despliegue](#despliegue)
-- [Microservicios](#microservicios)
-- [Comandos Útiles](#comandos-útiles)
+- [Estructura del Proyecto](#estructura-del-proyecto)
 
 ## 🏗️ Arquitectura
