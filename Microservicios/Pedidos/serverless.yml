@@ -203,7 +203,8 @@ resources:
       Properties:
         Name: ${self:service}-rules
         Description: Reglas para enviar pedidos creados al Step Function
-        EventBusName: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
+        EventBusName: 
+          Fn::ImportValue: ChinaWok-EventBus-Name
         EventPattern:
           source:
             - chinawok.pedidos

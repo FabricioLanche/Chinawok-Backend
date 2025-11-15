@@ -18,9 +18,23 @@ layers:
     retain: false
 
 resources:
+  Resources:
+    # 🆕 EventBus para el sistema de pedidos
+    ChinawokPedidosEventBus:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
+  
   Outputs:
     PythonDependenciesLayerExport:
       Value:
         Ref: PythonDependenciesLambdaLayer
       Export:
         Name: ChinaWok-Python-Dependencies-Layer
+    
+    # 🆕 Exportar el nombre del EventBus
+    EventBusNameExport:
+      Value:
+        Ref: ChinawokPedidosEventBus
+      Export:
+        Name: ChinaWok-EventBus-Name
