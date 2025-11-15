@@ -152,38 +152,7 @@ show_endpoints() {
         fi
     done
     
-    # Guardar endpoints en archivo
-    cat > endpoints.txt << EOF
-╔════════════════════════════════════════════════════════════╗
-║              📡 CHINAWOK - ENDPOINTS DE API                ║
-╚════════════════════════════════════════════════════════════╝
-
-Fecha: $(date)
-Región: $AWS_REGION
-
-EOF
-    
-    for service_name in "${!service_dirs[@]}"; do
-        service_path="${service_dirs[$service_name]}"
-        
-        if [ -d "$service_path" ]; then
-            cd "$service_path" || continue
-            sls_service=$(grep "^service:" serverless.yml | awk '{print $2}')
-            
-            if [ -n "$sls_service" ]; then
-                api_id=$(aws apigateway get-rest-apis --region "$AWS_REGION" --query "items[?name=='dev-$sls_service'].id" --output text 2>/dev/null)
-                
-                if [ -n "$api_id" ] && [ "$api_id" != "None" ]; then
-                    endpoint="https://${api_id}.execute-api.${AWS_REGION}.amazonaws.com/dev"
-                    echo "$service_name: $endpoint" >> ../../endpoints.txt
-                fi
-            fi
-            
-            cd - > /dev/null || exit 1
-        fi
-    done
-    
-    log_info "Endpoints guardados en: endpoints.txt"
+    log ""
 }
 
 # Menú de opciones
