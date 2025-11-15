@@ -11,47 +11,31 @@
 # 3. Ejecuta: serverless deploy (despliega todos los servicios)
 # 4. O despliega servicios individuales: serverless deploy --service=usuarios
 
+org: flanche
+app: chinawok-backend
+stage: dev
+
 services:
-  # ------------------------------------------------------------
-  # LAMBDA LAYER: DEPENDENCIAS COMPARTIDAS
-  # ------------------------------------------------------------
-  # Layer con todas las dependencias Python comunes
   shared-layer:
     path: Layers
 
-  # ------------------------------------------------------------
-  # MICROSERVICIO: USUARIOS
-  # ------------------------------------------------------------
-  # Gestión de usuarios, autenticación y autorización
   usuarios:
     path: Microservicios/Usuarios
     dependsOn:
       - shared-layer
 
-  # ------------------------------------------------------------
-  # MICROSERVICIO: LOCALES
-  # ------------------------------------------------------------
-  # Gestión de locales/restaurantes
   locales:
     path: Microservicios/Locales
     dependsOn:
       - shared-layer
       - usuarios
 
-  # ------------------------------------------------------------
-  # MICROSERVICIO: EMPLEADOS
-  # ------------------------------------------------------------
-  # Gestión de empleados y reseñas
   empleados:
     path: Microservicios/Empleados
     dependsOn:
       - shared-layer
       - locales
 
-  # ------------------------------------------------------------
-  # MICROSERVICIO: PEDIDOS
-  # ------------------------------------------------------------
-  # Gestión de pedidos, productos, combos y ofertas
   pedidos:
     path: Microservicios/Pedidos
     dependsOn:
@@ -59,13 +43,10 @@ services:
       - locales
       - usuarios
 
-  # ------------------------------------------------------------
-  # MICROSERVICIO: STEP FUNCTIONS (WORKFLOW)
-  # ------------------------------------------------------------
-  # Orquestación del flujo de pedidos
   stepfunctions:
     path: Microservicios/Stepfunctions
     dependsOn:
       - shared-layer
       - pedidos
       - empleados
+
