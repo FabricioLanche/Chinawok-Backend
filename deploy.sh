@@ -112,94 +112,78 @@ show_endpoints() {
     log "╚════════════════════════════════════════════════════════════╝"
     log ""
     
-    # Obtener información de cada servicio usando serverless info
-    services=("Microservicios/Usuarios" "Microservicios/Locales" "Microservicios/Empleados" "Microservicios/Pedidos" "Microservicios/Stepfunctions")
-    service_names=("👤 Usuarios" "🏪 Locales" "👨‍🍳 Empleados" "🍜 Pedidos" "⚙️  Workflow")
+    # Arrays de servicios
+    declare -A service_dirs=(
+        ["👤 Usuarios"]="Microservicios/Usuarios"
+        ["🏪 Locales"]="Microservicios/Locales"
+        ["👨‍🍳 Empleados"]="Microservicios/Empleados"
+        ["🍜 Pedidos"]="Microservicios/Pedidos"
+        ["⚙️  Workflow"]="Microservicios/Stepfunctions"
+    )
     
-    for i in "${!services[@]}"; do
-        service_path="${services[$i]}"
-        service_name="${service_names[$i]}"
+    # Obtener región de AWS
+    AWS_REGION=$(aws configure get region 2>/dev/null || echo "us-east-1")
+    
+    # Obtener endpoints usando AWS CLI
+    for service_name in "${!service_dirs[@]}"; do
+        service_path="${service_dirs[$service_name]}"
         
         if [ -d "$service_path" ]; then
+            # Extraer el nombre del servicio del serverless.yml
             cd "$service_path" || continue
+            sls_service=$(grep "^service:" serverless.yml | awk '{print $2}')
             
-            # Obtener endpoint usando serverless info
-            endpoint=$(serverless info --verbose 2>/dev/null | grep "ServiceEndpoint:" | awk '{print $2}')
-            
-            if [ -n "$endpoint" ]; then
-                log_success "$service_name"
-                log "   URL: $endpoint"
+            if [ -n "$sls_service" ]; then
+                # Buscar API Gateway usando AWS CLI
+                api_id=$(aws apigateway get-rest-apis --region "$AWS_REGION" --query "items[?name=='dev-$sls_service'].id" --output text 2>/dev/null)
+                
+                if [ -n "$api_id" ] && [ "$api_id" != "None" ]; then
+                    endpoint="https://${api_id}.execute-api.${AWS_REGION}.amazonaws.com/dev"
+                    log_success "$service_name"
+                    log "   URL: $endpoint"
+                else
+                    log_warning "$service_name - API no encontrada en AWS"
+                fi
             else
-                log_warning "$service_name - No se pudo obtener el endpoint"
+                log_warning "$service_name - No se pudo leer serverless.yml"
             fi
             
             cd - > /dev/null || exit 1
         fi
     done
     
-    log ""
-    log "╔════════════════════════════════════════════════════════════╗"
-    log "║              📋 DOCUMENTACIÓN DE ENDPOINTS                 ║"
-    log "╚════════════════════════════════════════════════════════════╝"
-    log ""
-    log "👤 Usuarios:"
-    log "   POST   /usuario/crear"
-    log "   POST   /usuario/login"
-    log "   GET    /usuario/listar"
-    log "   GET    /usuario/mi-info"
-    log "   PUT    /usuario/modificar"
-    log "   DELETE /usuario/eliminar"
-    log ""
-    log "🏪 Locales:"
-    log "   GET    /local/listar"
-    log "   POST   /local/crear"
-    log "   GET    /local/obtener/{local_id}"
-    log "   PUT    /local/actualizar/{local_id}"
-    log "   DELETE /local/eliminar/{local_id}"
-    log ""
-    log "👨‍🍳 Empleados:"
-    log "   POST   /empleados"
-    log "   GET    /empleados/{local_id}/{dni}"
-    log "   GET    /empleados/local/{local_id}"
-    log "   GET    /empleados/local/{local_id}/rol/{role}"
-    log "   PUT    /empleados/{local_id}/{dni}"
-    log "   DELETE /empleados/{local_id}/{dni}"
-    log ""
-    log "   POST   /resenas"
-    log "   GET    /resenas/local/{local_id}"
-    log "   GET    /resenas/empleado/{local_id}/{dni}"
-    log "   PUT    /resenas/{local_id}/{resena_id}"
-    log "   DELETE /resenas/{local_id}/{resena_id}"
-    log ""
-    log "🍜 Pedidos:"
-    log "   POST   /productos"
-    log "   GET    /productos"
-    log "   PUT    /productos"
-    log "   DELETE /productos"
-    log ""
-    log "   POST   /combos"
-    log "   GET    /combos"
-    log "   PUT    /combos"
-    log "   DELETE /combos"
-    log ""
-    log "   POST   /ofertas"
-    log "   GET    /ofertas"
-    log "   PUT    /ofertas"
-    log "   DELETE /ofertas"
-    log ""
-    log "   POST   /pedidos"
-    log "   GET    /pedidos"
-    log "   PUT    /pedidos"
-    log "   DELETE /pedidos"
-    log ""
-    log "⚙️  Workflow:"
-    log "   POST   /workflow/iniciar"
-    log "   POST   /workflow/cocinar"
-    log "   POST   /workflow/empacar"
-    log "   POST   /workflow/enviar"
-    log "   POST   /workflow/confirmar"
-    log "   POST   /workflow/confirmar-recepcion"
-    log ""
+    # Guardar endpoints en archivo
+    cat > endpoints.txt << EOF
+╔════════════════════════════════════════════════════════════╗
+║              📡 CHINAWOK - ENDPOINTS DE API                ║
+╚════════════════════════════════════════════════════════════╝
+
+Fecha: $(date)
+Región: $AWS_REGION
+
+EOF
+    
+    for service_name in "${!service_dirs[@]}"; do
+        service_path="${service_dirs[$service_name]}"
+        
+        if [ -d "$service_path" ]; then
+            cd "$service_path" || continue
+            sls_service=$(grep "^service:" serverless.yml | awk '{print $2}')
+            
+            if [ -n "$sls_service" ]; then
+                api_id=$(aws apigateway get-rest-apis --region "$AWS_REGION" --query "items[?name=='dev-$sls_service'].id" --output text 2>/dev/null)
+                
+                if [ -n "$api_id" ] && [ "$api_id" != "None" ]; then
+                    endpoint="https://${api_id}.execute-api.${AWS_REGION}.amazonaws.com/dev"
+                    echo "$service_name: $endpoint" >> ../../endpoints.txt
+                fi
+            fi
+            
+            cd - > /dev/null || exit 1
+        fi
+    done
+    
+    log_info "Endpoints guardados en: endpoints.txt"
 }
 
 # Menú de opciones
