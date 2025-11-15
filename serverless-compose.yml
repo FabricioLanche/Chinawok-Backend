@@ -18,9 +18,6 @@ services:
   # Layer con todas las dependencias Python comunes
   shared-layer:
     path: Layers
-    params:
-      default:
-        org: ${env:SERVERLESS_ORG, 'flanche'}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: USUARIOS
@@ -30,9 +27,6 @@ services:
     path: Microservicios/Usuarios
     dependsOn:
       - shared-layer
-    params:
-      default:
-        org: ${env:SERVERLESS_ORG, 'flanche'}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: LOCALES
@@ -43,9 +37,6 @@ services:
     dependsOn:
       - shared-layer
       - usuarios
-    params:
-      default:
-        org: ${env:SERVERLESS_ORG, 'flanche'}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: EMPLEADOS
@@ -56,9 +47,6 @@ services:
     dependsOn:
       - shared-layer
       - locales
-    params:
-      default:
-        org: ${env:SERVERLESS_ORG, 'flanche'}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: PEDIDOS
@@ -70,9 +58,6 @@ services:
       - shared-layer
       - locales
       - usuarios
-    params:
-      default:
-        org: ${env:SERVERLESS_ORG, 'flanche'}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: STEP FUNCTIONS (WORKFLOW)
@@ -84,15 +69,3 @@ services:
       - shared-layer
       - pedidos
       - empleados
-    params:
-      default:
-        org: ${env:SERVERLESS_ORG, 'flanche'}
-
-# ------------------------------------------------------------
-# VARIABLES COMPARTIDAS
-# ------------------------------------------------------------
-# Estas variables están disponibles para todos los servicios
-params:
-  default:
-    region: ${env:AWS_REGION, 'us-east-1'}
-    org: ${env:SERVERLESS_ORG, 'flanche'}

@@ -1,4 +1,4 @@
-org: ${param:org}
+org: flanche
 service: chinawok-workflow
 
 provider:
