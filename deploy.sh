@@ -104,6 +104,104 @@ build_layer() {
     log_success "Lambda Layer construido correctamente"
 }
 
+# Función para mostrar URLs de los servicios desplegados
+show_endpoints() {
+    log ""
+    log "╔════════════════════════════════════════════════════════════╗"
+    log "║              📡 ENDPOINTS DE MICROSERVICIOS                ║"
+    log "╚════════════════════════════════════════════════════════════╝"
+    log ""
+    
+    # Obtener información de cada servicio usando serverless info
+    services=("Microservicios/Usuarios" "Microservicios/Locales" "Microservicios/Empleados" "Microservicios/Pedidos" "Microservicios/Stepfunctions")
+    service_names=("👤 Usuarios" "🏪 Locales" "👨‍🍳 Empleados" "🍜 Pedidos" "⚙️  Workflow")
+    
+    for i in "${!services[@]}"; do
+        service_path="${services[$i]}"
+        service_name="${service_names[$i]}"
+        
+        if [ -d "$service_path" ]; then
+            cd "$service_path" || continue
+            
+            # Obtener endpoint usando serverless info
+            endpoint=$(serverless info --verbose 2>/dev/null | grep "ServiceEndpoint:" | awk '{print $2}')
+            
+            if [ -n "$endpoint" ]; then
+                log_success "$service_name"
+                log "   URL: $endpoint"
+            else
+                log_warning "$service_name - No se pudo obtener el endpoint"
+            fi
+            
+            cd - > /dev/null || exit 1
+        fi
+    done
+    
+    log ""
+    log "╔════════════════════════════════════════════════════════════╗"
+    log "║              📋 DOCUMENTACIÓN DE ENDPOINTS                 ║"
+    log "╚════════════════════════════════════════════════════════════╝"
+    log ""
+    log "👤 Usuarios:"
+    log "   POST   /usuario/crear"
+    log "   POST   /usuario/login"
+    log "   GET    /usuario/listar"
+    log "   GET    /usuario/mi-info"
+    log "   PUT    /usuario/modificar"
+    log "   DELETE /usuario/eliminar"
+    log ""
+    log "🏪 Locales:"
+    log "   GET    /local/listar"
+    log "   POST   /local/crear"
+    log "   GET    /local/obtener/{local_id}"
+    log "   PUT    /local/actualizar/{local_id}"
+    log "   DELETE /local/eliminar/{local_id}"
+    log ""
+    log "👨‍🍳 Empleados:"
+    log "   POST   /empleados"
+    log "   GET    /empleados/{local_id}/{dni}"
+    log "   GET    /empleados/local/{local_id}"
+    log "   GET    /empleados/local/{local_id}/rol/{role}"
+    log "   PUT    /empleados/{local_id}/{dni}"
+    log "   DELETE /empleados/{local_id}/{dni}"
+    log ""
+    log "   POST   /resenas"
+    log "   GET    /resenas/local/{local_id}"
+    log "   GET    /resenas/empleado/{local_id}/{dni}"
+    log "   PUT    /resenas/{local_id}/{resena_id}"
+    log "   DELETE /resenas/{local_id}/{resena_id}"
+    log ""
+    log "🍜 Pedidos:"
+    log "   POST   /productos"
+    log "   GET    /productos"
+    log "   PUT    /productos"
+    log "   DELETE /productos"
+    log ""
+    log "   POST   /combos"
+    log "   GET    /combos"
+    log "   PUT    /combos"
+    log "   DELETE /combos"
+    log ""
+    log "   POST   /ofertas"
+    log "   GET    /ofertas"
+    log "   PUT    /ofertas"
+    log "   DELETE /ofertas"
+    log ""
+    log "   POST   /pedidos"
+    log "   GET    /pedidos"
+    log "   PUT    /pedidos"
+    log "   DELETE /pedidos"
+    log ""
+    log "⚙️  Workflow:"
+    log "   POST   /workflow/iniciar"
+    log "   POST   /workflow/cocinar"
+    log "   POST   /workflow/empacar"
+    log "   POST   /workflow/enviar"
+    log "   POST   /workflow/confirmar"
+    log "   POST   /workflow/confirmar-recepcion"
+    log ""
+}
+
 # Menú de opciones
 echo ""
 echo "┌─────────────────────────────────────────────────────────┐"
@@ -150,6 +248,9 @@ case $opcion in
         
         if [ $? -eq 0 ]; then
             log_success "🎉 Despliegue completo exitoso"
+            
+            # Mostrar endpoints
+            show_endpoints
         else
             log_error "Error en despliegue de microservicios"
             exit 1
@@ -181,6 +282,9 @@ case $opcion in
         
         if [ $? -eq 0 ]; then
             log_success "Microservicios desplegados exitosamente"
+            
+            # Mostrar endpoints
+            show_endpoints
         else
             log_error "Error en despliegue"
             exit 1
