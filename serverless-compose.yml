@@ -11,7 +11,7 @@
 # 3. Ejecuta: serverless deploy (despliega todos los servicios)
 # 4. O despliega servicios individuales: serverless deploy --service=usuarios
 
-org: flanche
+org: ${env:ORG_NAME}
 app: chinawok-backend
 stage: dev
 
