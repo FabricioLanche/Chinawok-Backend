@@ -1,4 +1,4 @@
-org: flanche
+org: ${param:org}
 service: chinawok-pedidos
 
 provider:

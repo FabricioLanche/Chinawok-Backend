@@ -1,3 +1,4 @@
+org: ${param:org}
 service: chinawok-shared-layer
 
 provider:
@@ -19,7 +20,6 @@ layers:
 
 resources:
   Resources:
-    # 🆕 EventBus para el sistema de pedidos
     ChinawokPedidosEventBus:
       Type: AWS::Events::EventBus
       Properties:
@@ -32,7 +32,6 @@ resources:
       Export:
         Name: ChinaWok-Python-Dependencies-Layer
     
-    # 🆕 Exportar el nombre del EventBus
     EventBusNameExport:
       Value:
         Ref: ChinawokPedidosEventBus
