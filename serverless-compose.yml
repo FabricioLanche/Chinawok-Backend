@@ -18,9 +18,6 @@ services:
   # Layer con todas las dependencias Python comunes
   shared-layer:
     path: Layers
-    params:
-      default:
-        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: USUARIOS
@@ -29,13 +26,7 @@ services:
   usuarios:
     path: Microservicios/Usuarios
     dependsOn:
-      - shared-layer  # Depende del layer compartido
-    params:
-      default:
-        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
-        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
-        JWT_SECRET: ${env:JWT_SECRET}
-        JWT_EXPIRATION_HOURS: ${env:JWT_EXPIRATION_HOURS}
+      - shared-layer
 
   # ------------------------------------------------------------
   # MICROSERVICIO: LOCALES
@@ -45,12 +36,7 @@ services:
     path: Microservicios/Locales
     dependsOn:
       - shared-layer
-      - usuarios  # Depende de usuarios para validaciones
-    params:
-      default:
-        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
-        TABLE_LOCALES: ${env:TABLE_LOCALES}
-        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
+      - usuarios
 
   # ------------------------------------------------------------
   # MICROSERVICIO: EMPLEADOS
@@ -60,14 +46,7 @@ services:
     path: Microservicios/Empleados
     dependsOn:
       - shared-layer
-      - locales  # Depende de locales para asignación
-    params:
-      default:
-        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
-        TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
-        TABLE_RESENAS: ${env:TABLE_RESENAS}
-        TABLE_LOCALES: ${env:TABLE_LOCALES}
-        TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+      - locales
 
   # ------------------------------------------------------------
   # MICROSERVICIO: PEDIDOS
@@ -79,18 +58,6 @@ services:
       - shared-layer
       - locales
       - usuarios
-    params:
-      default:
-        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
-        TABLE_LOCALES: ${env:TABLE_LOCALES}
-        TABLE_COMBOS: ${env:TABLE_COMBOS}
-        TABLE_OFERTAS: ${env:TABLE_OFERTAS}
-        TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
-        TABLE_PRODUCTOS: ${env:TABLE_PRODUCTOS}
-        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
-        TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
-        STEP_FUNCTION_PEDIDOS_NAME: ${env:STEP_FUNCTION_PEDIDOS_NAME}
-        EVENT_BUS_NAME: ${env:EVENT_BUS_NAME}
 
   # ------------------------------------------------------------
   # MICROSERVICIO: STEP FUNCTIONS (WORKFLOW)
@@ -102,13 +69,6 @@ services:
       - shared-layer
       - pedidos
       - empleados
-    params:
-      default:
-        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
-        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
-        TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
-        TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
-        MODO_REALISTA: ${env:MODO_REALISTA}
 
 # ------------------------------------------------------------
 # VARIABLES COMPARTIDAS
