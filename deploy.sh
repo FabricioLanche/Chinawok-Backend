@@ -32,6 +32,32 @@ fi
 
 log_success "Archivo .env encontrado"
 
+# Verificar e instalar Serverless Framework
+log "Verificando Serverless Framework..."
+if ! command -v serverless &> /dev/null; then
+    log_warning "Serverless Framework no está instalado"
+    log "Instalando Serverless Framework globalmente..."
+    
+    # Verificar si npm está instalado
+    if ! command -v npm &> /dev/null; then
+        log_error "npm no está instalado. Instálalo primero:"
+        log_error "  sudo apt update && sudo apt install -y nodejs npm"
+        exit 1
+    fi
+    
+    # Instalar serverless
+    npm install -g serverless
+    
+    if [ $? -eq 0 ]; then
+        log_success "Serverless Framework instalado correctamente"
+    else
+        log_error "Error al instalar Serverless Framework"
+        exit 1
+    fi
+else
+    log_success "Serverless Framework encontrado: $(serverless --version | head -n1)"
+fi
+
 # Verificar credenciales AWS
 log "Verificando credenciales AWS..."
 if ! aws sts get-caller-identity &> /dev/null; then
