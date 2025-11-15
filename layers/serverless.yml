@@ -1,0 +1,27 @@
+service: chinawok-shared-layer
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+
+layers:
+  pythonDependencies:
+    path: python-dependencies
+    name: chinawok-python-dependencies
+    description: Dependencias Python compartidas para todos los microservicios ChinaWok
+    compatibleRuntimes:
+      - python3.12
+      - python3.13
+    retain: false
+
+# Exportar el ARN del layer para que otros servicios lo usen
+resources:
+  Outputs:
+    PythonDependenciesLayerExport:
+      Value:
+        Ref: PythonDependenciesLambdaLayer
+      Export:
+        Name: ChinaWok-Python-Dependencies-Layer

@@ -1,0 +1,120 @@
+# ============================================================
+# CHINAWOK BACKEND - SERVERLESS COMPOSE
+# ============================================================
+# Este archivo orquesta el despliegue de todos los microservicios
+# del backend de ChinaWok usando Serverless Framework Compose
+# ============================================================
+
+# Instrucciones de uso:
+# 1. Configura tu archivo .env basándote en .env.example
+# 2. Asegúrate de tener credenciales AWS configuradas en ~/.aws/credentials
+# 3. Ejecuta: serverless deploy (despliega todos los servicios)
+# 4. O despliega servicios individuales: serverless deploy --service=usuarios
+
+services:
+  # ------------------------------------------------------------
+  # LAMBDA LAYER: DEPENDENCIAS COMPARTIDAS
+  # ------------------------------------------------------------
+  # Layer con todas las dependencias Python comunes
+  shared-layer:
+    path: layers
+    params:
+      default:
+        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+
+  # ------------------------------------------------------------
+  # MICROSERVICIO: USUARIOS
+  # ------------------------------------------------------------
+  # Gestión de usuarios, autenticación y autorización
+  usuarios:
+    path: Usuarios
+    dependsOn:
+      - shared-layer  # Depende del layer compartido
+    params:
+      default:
+        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
+        JWT_SECRET: ${env:JWT_SECRET}
+        JWT_EXPIRATION_HOURS: ${env:JWT_EXPIRATION_HOURS}
+
+  # ------------------------------------------------------------
+  # MICROSERVICIO: LOCALES
+  # ------------------------------------------------------------
+  # Gestión de locales/restaurantes
+  locales:
+    path: Locales
+    dependsOn:
+      - shared-layer
+      - usuarios  # Depende de usuarios para validaciones
+    params:
+      default:
+        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+        TABLE_LOCALES: ${env:TABLE_LOCALES}
+        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
+
+  # ------------------------------------------------------------
+  # MICROSERVICIO: EMPLEADOS
+  # ------------------------------------------------------------
+  # Gestión de empleados y reseñas
+  empleados:
+    path: Empleados
+    dependsOn:
+      - shared-layer
+      - locales  # Depende de locales para asignación
+    params:
+      default:
+        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+        TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
+        TABLE_RESENAS: ${env:TABLE_RESENAS}
+        TABLE_LOCALES: ${env:TABLE_LOCALES}
+        TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+
+  # ------------------------------------------------------------
+  # MICROSERVICIO: PEDIDOS
+  # ------------------------------------------------------------
+  # Gestión de pedidos, productos, combos y ofertas
+  pedidos:
+    path: Pedidos
+    dependsOn:
+      - shared-layer
+      - locales
+      - usuarios
+    params:
+      default:
+        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+        TABLE_LOCALES: ${env:TABLE_LOCALES}
+        TABLE_COMBOS: ${env:TABLE_COMBOS}
+        TABLE_OFERTAS: ${env:TABLE_OFERTAS}
+        TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+        TABLE_PRODUCTOS: ${env:TABLE_PRODUCTOS}
+        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
+        TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
+        STEP_FUNCTION_PEDIDOS_NAME: ${env:STEP_FUNCTION_PEDIDOS_NAME}
+        EVENT_BUS_NAME: ${env:EVENT_BUS_NAME}
+
+  # ------------------------------------------------------------
+  # MICROSERVICIO: STEP FUNCTIONS (WORKFLOW)
+  # ------------------------------------------------------------
+  # Orquestación del flujo de pedidos
+  stepfunctions:
+    path: Stepfunctions
+    dependsOn:
+      - shared-layer
+      - pedidos
+      - empleados
+    params:
+      default:
+        AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+        TABLE_USUARIOS: ${env:TABLE_USUARIOS}
+        TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
+        TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+        MODO_REALISTA: ${env:MODO_REALISTA}
+
+# ------------------------------------------------------------
+# VARIABLES COMPARTIDAS
+# ------------------------------------------------------------
+# Estas variables están disponibles para todos los servicios
+params:
+  default:
+    region: ${env:AWS_REGION, 'us-east-1'}
+    org: ${env:SERVERLESS_ORG, 'flanche'}

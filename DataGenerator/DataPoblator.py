@@ -339,6 +339,14 @@ def ask_user_action_global():
     """
     Pregunta al usuario qué hacer con los datos existentes (aplica a todas las tablas)
     """
+    # Verificar si hay variable de entorno para modo automático
+    auto_replace = os.getenv('AUTO_REPLACE', 'false').lower() == 'true'
+    
+    if auto_replace:
+        print("\n   🤖 Modo automático activado: REPLACE")
+        print("   ✅ Se eliminarán todos los datos existentes antes de insertar")
+        return "replace"
+    
     print("\n" + "=" * 60)
     print("❓ ACCIÓN GLOBAL PARA DATOS EXISTENTES")
     print("=" * 60)

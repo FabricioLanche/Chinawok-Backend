@@ -13,6 +13,10 @@ provider:
     TABLE_RESENAS: ${env:TABLE_RESENAS}
     TABLE_LOCALES: ${env:TABLE_LOCALES}
     TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+  
+  # 🔥 USAR LAYER COMPARTIDO
+  layers:
+    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
 
 functions:
   # ========== EMPLEADOS ==========

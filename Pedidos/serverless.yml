@@ -20,6 +20,10 @@ provider:
     STEP_FUNCTION_PEDIDOS_NAME: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
     EVENT_BUS_NAME: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
   
+  # 🔥 USAR LAYER COMPARTIDO
+  layers:
+    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
+
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
@@ -193,12 +197,6 @@ functions:
   # La regla se debe crear manualmente o con CloudFormation resources
   # Esta función Lambda ya no es necesaria si EventBridge va directo al Step Function
 
-custom:
-  pythonRequirements:
-    dockerizePip: true
-    slim: true
-
-# Recursos adicionales para crear la regla de EventBridge que apunte al Step Function
 resources:
   Resources:
     PedidoCreadoEventRule:

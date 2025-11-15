@@ -14,15 +14,12 @@ provider:
     TABLE_PEDIDOS: ${env:TABLE_PEDIDOS, 'ChinaWok-Pedidos'}
     MODO_REALISTA: ${env:MODO_REALISTA, 'false'}
   
+  # 🔥 USAR LAYER COMPARTIDO
+  layers:
+    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
+  
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-
-custom:
-  pythonRequirements:
-    dockerizePip: false
-    usePoetry: false
-    slim: true
-    strip: false
 
 functions:
   iniciarWorkflow:

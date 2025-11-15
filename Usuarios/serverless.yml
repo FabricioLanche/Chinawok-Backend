@@ -1,14 +1,6 @@
 org: flanche
 service: chinawok-usuarios
 
-custom:
-  pythonRequirements:
-    dockerizePip: true
-    slim: true
-    strip: false
-    usePipenv: false
-    usePoetry: false
-
 provider:
   name: aws
   runtime: python3.12
@@ -23,6 +15,10 @@ provider:
 
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+  
+  # 🔥 USAR LAYER COMPARTIDO (elimina necesidad de requirements.txt)
+  layers:
+    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
 
 package:
   patterns:
@@ -31,6 +27,7 @@ package:
     - '!node_modules/**'
     - '!__pycache__/**'
     - '!*.pyc'
+    - '!requirements.txt'  # Ya no se necesita
     - 'personas/**'
 
 functions:
