@@ -326,19 +326,19 @@ resources:
           }
 
   Outputs:
-    EventBusName:
-      Description: Nombre del Event Bus de ChinaWok
+    PedidosEventBusName:
+      Description: Nombre del Event Bus de Pedidos
       Value: !Ref ChinaWokEventBus
       Export:
-        Name: ChinaWok-EventBus-Name
+        Name: ChinaWok-Pedidos-EventBus-Name
     
-    EventBusArn:
-      Description: ARN del Event Bus de ChinaWok
+    PedidosEventBusArn:
+      Description: ARN del Event Bus de Pedidos
       Value: !GetAtt ChinaWokEventBus.Arn
       Export:
-        Name: ChinaWok-EventBus-Arn
+        Name: ChinaWok-Pedidos-EventBus-Arn
     
-    StateMachineArn:
+    PedidosStateMachineArn:
       Description: ARN del Step Function de procesamiento de pedidos
       Value: !GetAtt ChinaWokPedidosStateMachine.Arn
       Export:
