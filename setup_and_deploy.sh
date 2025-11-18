@@ -97,6 +97,7 @@ build_layer() {
     cd Layers || exit 1
     
     # Limpiar build anterior de libs (las dependencias de terceros)
+    log "🗑️  Limpiando python/libs anterior..."
     rm -rf python/libs/*
     
     # Crear estructura si no existe
@@ -117,6 +118,17 @@ build_layer() {
     
     log_success "✅ Dependencias instaladas en python/libs/"
     log_info "ℹ️  Las utilidades compartidas ya están en python/utils/"
+    
+    # Verificar estructura
+    log "🔍 Verificando estructura del layer..."
+    if [ -d "python/libs" ] && [ -d "python/utils" ]; then
+        log_success "✅ Estructura del layer correcta"
+        log_info "   📂 python/libs/ - Dependencias de terceros"
+        log_info "   📂 python/utils/ - Código compartido"
+    else
+        log_error "❌ Estructura del layer incorrecta"
+        exit 1
+    fi
 
     cd ..
     log_success "Lambda Layer construido correctamente"

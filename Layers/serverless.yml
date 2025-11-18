@@ -9,7 +9,7 @@ provider:
 
 layers:
   pythonDependencies:
-    path: python-dependencies
+    path: python
     name: ${self:provider.stage, 'dev'}-chinawok-python-dependencies
     description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
     compatibleRuntimes:
