@@ -265,140 +265,65 @@ resources:
       Properties:
         StateMachineName: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
         RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-        DefinitionString:
-          Fn::Sub:
-            - |
-              {
-                "Comment": "Workflow de procesamiento de pedidos ChinaWok",
-                "StartAt": "StepConfirmar",
-                "States": {
-                  "StepConfirmar": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-step-confirmar",
-                    "Next": "StepCocinar",
-                    "Retry": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "IntervalSeconds": 2,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
-                      }
-                    ],
-                    "Catch": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "NotificarError"
-                      }
-                    ]
-                  },
-                  "StepCocinar": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-step-cocinar",
-                    "Next": "StepEmpacar",
-                    "Retry": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "IntervalSeconds": 2,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
-                      }
-                    ],
-                    "Catch": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "NotificarError"
-                      }
-                    ]
-                  },
-                  "StepEmpacar": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-step-empacar",
-                    "Next": "StepEnviar",
-                    "Retry": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "IntervalSeconds": 2,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
-                      }
-                    ],
-                    "Catch": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "NotificarError"
-                      }
-                    ]
-                  },
-                  "StepEnviar": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-step-enviar",
-                    "Next": "ConfirmarRecepcion",
-                    "Retry": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "IntervalSeconds": 2,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
-                      }
-                    ],
-                    "Catch": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "NotificarError"
-                      }
-                    ]
-                  },
-                  "ConfirmarRecepcion": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-confirmar-recepcion",
-                    "Next": "LiberarPedido",
-                    "Retry": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "IntervalSeconds": 2,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
-                      }
-                    ],
-                    "Catch": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "NotificarError"
-                      }
-                    ]
-                  },
-                  "LiberarPedido": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-liberar-pedido",
-                    "Next": "NotificarExito",
-                    "Retry": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "IntervalSeconds": 2,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
-                      }
-                    ],
-                    "Catch": [
-                      {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "NotificarError"
-                      }
-                    ]
-                  },
-                  "NotificarExito": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-notificar-usuario",
-                    "End": true
-                  },
-                  "NotificarError": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:chinawok-pedidos-workflow-notificar-usuario",
-                    "End": true
-                  }
-                }
+        DefinitionString: |
+          {
+            "Comment": "Workflow de procesamiento de pedidos ChinaWok",
+            "StartAt": "StepConfirmar",
+            "States": {
+              "StepConfirmar": {
+                "Type": "Task",
+                "Resource": "${WorkflowStepConfirmarLambdaFunctionQualifiedArn}",
+                "Next": "StepCocinar",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+              },
+              "StepCocinar": {
+                "Type": "Task",
+                "Resource": "${WorkflowStepCocinarLambdaFunctionQualifiedArn}",
+                "Next": "StepEmpacar",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+              },
+              "StepEmpacar": {
+                "Type": "Task",
+                "Resource": "${WorkflowStepEmpacarLambdaFunctionQualifiedArn}",
+                "Next": "StepEnviar",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+              },
+              "StepEnviar": {
+                "Type": "Task",
+                "Resource": "${WorkflowStepEnviarLambdaFunctionQualifiedArn}",
+                "Next": "ConfirmarRecepcion",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+              },
+              "ConfirmarRecepcion": {
+                "Type": "Task",
+                "Resource": "${WorkflowConfirmarRecepcionLambdaFunctionQualifiedArn}",
+                "Next": "LiberarPedido",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+              },
+              "LiberarPedido": {
+                "Type": "Task",
+                "Resource": "${WorkflowLiberarPedidoLambdaFunctionQualifiedArn}",
+                "Next": "NotificarExito",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+              },
+              "NotificarExito": {
+                "Type": "Task",
+                "Resource": "${WorkflowNotificarUsuarioLambdaFunctionQualifiedArn}",
+                "End": true
+              },
+              "NotificarError": {
+                "Type": "Task",
+                "Resource": "${WorkflowNotificarUsuarioLambdaFunctionQualifiedArn}",
+                "End": true
               }
-            - {}
+            }
+          }
 
   Outputs:
     EventBusName:
