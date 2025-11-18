@@ -6,6 +6,7 @@ provider:
   memorySize: 512
   timeout: 300
   region: us-east-1
+  stage: ${param:stage}
   
   environment:
     TABLE_LOCALES: ${env:TABLE_LOCALES, 'ChinaWok-Locales'}
@@ -22,7 +23,7 @@ provider:
     MODO_REALISTA: ${env:MODO_REALISTA, 'false'}
 
   layers:
-    - ${cf:chinawok-shared-layer-dev.PythonDependenciesLayerExport}
+    - ${cf:${self:provider.stage}-ChinaWok-Python-Dependencies-Layer}
 
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole

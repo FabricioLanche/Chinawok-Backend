@@ -2,19 +2,23 @@ service: chinawok-empleados
 
 provider:
   name: aws
-  runtime: python3.13
+  runtime: python3.12
   memorySize: 256
   timeout: 20
+  region: us-east-1
+  stage: ${param:stage}
+  
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+    
   environment:
-    TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS}
-    TABLE_RESENAS: ${env:TABLE_RESENAS}
-    TABLE_LOCALES: ${env:TABLE_LOCALES}
-    TABLE_PEDIDOS: ${env:TABLE_PEDIDOS}
+    TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS, 'ChinaWok-Empleados'}
+    TABLE_RESENAS: ${env:TABLE_RESENAS, 'ChinaWok-Resenas'}
+    TABLE_LOCALES: ${env:TABLE_LOCALES, 'ChinaWok-Locales'}
+    TABLE_PEDIDOS: ${env:TABLE_PEDIDOS, 'ChinaWok-Pedidos'}
   
   layers:
-    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
+    - ${cf:${self:provider.stage}-ChinaWok-Python-Dependencies-Layer}
 
 functions:
   # ========== EMPLEADOS ==========

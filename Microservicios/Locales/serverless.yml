@@ -8,6 +8,7 @@ provider:
   memorySize: 512
   timeout: 300
   region: us-east-1
+  stage: ${param:stage}
   
   environment:
     # Variables de Locales
@@ -33,7 +34,7 @@ provider:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
   
   layers:
-    - ${cf:chinawok-shared-layer-dev.PythonDependenciesLayerExport}
+    - ${cf:${self:provider.stage}-ChinaWok-Python-Dependencies-Layer}
 
 functions:
   # ============================================================
