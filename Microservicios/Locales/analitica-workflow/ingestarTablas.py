@@ -27,31 +27,32 @@ def handler(event, context):
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
     bucket = os.environ['S3_BUCKET_NAME']
     
-    logger.info(f'Iniciando ingesta de {len(TABLES)} tablas')
+    logger.info(f'🚀 Iniciando ingesta de {len(TABLES)} tablas - Timestamp: {timestamp}')
     
     for table_key, dynamodb_table in TABLES.items():
         try:
-            logger.info(f'Procesando tabla: {dynamodb_table}')
+            logger.info(f'📋 Procesando tabla: {dynamodb_table}')
             
             # Obtener datos de DynamoDB
             items = get_table_data(dynamodb_table)
-            logger.info(f'Obtenidos {len(items)} items de {dynamodb_table}')
+            logger.info(f'✅ Obtenidos {len(items)} items de {dynamodb_table}')
             
             # Preparar ruta S3
             s3_key = f'ingesta/{table_key}/{timestamp}.json'
             
-            # Subir datos directamente a S3 (sin wrapper)
+            # Subir datos directamente a S3
             upload_to_s3(bucket, s3_key, items)
             
-            results.append({
+            result = {
                 'table': table_key,
                 'dynamodb_table': dynamodb_table,
                 'records': len(items),
                 's3_location': f's3://{bucket}/{s3_key}',
                 'status': 'success'
-            })
+            }
             
-            logger.info(f'Tabla {table_key} procesada exitosamente')
+            results.append(result)
+            logger.info(f'✅ Tabla {table_key} procesada exitosamente: {len(items)} registros')
             
         except Exception as e:
             error_msg = f'Error procesando {table_key}: {str(e)}'
@@ -74,10 +75,11 @@ def handler(event, context):
     
     if errors:
         response_body['errors'] = errors
+        logger.error(f'❌ Ingesta completada con errores: {len(errors)} tablas fallidas')
+    else:
+        logger.info(f'✅ Ingesta completada exitosamente: {len(results)} tablas procesadas')
     
     status_code = 200 if not errors else 207
-    
-    logger.info(f'Ingesta completada: {len(results)} exitosas, {len(errors)} fallidas')
     
     return {
         'statusCode': status_code,
