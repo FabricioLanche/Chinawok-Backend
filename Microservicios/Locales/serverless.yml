@@ -1,56 +1,173 @@
+org: flanche
 service: chinawok-locales
 
 
 provider:
   name: aws
-  runtime: python3.13
-  stage: dev
-  timeout: 20
-  memorySize: 256
-  iam:
-    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
+  runtime: python3.12
+  memorySize: 512
+  timeout: 300
+  region: us-east-1
+  
   environment:
+    # Variables de Locales
     TABLE_LOCALES: ${env:TABLE_LOCALES, 'ChinaWok-Locales'}
     TABLE_USUARIOS: ${env:TABLE_USUARIOS, 'ChinaWok-Usuarios'}
+    # Variables para Analítica (con valores por defecto seguros)
+    ATHENA_DATABASE: ${env:ATHENA_DATABASE, 'chinawok_analytics'}
+    ATHENA_OUTPUT_LOCATION: ${env:ATHENA_OUTPUT_LOCATION, 'chinawok-data/athena-results/'}
+    ATHENA_WORKGROUP: 'development'
+    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+    # Variables para Ingesta
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, 'chinawok-data/data-ingestion'}
+    TABLE_PRODUCTOS: ${env:TABLE_PRODUCTOS, 'ChinaWok-Productos'}
+    TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS, 'ChinaWok-Empleados'}
+    TABLE_COMBOS: ${env:TABLE_COMBOS, 'ChinaWok-Combos'}
+    TABLE_PEDIDOS: ${env:TABLE_PEDIDOS, 'ChinaWok-Pedidos'}
+    TABLE_OFERTAS: ${env:TABLE_OFERTAS, 'ChinaWok-Ofertas'}
+    TABLE_RESENAS: ${env:TABLE_RESENAS, 'ChinaWok-Resenas'}
+  
+  iam:
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
   
   layers:
-    - Fn::ImportValue: ChinaWok-Python-Dependencies-Layer
+    - ${cf:chinawok-shared-layer-dev.PythonDependenciesLayerExport}
 
 functions:
-  # -------- LOCAL --------
+  # ============================================================
+  # GESTIÓN DE LOCALES
+  # ============================================================
   localListar:
-    handler: lambdas/getLocales.lambda_handler
+    handler: locales/listarLocales.lambda_handler
+    name: ${self:service}-listar
+    description: Listar todos los locales
     events:
       - http:
-          path: /local/listar
+          path: local/listar
           method: get
           cors: true
+  
   localCrear:
-    handler: lambdas/crearLocal.lambda_handler
+    handler: locales/crearLocal.lambda_handler
+    name: ${self:service}-crear
+    description: Crear un nuevo local
     events:
       - http:
-          path: /local/crear
+          path: local/crear
           method: post
           cors: true
+  
   localObtener:
-    handler: lambdas/getLocalById.lambda_handler
+    handler: locales/obtenerLocal.lambda_handler
+    name: ${self:service}-obtener
+    description: Obtener un local por ID
     events:
       - http:
-          path: /local/obtener/{local_id}
+          path: local/obtener/{local_id}
           method: get
           cors: true
+  
   localActualizar:
-    handler: lambdas/editarLocal.lambda_handler
+    handler: locales/editarLocal.lambda_handler
+    name: ${self:service}-actualizar
+    description: Actualizar un local existente
     events:
       - http:
-          path: /local/actualizar/{local_id}
+          path: local/actualizar/{local_id}
           method: put
           cors: true
+  
   localEliminar:
-    handler: lambdas/eliminarLocal.lambda_handler
+    handler: locales/eliminarLocal.lambda_handler
+    name: ${self:service}-eliminar
+    description: Eliminar un local
     events:
       - http:
-          path: /local/eliminar/{local_id}
+          path: local/eliminar/{local_id}
           method: delete
           cors: true
+
+  # ============================================================
+  # ANALÍTICA - CONSULTAS ATHENA
+  # ============================================================
+  analiticaProductosVendidos:
+    handler: analitica/mejorProducto.handler
+    name: ${self:service}-analitica-productos
+    description: Consulta los productos más vendidos por local
+    events:
+      - http:
+          path: analitica/productos
+          method: post
+          cors: true
+  
+  analiticaMejorPersonal:
+    handler: analitica/mejorPersonal.handler
+    name: ${self:service}-analitica-personal
+    description: Ranking del mejor personal por local
+    events:
+      - http:
+          path: analitica/personal
+          method: post
+          cors: true
+  
+  analiticaRecordDiario:
+    handler: analitica/recordDiario.handler
+    name: ${self:service}-analitica-diario
+    description: Récord diario de pedidos y revenue por mes
+    events:
+      - http:
+          path: analitica/diario
+          method: post
+          cors: true
+  
+  analiticaEstadisticasGenerales:
+    handler: analitica/estadisticas.handler
+    name: ${self:service}-analitica-estadisticas
+    description: Dashboard con estadísticas generales del local
+    events:
+      - http:
+          path: analitica/estadisticas
+          method: post
+          cors: true
+
+  # ============================================================
+  # INGESTA DE DATOS - DYNAMODB A S3
+  # ============================================================
+  ingestTable:
+    handler: analitica/ingest_table.handler
+    name: ${self:service}-ingest-table
+    description: Ingesta datos de una tabla específica de DynamoDB a S3
+    events:
+      - http:
+          path: ingest/{tableName}
+          method: post
+          cors: true
+          request:
+            parameters:
+              paths:
+                tableName: true
+  
+  ingestAllTables:
+    handler: analitica/ingest_all_tables.handler
+    name: ${self:service}-ingest-all-tables
+    description: Ingesta datos de todas las tablas de DynamoDB a S3
+    events:
+      - http:
+          path: ingest/all
+          method: post
+          cors: true
+      - schedule:
+          rate: cron(0 2 * * ? *)
+          enabled: false
+          description: Ejecuta ingesta diaria a las 2 AM UTC
+
+package:
+  individually: false
+  exclude:
+    - node_modules/**
+    - .git/**
+    - .env
+    - __pycache__/**
+    - "*.pyc"
+    - "**/requirements.txt"
 

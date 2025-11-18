@@ -54,11 +54,20 @@ functions:
           cors: true
           integration: lambda-proxy
 
-  actualizarEmpleado:
-    handler: empleados/actualizarEmpleado.lambda_handler
+  editarEmpleado:
+    handler: empleados/editarEmpleado.lambda_handler
     events:
       - http:
           path: /empleados/{local_id}/{dni}
+          method: put
+          cors: true
+          integration: lambda-proxy
+
+  actualizarPromedioEmpleado:
+    handler: empleados/actualizarPromedioEmpleado.lambda_handler
+    events:
+      - http:
+          path: /empleados/{local_id}/{dni}/promedio
           method: put
           cors: true
           integration: lambda-proxy
@@ -100,8 +109,8 @@ functions:
           cors: true
           integration: lambda-proxy
 
-  actualizarResena:
-    handler: resenhas/actualizarResena.lambda_handler
+  editarResena:
+    handler: resenhas/editarResena.lambda_handler
     events:
       - http:
           path: /resenas/{local_id}/{resena_id}

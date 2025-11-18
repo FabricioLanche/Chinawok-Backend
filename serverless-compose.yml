@@ -42,18 +42,5 @@ services:
       - shared-layer
       - locales
       - usuarios
-
-  stepfunctions:
-    path: Microservicios/Stepfunctions
-    dependsOn:
-      - shared-layer
-      - pedidos
       - empleados
-
-  analitica:
-    path: Microservicios/Analitica
-    dependsOn:
-      - shared-layer
-      - pedidos
-      - locales
 

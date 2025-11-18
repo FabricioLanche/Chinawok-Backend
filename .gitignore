@@ -28,9 +28,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# DataGenerator output
-DataGenerator/dynamodb_data/
-
 # Serverless
 .serverless/
 .serverless_plugins/

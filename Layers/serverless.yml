@@ -1,4 +1,4 @@
-service: chinawok-shared-layer
+service: chinawok-dependencias
 
 provider:
   name: aws
