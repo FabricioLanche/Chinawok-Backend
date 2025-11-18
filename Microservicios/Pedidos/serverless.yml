@@ -235,11 +235,11 @@ functions:
 
 resources:
   Resources:
-    # EventBridge Event Bus
-    ChinaWokEventBus:
+    # EventBridge Event Bus - NOMBRE ÚNICO
+    ChinaWokPedidosEventBus:
       Type: AWS::Events::EventBus
       Properties:
-        Name: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
+        Name: chinawok-pedidos-events
 
     # EventBridge Rule para PedidoCreado
     PedidoCreadoEventRule:
@@ -247,7 +247,7 @@ resources:
       Properties:
         Name: ${self:service}-pedido-creado-rule
         Description: Regla para enviar pedidos creados al Step Function
-        EventBusName: !Ref ChinaWokEventBus
+        EventBusName: !Ref ChinaWokPedidosEventBus
         EventPattern:
           source:
             - chinawok.pedidos
@@ -262,79 +262,96 @@ resources:
     # Step Functions State Machine
     ChinaWokPedidosStateMachine:
       Type: AWS::StepFunctions::StateMachine
+      DependsOn:
+        - WorkflowStepConfirmarLambdaFunction
+        - WorkflowStepCocinarLambdaFunction
+        - WorkflowStepEmpacarLambdaFunction
+        - WorkflowStepEnviarLambdaFunction
+        - WorkflowConfirmarRecepcionLambdaFunction
+        - WorkflowLiberarPedidoLambdaFunction
+        - WorkflowNotificarUsuarioLambdaFunction
       Properties:
         StateMachineName: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
         RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-        DefinitionString: |
-          {
-            "Comment": "Workflow de procesamiento de pedidos ChinaWok",
-            "StartAt": "StepConfirmar",
-            "States": {
-              "StepConfirmar": {
-                "Type": "Task",
-                "Resource": "${WorkflowStepConfirmarLambdaFunctionQualifiedArn}",
-                "Next": "StepCocinar",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
-              },
-              "StepCocinar": {
-                "Type": "Task",
-                "Resource": "${WorkflowStepCocinarLambdaFunctionQualifiedArn}",
-                "Next": "StepEmpacar",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
-              },
-              "StepEmpacar": {
-                "Type": "Task",
-                "Resource": "${WorkflowStepEmpacarLambdaFunctionQualifiedArn}",
-                "Next": "StepEnviar",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
-              },
-              "StepEnviar": {
-                "Type": "Task",
-                "Resource": "${WorkflowStepEnviarLambdaFunctionQualifiedArn}",
-                "Next": "ConfirmarRecepcion",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
-              },
-              "ConfirmarRecepcion": {
-                "Type": "Task",
-                "Resource": "${WorkflowConfirmarRecepcionLambdaFunctionQualifiedArn}",
-                "Next": "LiberarPedido",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
-              },
-              "LiberarPedido": {
-                "Type": "Task",
-                "Resource": "${WorkflowLiberarPedidoLambdaFunctionQualifiedArn}",
-                "Next": "NotificarExito",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
-              },
-              "NotificarExito": {
-                "Type": "Task",
-                "Resource": "${WorkflowNotificarUsuarioLambdaFunctionQualifiedArn}",
-                "End": true
-              },
-              "NotificarError": {
-                "Type": "Task",
-                "Resource": "${WorkflowNotificarUsuarioLambdaFunctionQualifiedArn}",
-                "End": true
+        DefinitionString:
+          Fn::Sub:
+            - |
+              {
+                "Comment": "Workflow de procesamiento de pedidos ChinaWok",
+                "StartAt": "StepConfirmar",
+                "States": {
+                  "StepConfirmar": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowStepConfirmarArn}",
+                    "Next": "StepCocinar",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+                  },
+                  "StepCocinar": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowStepCocinarArn}",
+                    "Next": "StepEmpacar",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+                  },
+                  "StepEmpacar": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowStepEmpacarArn}",
+                    "Next": "StepEnviar",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+                  },
+                  "StepEnviar": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowStepEnviarArn}",
+                    "Next": "ConfirmarRecepcion",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+                  },
+                  "ConfirmarRecepcion": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowConfirmarRecepcionArn}",
+                    "Next": "LiberarPedido",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+                  },
+                  "LiberarPedido": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowLiberarPedidoArn}",
+                    "Next": "NotificarExito",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2}],
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotificarError"}]
+                  },
+                  "NotificarExito": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowNotificarUsuarioArn}",
+                    "End": true
+                  },
+                  "NotificarError": {
+                    "Type": "Task",
+                    "Resource": "${WorkflowNotificarUsuarioArn}",
+                    "End": true
+                  }
+                }
               }
-            }
-          }
+            - WorkflowStepConfirmarArn: !GetAtt WorkflowStepConfirmarLambdaFunction.Arn
+              WorkflowStepCocinarArn: !GetAtt WorkflowStepCocinarLambdaFunction.Arn
+              WorkflowStepEmpacarArn: !GetAtt WorkflowStepEmpacarLambdaFunction.Arn
+              WorkflowStepEnviarArn: !GetAtt WorkflowStepEnviarLambdaFunction.Arn
+              WorkflowConfirmarRecepcionArn: !GetAtt WorkflowConfirmarRecepcionLambdaFunction.Arn
+              WorkflowLiberarPedidoArn: !GetAtt WorkflowLiberarPedidoLambdaFunction.Arn
+              WorkflowNotificarUsuarioArn: !GetAtt WorkflowNotificarUsuarioLambdaFunction.Arn
 
   Outputs:
     PedidosEventBusName:
       Description: Nombre del Event Bus de Pedidos
-      Value: !Ref ChinaWokEventBus
+      Value: !Ref ChinaWokPedidosEventBus
       Export:
         Name: ChinaWok-Pedidos-EventBus-Name
     
     PedidosEventBusArn:
       Description: ARN del Event Bus de Pedidos
-      Value: !GetAtt ChinaWokEventBus.Arn
+      Value: !GetAtt ChinaWokPedidosEventBus.Arn
       Export:
         Name: ChinaWok-Pedidos-EventBus-Arn
     
