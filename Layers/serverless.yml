@@ -1,4 +1,4 @@
-service: chinawok-dependencias
+service: chinawok-shared-layer
 
 provider:
   name: aws
@@ -11,28 +11,17 @@ layers:
   pythonDependencies:
     path: python-dependencies
     name: ${self:provider.stage, 'dev'}-chinawok-python-dependencies
-    description: Dependencias Python compartidas para todos los microservicios ChinaWok
+    description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
     compatibleRuntimes:
       - python3.12
       - python3.13
     retain: false
 
 resources:
-  Resources:
-    ChinawokPedidosEventBus:
-      Type: AWS::Events::EventBus
-      Properties:
-        Name: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
-  
   Outputs:
     PythonDependenciesLayerExport:
+      Description: ARN del Lambda Layer compartido de ChinaWok
       Value:
         Ref: PythonDependenciesLambdaLayer
       Export:
         Name: ChinaWok-Python-Dependencies-Layer
-    
-    EventBusNameExport:
-      Value:
-        Ref: ChinawokPedidosEventBus
-      Export:
-        Name: ChinaWok-EventBus-Name

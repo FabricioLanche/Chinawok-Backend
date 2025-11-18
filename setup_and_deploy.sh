@@ -96,14 +96,14 @@ build_layer() {
     
     cd Layers || exit 1
     
-    # Limpiar build anterior
-    rm -rf python/libs
+    # Limpiar build anterior de libs (las dependencias de terceros)
+    rm -rf python/libs/*
     
-    # Crear estructura
+    # Crear estructura si no existe
     mkdir -p python/libs
     
-    # Instalar dependencias
-    log "📦 Instalando dependencias en el layer..."
+    # Instalar dependencias de terceros en python/libs
+    log "📦 Instalando dependencias de terceros en python/libs..."
     pip install -r requirements.txt \
         -t python/libs \
         --quiet \
@@ -114,6 +114,9 @@ build_layer() {
         log_error "Error al instalar dependencias del layer"
         exit 1
     fi
+    
+    log_success "✅ Dependencias instaladas en python/libs/"
+    log_info "ℹ️  Las utilidades compartidas ya están en python/utils/"
 
     cd ..
     log_success "Lambda Layer construido correctamente"
