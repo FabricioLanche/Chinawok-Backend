@@ -206,9 +206,9 @@ populate_data() {
 # Función para mostrar URLs de los servicios desplegados
 show_endpoints() {
     log ""
-    log "╔════════════════════════════════════════════════════════════╗"
-    log "║              📡 ENDPOINTS DE MICROSERVICIOS                ║"
-    log "╚════════════════════════════════════════════════════════════╝"
+    log "═══════════════════════════════════════════════════════"
+    log "         📡 ENDPOINTS DE MICROSERVICIOS                "
+    log "═══════════════════════════════════════════════════════"
     log ""
     
     # Arrays de servicios
@@ -257,14 +257,14 @@ show_endpoints() {
 
 # Menú de opciones
 echo ""
-echo "┌─────────────────────────────────────────────────────────┐"
-echo "│  📋 OPCIONES DE DESPLIEGUE                              │"
-echo "├─────────────────────────────────────────────────────────┤"
-echo "│  1) 🚀 Despliegue completo (datos + microservicios)     │"
-echo "│  2) 📊 Solo poblar datos (DataGenerator)               │"
-echo "│  3) ⚙️  Solo desplegar microservicios                   │"
-echo "│  4) 🗑️  Eliminar todo (remove)                          │"
-echo "└─────────────────────────────────────────────────────────┘"
+echo "═══════════════════════════════════════════════════════"
+echo "  📋 OPCIONES DE DESPLIEGUE                           "
+echo "═══════════════════════════════════════════════════════"
+echo "  1) 🚀 Despliegue completo (datos + microservicios)  "
+echo "  2) 📊 Solo poblar datos (DataGenerator)             "
+echo "  3) ⚙️  Solo desplegar microservicios                "
+echo "  4) 🗑️  Eliminar todo (remove)                       "
+echo "═══════════════════════════════════════════════════════"
 echo ""
 read -p "Selecciona una opción (1-4): " opcion
 
