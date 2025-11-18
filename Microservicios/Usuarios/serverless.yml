@@ -17,7 +17,7 @@ provider:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
   
   layers:
-    - ${cf:${self:provider.stage}-ChinaWok-Python-Dependencies-Layer}
+    - ${cf:chinawok-shared-layer-${param:stage}.PythonDependenciesLayerExport}
 
 package:
   patterns:
@@ -146,7 +146,7 @@ resources:
         Role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
         Timeout: 30
         Layers:
-          - ${cf:chinawok-shared-layer-dev.PythonDependenciesLayerExport}
+          - ${cf:chinawok-shared-layer-${param:stage}.PythonDependenciesLayerExport}
         Environment:
           Variables:
             JWT_SECRET: ${env:JWT_SECRET}

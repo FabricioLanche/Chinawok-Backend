@@ -18,7 +18,7 @@ provider:
     TABLE_PEDIDOS: ${env:TABLE_PEDIDOS, 'ChinaWok-Pedidos'}
   
   layers:
-    - ${cf:${self:provider.stage}-ChinaWok-Python-Dependencies-Layer}
+    - ${cf:chinawok-shared-layer-${param:stage}.PythonDependenciesLayerExport}
 
 functions:
   # ========== EMPLEADOS ==========
