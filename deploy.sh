@@ -60,8 +60,32 @@ fi
 
 # Verificar credenciales AWS
 log "Verificando credenciales AWS..."
+
+if [ -f ~/.aws/credentials ]; then
+    log_success "Archivo de credenciales AWS encontrado: ~/.aws/credentials"
+    
+    # Verificar si el perfil default existe
+    if grep -q "\[default\]" ~/.aws/credentials; then
+        log_success "Perfil [default] encontrado"
+    else
+        log_warning "Perfil [default] no encontrado. Usando credenciales del entorno."
+    fi
+else
+    log_warning "Archivo ~/.aws/credentials no encontrado"
+    log_warning "Buscando credenciales en variables de entorno..."
+    
+    if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+        log_success "Credenciales AWS encontradas en variables de entorno"
+    else
+        log_error "No se encontraron credenciales de AWS"
+        log_error "Por favor, configura tus credenciales en ~/.aws/credentials o en variables de entorno"
+        exit 1
+    fi
+fi
+
+# Verificar conectividad con AWS
 if ! aws sts get-caller-identity &> /dev/null; then
-    log_error "No se pudo conectar con AWS"
+    log_error "No se pudo conectar con AWS. Verifica tus credenciales."
     exit 1
 fi
 log_success "Credenciales AWS verificadas"
@@ -73,15 +97,15 @@ build_layer() {
     cd Layers || exit 1
     
     # Limpiar build anterior
-    rm -rf python-dependencies/python
+    rm -rf python-dependencies
     
     # Crear estructura
-    mkdir -p python-dependencies/python
+    mkdir -p python-dependencies
     
     # Instalar dependencias
     log "📦 Instalando dependencias en el layer..."
-    pip install -r python-dependencies/requirements.txt \
-        -t python-dependencies/python/ \
+    pip install -r requirements.txt \
+        -t python-dependencies \
         --quiet \
         --upgrade \
         --no-cache-dir
@@ -90,12 +114,93 @@ build_layer() {
         log_error "Error al instalar dependencias del layer"
         exit 1
     fi
-    
-    # ⚠️ NO eliminar la carpeta python/ - Serverless la necesita para el despliegue
-    # La carpeta python-dependencies/python/ debe existir cuando serverless deploy se ejecute
-    
+
     cd ..
     log_success "Lambda Layer construido correctamente"
+}
+
+# Función para generar y poblar datos
+populate_data() {
+    log ""
+    log "═══════════════════════════════════════════════════════════"
+    log "📊 Generación y población de datos"
+    log "═══════════════════════════════════════════════════════════"
+    
+    cd Microservicios/DataGenerator || exit 1
+    
+    # Instalar dependencias de Python
+    log "📦 Instalando dependencias de Python..."
+    if [ -f ../../requirements.txt ]; then
+        pip install -r ../../requirements.txt --quiet
+        
+        if [ $? -eq 0 ]; then
+            log_success "Dependencias instaladas correctamente"
+        else
+            log_error "Error al instalar dependencias"
+            cd ../..
+            exit 1
+        fi
+    else
+        log_error "Archivo requirements.txt no encontrado en el directorio raíz"
+        cd ../..
+        exit 1
+    fi
+    
+    # Verificar existencia de datos generados
+    log "🔍 Verificando existencia de datos generados..."
+    
+    if [ -d "dynamodb_data" ] && [ "$(ls -A dynamodb_data)" ]; then
+        log_warning "La carpeta dynamodb_data ya existe y contiene archivos"
+        read -p "¿Deseas regenerar los datos? (s/n): " respuesta
+        
+        if [ "$respuesta" = "s" ] || [ "$respuesta" = "S" ]; then
+            log "🗑️  Eliminando datos anteriores..."
+            rm -rf dynamodb_data
+            log_success "Datos anteriores eliminados"
+        else
+            log "⏭️  Saltando generación de datos. Usando datos existentes."
+        fi
+    fi
+    
+    # Generar datos si no existen
+    if [ ! -d "dynamodb_data" ] || [ ! "$(ls -A dynamodb_data)" ]; then
+        log "📝 Generando nuevos datos..."
+        log "────────────────────────────────────────────────────────────"
+        
+        python3 DataGenerator.py
+        
+        if [ $? -eq 0 ]; then
+            log "────────────────────────────────────────────────────────────"
+            log_success "Datos generados correctamente en dynamodb_data/"
+        else
+            log_error "Error al generar datos"
+            cd ../..
+            exit 1
+        fi
+    else
+        log_success "Usando datos existentes en dynamodb_data/"
+    fi
+    
+    # Poblar DynamoDB
+    log "🗄️  Poblando DynamoDB..."
+    log "────────────────────────────────────────────────────────────"
+    
+    python3 DataPoblator.py
+    
+    if [ $? -eq 0 ]; then
+        log "────────────────────────────────────────────────────────────"
+        log_success "Datos poblados correctamente en DynamoDB"
+        log ""
+        log "📊 Resumen de datos:"
+        log "   ✅ Datos generados en dynamodb_data/"
+        log "   ✅ Datos poblados en DynamoDB"
+    else
+        log_error "Error al poblar DynamoDB"
+        cd ../..
+        exit 1
+    fi
+    
+    cd ../..
 }
 
 # Función para mostrar URLs de los servicios desplegados
@@ -113,6 +218,7 @@ show_endpoints() {
         ["👨‍🍳 Empleados"]="Microservicios/Empleados"
         ["🍜 Pedidos"]="Microservicios/Pedidos"
         ["⚙️  Workflow"]="Microservicios/Stepfunctions"
+        ["📊 Analítica"]="Microservicios/Analitica"
     )
     
     # Obtener región de AWS
@@ -174,17 +280,7 @@ case $opcion in
         build_layer
         
         # Paso 2: Poblar datos
-        log ""
-        log "═══════════════════════════════════════════════════════"
-        log "📊 PASO 2/3: Población de datos"
-        log "═══════════════════════════════════════════════════════"
-        cd Microservicios/DataGenerator || exit 1
-        bash setup_and_run.sh
-        if [ $? -ne 0 ]; then
-            log_error "Error en DataGenerator"
-            exit 1
-        fi
-        cd ../..
+        populate_data
         
         # Paso 3: Despliegue de microservicios
         log ""
@@ -206,14 +302,8 @@ case $opcion in
         
     2)
         log_info "Poblando datos..."
-        cd Microservicios/DataGenerator || exit 1
-        bash setup_and_run.sh
-        if [ $? -ne 0 ]; then
-            log_error "Error en DataGenerator"
-            exit 1
-        fi
-        cd ../..
-        log_success "Datos poblados exitosamente"
+        populate_data
+        log_success "✨ Datos poblados exitosamente"
         ;;
         
     3)

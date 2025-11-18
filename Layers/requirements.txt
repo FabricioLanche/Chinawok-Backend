@@ -13,3 +13,11 @@ PyJWT==2.8.0
 
 # Validación de schemas (Pedidos)
 jsonschema==4.21.1
+
+# FastAPI para APIs (Ingesta)
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Pydantic para validación de datos (Ingesta)
+pydantic==2.5.3
+pydantic-settings==2.1.0

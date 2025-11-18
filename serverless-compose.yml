@@ -50,3 +50,10 @@ services:
       - pedidos
       - empleados
 
+  analitica:
+    path: Microservicios/Analitica
+    dependsOn:
+      - shared-layer
+      - pedidos
+      - locales
+
