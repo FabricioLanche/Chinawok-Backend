@@ -182,19 +182,19 @@ functions:
 
 resources:
   Resources:
-    # EventBridge Event Bus para Analítica
+    # EventBridge Event Bus para Analítica (para eventos custom)
     ChinaWokAnaliticaEventBus:
       Type: AWS::Events::EventBus
       Properties:
         Name: ${env:EVENT_BUS_ANALITICA_NAME, 'chinawok-analitica-events'}
 
-    # EventBridge Rule - Ejecución diaria a las 3 AM
+    # EventBridge Rule - Ejecución diaria a las 3 AM (usa el bus por defecto)
     AnaliticaDiariaRule:
       Type: AWS::Events::Rule
       Properties:
         Name: ${self:service}-analitica-diaria-rule
         Description: Ejecuta el workflow de analítica diariamente a las 3 AM UTC
-        EventBusName: !Ref ChinaWokAnaliticaEventBus
+        # NO especificar EventBusName para usar el bus por defecto
         ScheduleExpression: 'cron(0 3 * * ? *)'
         State: ENABLED
         Targets:
@@ -391,8 +391,6 @@ resources:
           Description: Base de datos de analítica para ChinaWok con tablas de Glue
 
   Outputs:
-    # ...existing code...
-    
     AnaliticaEventBusName:
       Description: Nombre del Event Bus de Analítica
       Value: !Ref ChinaWokAnaliticaEventBus
