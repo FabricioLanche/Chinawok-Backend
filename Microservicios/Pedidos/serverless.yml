@@ -259,17 +259,16 @@ resources:
             Id: PedidoCreadoStepFunction
             RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
-    # Step Functions State Machine - VERSIÓN COMPLETA CON REINTENTOS
+    # Step Functions State Machine - EXACTO AL MODELO ORIGINAL
     ChinaWokPedidosStateMachine:
       Type: AWS::StepFunctions::StateMachine
       DependsOn:
-        - WorkflowStepConfirmarLambdaFunction
         - WorkflowStepCocinarLambdaFunction
         - WorkflowStepEmpacarLambdaFunction
         - WorkflowStepEnviarLambdaFunction
+        - WorkflowNotificarUsuarioLambdaFunction
         - WorkflowConfirmarRecepcionLambdaFunction
         - WorkflowLiberarPedidoLambdaFunction
-        - WorkflowNotificarUsuarioLambdaFunction
       Properties:
         StateMachineName: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
         RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
@@ -277,44 +276,19 @@ resources:
           Fn::Sub:
             - |
               {
-                "Comment": "Workflow de procesamiento de pedidos ChinaWok con reintentos y modo realista",
+                "Comment": "Workflow de procesamiento de pedidos ChinaWok con asignación de empleados",
                 "StartAt": "InicializarContadores",
                 "States": {
                   "InicializarContadores": {
                     "Type": "Pass",
-                    "Result": {"intentos_confirmar": 0, "intentos_cocinar": 0, "intentos_empacar": 0, "intentos_enviar": 0, "modo_realista": false},
+                    "Result": {"intentos_cocinar": 0, "intentos_empacar": 0, "intentos_enviar": 0, "modo_realista": false},
                     "ResultPath": "$.contadores",
-                    "Next": "IntentarConfirmar"
-                  },
-                  "IntentarConfirmar": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${ConfirmarArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id"}},
-                    "ResultPath": "$.resultado_confirmar",
-                    "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
-                    "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosConfirmar"}],
-                    "Next": "ExtractResultConfirmar"
-                  },
-                  "ExtractResultConfirmar": {
-                    "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.resultado_confirmar.Payload.usuario_correo", "estado.$": "$.resultado_confirmar.Payload.estado", "contadores.$": "$.contadores"},
                     "Next": "IntentarCocinar"
                   },
-                  "IncrementarIntentosConfirmar": {
-                    "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "contadores": {"intentos_confirmar.$": "States.MathAdd($.contadores.intentos_confirmar, 1)", "intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "$.contadores.intentos_enviar"}},
-                    "Next": "VerificarMaximoIntentosConfirmar"
-                  },
-                  "VerificarMaximoIntentosConfirmar": {
-                    "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.intentos_confirmar", "NumericLessThan": 5, "Next": "EsperarReintentoConfirmar"}],
-                    "Default": "ServicioSaturado"
-                  },
-                  "EsperarReintentoConfirmar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarConfirmar"},
                   "IntentarCocinar": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${CocinarArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id"}},
+                    "Parameters": {"FunctionName": "${CocinarArn}", "Payload.$": "$"},
                     "ResultPath": "$.resultado_cocinar",
                     "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
                     "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosCocinar"}],
@@ -322,12 +296,13 @@ resources:
                   },
                   "ExtractResultCocinar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.resultado_cocinar.Payload.usuario_correo", "cocinero_dni.$": "$.resultado_cocinar.Payload.cocinero_dni", "estado.$": "$.resultado_cocinar.Payload.estado", "contadores.$": "$.contadores"},
+                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "cocinero_dni.$": "$.resultado_cocinar.Payload.cocinero_dni", "estado.$": "$.resultado_cocinar.Payload.estado", "historial_estados.$": "$.resultado_cocinar.Payload.historial_estados", "contadores.$": "$.contadores"},
                     "Next": "EsperarTiempoCocinar"
                   },
                   "IncrementarIntentosCocinar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "contadores": {"intentos_confirmar.$": "$.contadores.intentos_confirmar", "intentos_cocinar.$": "States.MathAdd($.contadores.intentos_cocinar, 1)", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "$.contadores.intentos_enviar"}},
+                    "Parameters": {"intentos_cocinar.$": "States.MathAdd($.contadores.intentos_cocinar, 1)", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "$.contadores.intentos_enviar"},
+                    "ResultPath": "$.contadores",
                     "Next": "VerificarMaximoIntentosCocinar"
                   },
                   "VerificarMaximoIntentosCocinar": {
@@ -338,7 +313,7 @@ resources:
                   "EsperarReintentoEmpleadoCocinar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarCocinar"},
                   "EsperarTiempoCocinar": {
                     "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.modo_realista", "BooleanEquals": true, "Next": "EsperaRealistaCocinar"}],
+                    "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaCocinar"}],
                     "Default": "EsperaDemoCocinar"
                   },
                   "EsperaRealistaCocinar": {"Type": "Wait", "Seconds": 900, "Next": "IntentarEmpacar"},
@@ -346,7 +321,7 @@ resources:
                   "IntentarEmpacar": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${EmpacarArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "cocinero_dni.$": "$.cocinero_dni"}},
+                    "Parameters": {"FunctionName": "${EmpacarArn}", "Payload.$": "$"},
                     "ResultPath": "$.resultado_empacar",
                     "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
                     "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosEmpacar"}],
@@ -354,18 +329,19 @@ resources:
                   },
                   "ExtractResultEmpacar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.resultado_empacar.Payload.usuario_correo", "despachador_dni.$": "$.resultado_empacar.Payload.despachador_dni", "estado.$": "$.resultado_empacar.Payload.estado", "contadores.$": "$.contadores"},
+                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "despachador_dni.$": "$.resultado_empacar.Payload.despachador_dni", "estado.$": "$.resultado_empacar.Payload.estado", "historial_estados.$": "$.resultado_empacar.Payload.historial_estados", "contadores.$": "$.contadores"},
                     "Next": "EsperarTiempoEmpacar"
                   },
                   "IncrementarIntentosEmpacar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "contadores": {"intentos_confirmar.$": "$.contadores.intentos_confirmar", "intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "States.MathAdd($.contadores.intentos_empacar, 1)", "intentos_enviar.$": "$.contadores.intentos_enviar"}},
+                    "Parameters": {"intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "States.MathAdd($.contadores.intentos_empacar, 1)", "intentos_enviar.$": "$.contadores.intentos_enviar"},
+                    "ResultPath": "$.contadores",
                     "Next": "EsperarReintentoEmpleadoEmpacar"
                   },
                   "EsperarReintentoEmpleadoEmpacar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEmpacar"},
                   "EsperarTiempoEmpacar": {
                     "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.modo_realista", "BooleanEquals": true, "Next": "EsperaRealistaEmpacar"}],
+                    "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaEmpacar"}],
                     "Default": "EsperaDemoEmpacar"
                   },
                   "EsperaRealistaEmpacar": {"Type": "Wait", "Seconds": 300, "Next": "IntentarEnviar"},
@@ -373,7 +349,7 @@ resources:
                   "IntentarEnviar": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${EnviarArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "despachador_dni.$": "$.despachador_dni"}},
+                    "Parameters": {"FunctionName": "${EnviarArn}", "Payload.$": "$"},
                     "ResultPath": "$.resultado_enviar",
                     "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
                     "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosEnviar"}],
@@ -381,18 +357,19 @@ resources:
                   },
                   "ExtractResultEnviar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.resultado_enviar.Payload.usuario_correo", "repartidor_dni.$": "$.resultado_enviar.Payload.repartidor_dni", "estado.$": "$.resultado_enviar.Payload.estado", "contadores.$": "$.contadores"},
+                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "repartidor_dni.$": "$.resultado_enviar.Payload.repartidor_dni", "estado.$": "$.resultado_enviar.Payload.estado", "historial_estados.$": "$.resultado_enviar.Payload.historial_estados", "contadores.$": "$.contadores"},
                     "Next": "EsperarTiempoEnviar"
                   },
                   "IncrementarIntentosEnviar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "contadores": {"intentos_confirmar.$": "$.contadores.intentos_confirmar", "intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "States.MathAdd($.contadores.intentos_enviar, 1)"}},
+                    "Parameters": {"intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "States.MathAdd($.contadores.intentos_enviar, 1)"},
+                    "ResultPath": "$.contadores",
                     "Next": "EsperarReintentoEmpleadoEnviar"
                   },
                   "EsperarReintentoEmpleadoEnviar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEnviar"},
                   "EsperarTiempoEnviar": {
                     "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.modo_realista", "BooleanEquals": true, "Next": "EsperaRealistaEnviar"}],
+                    "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaEnviar"}],
                     "Default": "EsperaDemoEnviar"
                   },
                   "EsperaRealistaEnviar": {"Type": "Wait", "Seconds": 1800, "Next": "EsperarConfirmacionUsuario"},
@@ -415,15 +392,8 @@ resources:
                   "ConfirmarEntrega": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${ConfirmarRecepcionArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "repartidor_dni.$": "$.repartidor_dni", "confirmacion_usuario.$": "$.confirmacion_usuario"}},
+                    "Parameters": {"FunctionName": "${ConfirmarArn}", "Payload.$": "$"},
                     "ResultPath": "$.resultado_final",
-                    "Next": "LiberarRecursos"
-                  },
-                  "LiberarRecursos": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${LiberarPedidoArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "motivo": "pedido_completado"}},
-                    "ResultPath": "$.liberacion",
                     "Next": "PedidoCompletado"
                   },
                   "PedidoCompletado": {"Type": "Succeed", "OutputPath": "$.resultado_final.Payload"},
@@ -438,16 +408,15 @@ resources:
                   "ServicioSaturadoFinal": {
                     "Type": "Fail",
                     "Error": "ServicioSaturado",
-                    "Cause": "No se encontraron empleados disponibles después de 5 intentos."
+                    "Cause": "No se encontraron empleados disponibles después de 5 intentos. El servicio está saturado."
                   }
                 }
               }
-            - ConfirmarArn: !GetAtt WorkflowStepConfirmarLambdaFunction.Arn
-              CocinarArn: !GetAtt WorkflowStepCocinarLambdaFunction.Arn
+            - CocinarArn: !GetAtt WorkflowStepCocinarLambdaFunction.Arn
               EmpacarArn: !GetAtt WorkflowStepEmpacarLambdaFunction.Arn
               EnviarArn: !GetAtt WorkflowStepEnviarLambdaFunction.Arn
               NotificarUsuarioArn: !GetAtt WorkflowNotificarUsuarioLambdaFunction.Arn
-              ConfirmarRecepcionArn: !GetAtt WorkflowConfirmarRecepcionLambdaFunction.Arn
+              ConfirmarArn: !GetAtt WorkflowConfirmarRecepcionLambdaFunction.Arn
               LiberarPedidoArn: !GetAtt WorkflowLiberarPedidoLambdaFunction.Arn
 
   Outputs:
