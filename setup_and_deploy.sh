@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Aumentar memoria de Node.js para Serverless Framework
+export NODE_OPTIONS="--max-old-space-size=4096"
+
 # Colores para los logs
 RED='\033[0;31m'
 GREEN='\033[0;32m'

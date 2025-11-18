@@ -1,6 +1,4 @@
-org: flanche
 service: chinawok-locales
-
 
 provider:
   name: aws

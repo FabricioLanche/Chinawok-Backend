@@ -419,9 +419,23 @@ resources:
 
 package:
   individually: false
-  exclude:
-    - node_modules/**
-    - .git/**
-    - .env
-    - __pycache__/**
-    - "*.pyc"
+  patterns:
+    - '!node_modules/**'
+    - '!.git/**'
+    - '!.vscode/**'
+    - '!.env'
+    - '!.env.*'
+    - '!__pycache__/**'
+    - '!*.pyc'
+    - '!.pytest_cache/**'
+    - '!tests/**'
+    - '!*.md'
+    - '!.gitignore'
+    - '!package.json'
+    - '!package-lock.json'
+    - '!yarn.lock'
+    - 'combos/**'
+    - 'ofertas/**'
+    - 'pedidos/**'
+    - 'productos/**'
+    - 'worflow/**'
