@@ -32,7 +32,16 @@ package:
 
 functions:
   # ============================================================
-  # AUTENTICACIÓN Y REGISTRO
+  # LAMBDA AUTHORIZER COMPARTIDO
+  # ============================================================
+  authorizer:
+    handler: utils.Authorizer.lambda_handler
+    name: ${self:service}-authorizer
+    description: Lambda Authorizer compartido con validación JWT
+    timeout: 30
+
+  # ============================================================
+  # AUTENTICACIÓN Y REGISTRO (PÚBLICOS)
   # ============================================================
   registrar:
     handler: login/registrarUsuario.lambda_handler
@@ -43,7 +52,6 @@ functions:
           path: usuario/registrar
           method: post
           cors: true
-          # Sin authorizer - endpoint público
 
   login:
     handler: login/loginUsuario.lambda_handler
@@ -54,7 +62,6 @@ functions:
           path: usuario/login
           method: post
           cors: true
-          # Sin authorizer - endpoint público
 
   # ============================================================
   # GESTIÓN DE USUARIOS (REQUIEREN AUTENTICACIÓN)
@@ -69,9 +76,9 @@ functions:
           method: get
           cors: true
           authorizer:
-            type: REQUEST
+            name: authorizer
+            type: request
             identitySource: method.request.header.Authorization
-            name: AuthorizerFunction
             resultTtlInSeconds: 0
 
   obtenerMiInfo:
@@ -84,9 +91,9 @@ functions:
           method: get
           cors: true
           authorizer:
-            type: REQUEST
+            name: authorizer
+            type: request
             identitySource: method.request.header.Authorization
-            name: AuthorizerFunction
             resultTtlInSeconds: 0
 
   buscar:
@@ -99,9 +106,9 @@ functions:
           method: post
           cors: true
           authorizer:
-            type: REQUEST
+            name: authorizer
+            type: request
             identitySource: method.request.header.Authorization
-            name: AuthorizerFunction
             resultTtlInSeconds: 0
 
   editar:
@@ -114,9 +121,9 @@ functions:
           method: put
           cors: true
           authorizer:
-            type: REQUEST
+            name: authorizer
+            type: request
             identitySource: method.request.header.Authorization
-            name: AuthorizerFunction
             resultTtlInSeconds: 0
 
   eliminar:
@@ -129,60 +136,7 @@ functions:
           method: delete
           cors: true
           authorizer:
-            type: REQUEST
+            name: authorizer
+            type: request
             identitySource: method.request.header.Authorization
-            name: AuthorizerFunction
             resultTtlInSeconds: 0
-
-resources:
-  Resources:
-    # Lambda Authorizer compartido
-    AuthorizerFunction:
-      Type: AWS::Lambda::Function
-      Properties:
-        FunctionName: ${self:service}-authorizer
-        Runtime: python3.12
-        Handler: index.lambda_handler
-        Role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-        Timeout: 30
-        Layers:
-          - ${cf:chinawok-shared-layer-${param:stage}.PythonDependenciesLayerExport}
-        Environment:
-          Variables:
-            JWT_SECRET: ${env:JWT_SECRET}
-            JWT_EXPIRATION_HOURS: ${env:JWT_EXPIRATION_HOURS, '24'}
-        Code:
-          ZipFile: |
-            import json
-            from utils.jwt_utils import validar_token
-            
-            def lambda_handler(event, context):
-                """Lambda Authorizer con validación de JWT"""
-                token = event.get("authorizationToken", "")
-                
-                if token.lower().startswith("bearer "):
-                    token = token.split(" ", 1)[1].strip()
-                
-                resultado = validar_token(token)
-                
-                if not resultado.get("valido"):
-                    raise Exception("Unauthorized")
-                
-                return {
-                    "principalId": resultado["correo"],
-                    "policyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                                "Action": "execute-api:Invoke",
-                                "Effect": "Allow",
-                                "Resource": event["methodArn"]
-                            }
-                        ]
-                    },
-                    "context": {
-                        "correo": resultado["correo"],
-                        "role": resultado["role"],
-                        "nombre": resultado["nombre"]
-                    }
-                }
