@@ -181,6 +181,29 @@ functions:
 
 resources:
   Resources:
+    # Bucket S3 para ingesta de datos
+    ChinaWokDataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: chinawok-data
+        VersioningConfiguration:
+          Status: Enabled
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteOldIngestionData
+              Status: Enabled
+              Prefix: data-ingestion/
+              ExpirationInDays: 90
+            - Id: DeleteOldAthenaResults
+              Status: Enabled
+              Prefix: athena-results/
+              ExpirationInDays: 30
+
     # EventBridge Event Bus para Analítica (para eventos custom)
     ChinaWokAnaliticaEventBus:
       Type: AWS::Events::EventBus
@@ -407,6 +430,18 @@ resources:
       Value: !Ref ChinaWokGlueDatabase
       Export:
         Name: ChinaWok-Glue-Database-Name
+
+    DataBucketName:
+      Description: Nombre del bucket S3 para datos
+      Value: !Ref ChinaWokDataBucket
+      Export:
+        Name: ChinaWok-Data-Bucket-Name
+    
+    DataBucketArn:
+      Description: ARN del bucket S3 para datos
+      Value: !GetAtt ChinaWokDataBucket.Arn
+      Export:
+        Name: ChinaWok-Data-Bucket-Arn
 
 package:
   individually: false
