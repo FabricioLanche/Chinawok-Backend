@@ -6,7 +6,7 @@ Utilidades compartidas para todos los microservicios de ChinaWok
 from .logger import get_logger
 from .json_encoder import json_dumps, DecimalEncoder
 from .dynamodb_client import get_dynamodb_resource, get_table_data
-from .s3_client import upload_to_s3, download_from_s3
+from .s3_client import upload_to_s3, list_s3_files, delete_old_versions
 from .athena_client import AthenaQueryExecutor
 from .jwt_utils import generar_token, validar_token, verificar_rol
 from .authentication_utils import (
