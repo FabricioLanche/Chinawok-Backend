@@ -8,6 +8,20 @@ provider:
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+    layer: true
+    slim: true
+    strip: false
+    zip: true
+    usePoetry: false
+    useDownloadCache: true
+    useStaticCache: true
+
 layers:
   pythonDependencies:
     path: python
