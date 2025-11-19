@@ -19,12 +19,11 @@ layers:
     retain: false
     package:
       patterns:
-        - 'utils/**'
-        - 'libs/**'
-        - '!**/__pycache__/**'
-        - '!**/*.pyc'
-        - '!node_modules/**'
-        - '!.serverless/**'
+        - 'Layers/python/utils/**'
+        - 'Layers/python/libs/**'
+        - '!Layers/python/**/__pycache__/**'
+        - '!Layers/python/**/*.pyc'
+
 
 
 
