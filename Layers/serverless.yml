@@ -18,6 +18,19 @@ layers:
       - python3.13
     retain: false
 
+package:
+  patterns:
+    # INCLUIR explícitamente utils
+    - 'python/utils/**'
+    - 'python/lib/**'
+    # Excluir archivos innecesarios
+    - '!python/**/__pycache__/**'
+    - '!python/**/*.pyc'
+    - '!python/**/.pytest_cache/**'
+    - '!.serverless/**'
+    - '!node_modules/**'
+    - '!**/.git/**'
+
 resources:
   Outputs:
     PythonDependenciesLayerExport:
