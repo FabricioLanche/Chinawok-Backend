@@ -407,18 +407,6 @@ resources:
       Export:
         Name: ChinaWok-Glue-Database-Name
 
-    DataBucketName:
-      Description: Nombre del bucket S3 para datos
-      Value: !Ref ChinaWokDataBucket
-      Export:
-        Name: ChinaWok-Data-Bucket-Name
-    
-    DataBucketArn:
-      Description: ARN del bucket S3 para datos
-      Value: !GetAtt ChinaWokDataBucket.Arn
-      Export:
-        Name: ChinaWok-Data-Bucket-Arn
-
 package:
   individually: false
   exclude:
