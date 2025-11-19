@@ -19,15 +19,13 @@ layers:
     retain: false
     package:
       patterns:
-        # Incluir SOLO lo que necesitamos
         - 'utils/**'
-        - 'lib/**'
-        # Excluir todo lo demás explícitamente
+        - 'libs/**'
         - '!**/__pycache__/**'
         - '!**/*.pyc'
-        - '!libs/**'
         - '!.serverless/**'
         - '!node_modules/**'
+
 
 resources:
   Outputs:
