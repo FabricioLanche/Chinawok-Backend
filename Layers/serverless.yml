@@ -7,10 +7,10 @@ provider:
   stage: ${param:stage}
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-
+    
 layers:
   pythonDependencies:
-    path: python
+    path: Layers/python
     name: ${self:provider.stage}-chinawok-python-dependencies
     description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
     compatibleRuntimes:
