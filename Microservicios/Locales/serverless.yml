@@ -181,29 +181,6 @@ functions:
 
 resources:
   Resources:
-    # Bucket S3 para ingesta de datos
-    ChinaWokDataBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: chinawok-data
-        VersioningConfiguration:
-          Status: Enabled
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: true
-          BlockPublicPolicy: true
-          IgnorePublicAcls: true
-          RestrictPublicBuckets: true
-        LifecycleConfiguration:
-          Rules:
-            - Id: DeleteOldIngestionData
-              Status: Enabled
-              Prefix: data-ingestion/
-              ExpirationInDays: 90
-            - Id: DeleteOldAthenaResults
-              Status: Enabled
-              Prefix: athena-results/
-              ExpirationInDays: 30
-
     # EventBridge Event Bus para Analítica (para eventos custom)
     ChinaWokAnaliticaEventBus:
       Type: AWS::Events::EventBus
@@ -216,7 +193,6 @@ resources:
       Properties:
         Name: ${self:service}-analitica-diaria-rule
         Description: Ejecuta el workflow de analítica diariamente a las 3 AM UTC
-        # NO especificar EventBusName para usar el bus por defecto
         ScheduleExpression: 'cron(0 3 * * ? *)'
         State: ENABLED
         Targets:
@@ -229,7 +205,7 @@ resources:
                 "message": "Ejecución programada diaria"
               }
 
-    # Step Functions State Machine para Analítica (mejorado con polling dinámico)
+    # Step Functions State Machine para Analítica
     ChinaWokAnaliticaStateMachine:
       Type: AWS::StepFunctions::StateMachine
       Properties:

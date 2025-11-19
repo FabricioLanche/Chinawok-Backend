@@ -297,6 +297,87 @@ show_endpoints() {
     log ""
 }
 
+# Función para verificar/crear bucket S3
+ensure_s3_bucket() {
+    local bucket_name="${1:-chinawok-data}"
+    
+    log "🪣 Verificando bucket S3: $bucket_name"
+    
+    # Verificar si el bucket existe
+    if aws s3 ls "s3://$bucket_name" 2>&1 | grep -q 'NoSuchBucket'; then
+        log "📦 Bucket no existe, creándolo..."
+        
+        # Crear el bucket
+        if aws s3 mb "s3://$bucket_name" --region us-east-1 2>&1; then
+            log_success "✅ Bucket '$bucket_name' creado exitosamente"
+            
+            # Habilitar versionado
+            log "🔄 Habilitando versionado en el bucket..."
+            aws s3api put-bucket-versioning \
+                --bucket "$bucket_name" \
+                --versioning-configuration Status=Enabled \
+                --region us-east-1
+            
+            # Configurar bloqueo de acceso público
+            log "🔒 Configurando bloqueo de acceso público..."
+            aws s3api put-public-access-block \
+                --bucket "$bucket_name" \
+                --public-access-block-configuration \
+                    "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" \
+                --region us-east-1
+            
+            # Configurar reglas de ciclo de vida
+            log "♻️  Configurando reglas de ciclo de vida..."
+            cat > /tmp/lifecycle-policy.json << EOF
+{
+  "Rules": [
+    {
+      "Id": "DeleteOldIngestionData",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "data-ingestion/"
+      },
+      "Expiration": {
+        "Days": 90
+      }
+    },
+    {
+      "Id": "DeleteOldAthenaResults",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "athena-results/"
+      },
+      "Expiration": {
+        "Days": 30
+      }
+    }
+  ]
+}
+EOF
+            
+            aws s3api put-bucket-lifecycle-configuration \
+                --bucket "$bucket_name" \
+                --lifecycle-configuration file:///tmp/lifecycle-policy.json \
+                --region us-east-1
+            
+            rm /tmp/lifecycle-policy.json
+            
+            log_success "✅ Bucket configurado completamente"
+            return 0
+        else
+            log_error "❌ Error al crear bucket '$bucket_name'"
+            log_error "   Verifica los permisos del LabRole"
+            return 1
+        fi
+    elif aws s3 ls "s3://$bucket_name" >/dev/null 2>&1; then
+        log_success "✅ Bucket '$bucket_name' ya existe y es accesible"
+        return 0
+    else
+        log_error "❌ Error al verificar bucket '$bucket_name'"
+        return 1
+    fi
+}
+
 # Menú de opciones
 echo ""
 echo "═══════════════════════════════════════════════════════"
@@ -314,20 +395,35 @@ case $opcion in
     1)
         log_info "Iniciando despliegue completo..."
         
-        # Paso 1: Construir Lambda Layer
+        # Paso 1: Verificar/crear bucket S3
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "🔧 PASO 1/3: Construyendo Lambda Layer compartido"
+        log "🪣 PASO 1/4: Verificando infraestructura S3"
+        log "═══════════════════════════════════════════════════════"
+        
+        # Leer nombre del bucket del .env
+        BUCKET_NAME=$(grep '^S3_BUCKET_NAME=' .env | cut -d '=' -f2)
+        BUCKET_NAME=${BUCKET_NAME:-chinawok-data}
+        
+        if ! ensure_s3_bucket "$BUCKET_NAME"; then
+            log_error "No se pudo configurar el bucket S3"
+            exit 1
+        fi
+        
+        # Paso 2: Construir Lambda Layer
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "🔧 PASO 2/4: Construyendo Lambda Layer compartido"
         log "═══════════════════════════════════════════════════════"
         build_layer
         
-        # Paso 2: Poblar datos
+        # Paso 3: Poblar datos
         populate_data
         
-        # Paso 3: Despliegue de microservicios
+        # Paso 4: Despliegue de microservicios
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "⚙️  PASO 3/3: Despliegue de microservicios"
+        log "⚙️  PASO 4/4: Despliegue de microservicios"
         log "═══════════════════════════════════════════════════════"
         serverless deploy
         
@@ -350,6 +446,21 @@ case $opcion in
         
     3)
         log_info "Desplegando microservicios..."
+        
+        # Verificar bucket S3 primero
+        log ""
+        log "🪣 Verificando infraestructura S3..."
+        BUCKET_NAME=$(grep '^S3_BUCKET_NAME=' .env | cut -d '=' -f2)
+        BUCKET_NAME=${BUCKET_NAME:-chinawok-data}
+        
+        if ! ensure_s3_bucket "$BUCKET_NAME"; then
+            log_warning "⚠️  No se pudo configurar el bucket S3"
+            read -p "¿Continuar de todos modos? (s/n): " continuar
+            if [ "$continuar" != "s" ] && [ "$continuar" != "S" ]; then
+                log_info "Despliegue cancelado"
+                exit 0
+            fi
+        fi
         
         # Construir layer primero
         build_layer
