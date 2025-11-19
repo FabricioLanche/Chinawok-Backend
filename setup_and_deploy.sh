@@ -106,14 +106,6 @@ build_layer() {
     rm -rf python-dependencies
     rm -rf .serverless
     
-    # IMPORTANTE: Crear .serverlessignore para NO ignorar utils
-    cat > .serverlessignore << 'EOF'
-# NO ignorar nada en python/
-!python/**
-EOF
-    
-    log_info "   📝 Archivo .serverlessignore creado"
-    
     # Crear estructura correcta para Lambda Layer
     mkdir -p python/lib/python3.12/site-packages
     
@@ -163,13 +155,7 @@ EOF
         log_warning "   ⚠️  PyJWT NO se instaló correctamente"
     fi
     
-    # Verificar que utils se empaquetará
-    log "🔍 Verificando que utils está presente..."
-    if [ ! -d "python/utils" ] || [ -z "$(ls -A python/utils 2>/dev/null)" ]; then
-        log_error "❌ ERROR: python/utils/ está vacío o no existe"
-        exit 1
-    fi
-    
+    cd ..
     log_success "Lambda Layer construido correctamente"
 }
 
