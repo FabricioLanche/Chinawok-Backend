@@ -105,6 +105,7 @@ build_layer() {
     
     # Crear estructura si no existe
     mkdir -p python/libs
+    touch python/libs/__init__.py
     
     # Instalar dependencias de terceros en python/libs
     log "📦 Instalando dependencias de terceros en python/libs..."
