@@ -109,7 +109,13 @@ build_layer() {
     # Crear estructura correcta para Lambda Layer
     mkdir -p python/lib/python3.12/site-packages
     
-    # Instalar dependencias de terceros en la ubicación correcta para Lambda
+    # IMPORTANTE: Asegurar que utils existe antes de continuar
+    if [ ! -d "python/utils" ]; then
+        log_error "❌ ERROR: python/utils/ no existe"
+        exit 1
+    fi
+    
+    # Instalar dependencias de terceros
     log "📦 Instalando dependencias de terceros..."
     pip install -r requirements.txt \
         -t python/lib/python3.12/site-packages \
@@ -124,41 +130,31 @@ build_layer() {
     
     log_success "✅ Dependencias instaladas en python/lib/python3.12/site-packages/"
     
-    # Copiar utilidades compartidas a la raíz del layer (python/utils/)
-    # Estas ya están en python/utils/ y se mapearán a /opt/python/utils/ en Lambda
-    log_info "ℹ️  Las utilidades compartidas están en python/utils/"
-    
-    # Verificar estructura
+    # Verificar estructura final
     log "🔍 Verificando estructura del layer..."
-    if [ -d "python/lib/python3.12/site-packages" ] && [ -d "python/utils" ]; then
-        log_success "✅ Estructura del layer correcta"
-        log_info "   📂 python/lib/python3.12/site-packages/ - Dependencias de terceros"
-        log_info "   📂 python/utils/ - Código compartido"
-        
-        # Verificar que utils tiene __init__.py
-        if [ -f "python/utils/__init__.py" ]; then
-            log_info "   ✅ python/utils/__init__.py encontrado"
-        else
-            log_warning "   ⚠️  python/utils/__init__.py NO encontrado"
-        fi
-        
-        # Verificar que PyJWT se instaló correctamente
-        if [ -d "python/lib/python3.12/site-packages/jwt" ]; then
-            log_info "   ✅ PyJWT instalado correctamente"
-        else
-            log_warning "   ⚠️  PyJWT NO se instaló correctamente"
-        fi
-        
-        # Verificar que NO existe python/libs (instalación antigua)
-        if [ -d "python/libs" ]; then
-            log_warning "   ⚠️  python/libs/ aún existe, eliminándolo..."
-            rm -rf python/libs
-        fi
-    else
-        log_error "❌ Estructura del layer incorrecta"
+    
+    # Verificar que utils tiene archivos
+    utils_files=$(find python/utils -type f -name "*.py" | wc -l)
+    log_info "   📂 python/utils/ contiene $utils_files archivos .py"
+    
+    if [ "$utils_files" -eq 0 ]; then
+        log_error "❌ ERROR: python/utils/ no contiene archivos .py"
         exit 1
     fi
-
+    
+    # Listar archivos de utils para debug
+    log_info "   📋 Archivos en python/utils/:"
+    ls -1 python/utils/*.py | while read file; do
+        log_info "      - $(basename $file)"
+    done
+    
+    # Verificar PyJWT
+    if [ -d "python/lib/python3.12/site-packages/jwt" ]; then
+        log_info "   ✅ PyJWT instalado correctamente"
+    else
+        log_warning "   ⚠️  PyJWT NO se instaló correctamente"
+    fi
+    
     cd ..
     log_success "Lambda Layer construido correctamente"
 }

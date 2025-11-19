@@ -12,19 +12,29 @@ layers:
   pythonDependencies:
     path: python
     name: ${self:provider.stage}-chinawok-python-dependencies
-    description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
+    description: Dependencias Python y utilidades compartidas
     compatibleRuntimes:
       - python3.12
       - python3.13
     retain: false
 
-package:
-  patterns:
-    # IMPORTANTE: Incluir explícitamente todo el contenido de python/
-    - 'python/**'
-    # Excluir archivos innecesarios
-    - '!python/**/__pycache__/**'
-    - '!python/**/*.pyc'
-    - '!python/**/.pytest_cache/**'
-    - '!.serverless/**'
-    - '!node_modules/**'
+# NO especificar package.patterns - dejar que suba TODO
+# Serverless debería incluir todo en python/ por defecto
+
+resources:
+  Outputs:
+    PythonDependenciesLayerExport:
+      Description: ARN del Lambda Layer compartido
+      Value:
+        Ref: PythonDependenciesLambdaLayer
+      Export:
+        Name: ${self:provider.stage}-chinawok-python-dependencies-layer
+
+resources:
+  Outputs:
+    PythonDependenciesLayerExport:
+      Description: ARN del Lambda Layer compartido
+      Value:
+        Ref: PythonDependenciesLambdaLayer
+      Export:
+        Name: ${self:provider.stage}-chinawok-python-dependencies-layer
