@@ -28,8 +28,11 @@ wheels/
 .installed.cfg
 *.egg
 
-# Serverless
+# Serverless Framework
 .serverless/
+*.zip
+
+# Serverless
 .serverless_plugins/
 
 # IDE
@@ -59,3 +62,9 @@ endpoints.txt
 # Lambda Layer build
 Layers/python-dependencies/python/
 Layers/python-dependencies-layer.zip
+
+# Lambda Layers
+Layers/python/lib/
+Layers/python/libs/
+Layers/.serverless/
+Layers/node_modules/

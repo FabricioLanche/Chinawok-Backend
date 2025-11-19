@@ -17,6 +17,17 @@ layers:
       - python3.12
       - python3.13
     retain: false
+    package:
+      patterns:
+        # Incluir SOLO lo que necesitamos
+        - 'utils/**'
+        - 'lib/**'
+        # Excluir todo lo demás explícitamente
+        - '!**/__pycache__/**'
+        - '!**/*.pyc'
+        - '!libs/**'
+        - '!.serverless/**'
+        - '!node_modules/**'
 
 resources:
   Outputs:

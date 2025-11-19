@@ -102,6 +102,8 @@ build_layer() {
     # Limpiar build anterior completamente
     log "🗑️  Limpiando estructura anterior del layer..."
     rm -rf python/lib
+    rm -rf python/libs
+    rm -rf python-dependencies
     rm -rf .serverless
     
     # Crear estructura correcta para Lambda Layer
@@ -145,6 +147,12 @@ build_layer() {
             log_info "   ✅ PyJWT instalado correctamente"
         else
             log_warning "   ⚠️  PyJWT NO se instaló correctamente"
+        fi
+        
+        # Verificar que NO existe python/libs (instalación antigua)
+        if [ -d "python/libs" ]; then
+            log_warning "   ⚠️  python/libs/ aún existe, eliminándolo..."
+            rm -rf python/libs
         fi
     else
         log_error "❌ Estructura del layer incorrecta"
