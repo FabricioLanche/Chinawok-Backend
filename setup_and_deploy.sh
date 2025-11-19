@@ -99,18 +99,18 @@ build_layer() {
     
     cd Layers || exit 1
     
-    # Limpiar build anterior de libs (las dependencias de terceros)
-    log "🗑️  Limpiando python/libs anterior..."
-    rm -rf python/libs/*
+    # Limpiar build anterior completamente
+    log "🗑️  Limpiando estructura anterior del layer..."
+    rm -rf python/lib
+    rm -rf .serverless
     
-    # Crear estructura si no existe
-    mkdir -p python/libs
-    touch python/libs/__init__.py
+    # Crear estructura correcta para Lambda Layer
+    mkdir -p python/lib/python3.12/site-packages
     
-    # Instalar dependencias de terceros en python/libs
-    log "📦 Instalando dependencias de terceros en python/libs..."
+    # Instalar dependencias de terceros en la ubicación correcta para Lambda
+    log "📦 Instalando dependencias de terceros..."
     pip install -r requirements.txt \
-        -t python/libs \
+        -t python/lib/python3.12/site-packages \
         --quiet \
         --upgrade \
         --no-cache-dir
@@ -120,15 +120,32 @@ build_layer() {
         exit 1
     fi
     
-    log_success "✅ Dependencias instaladas en python/libs/"
-    log_info "ℹ️  Las utilidades compartidas ya están en python/utils/"
+    log_success "✅ Dependencias instaladas en python/lib/python3.12/site-packages/"
+    
+    # Copiar utilidades compartidas a la raíz del layer (python/utils/)
+    # Estas ya están en python/utils/ y se mapearán a /opt/python/utils/ en Lambda
+    log_info "ℹ️  Las utilidades compartidas están en python/utils/"
     
     # Verificar estructura
     log "🔍 Verificando estructura del layer..."
-    if [ -d "python/libs" ] && [ -d "python/utils" ]; then
+    if [ -d "python/lib/python3.12/site-packages" ] && [ -d "python/utils" ]; then
         log_success "✅ Estructura del layer correcta"
-        log_info "   📂 python/libs/ - Dependencias de terceros"
+        log_info "   📂 python/lib/python3.12/site-packages/ - Dependencias de terceros"
         log_info "   📂 python/utils/ - Código compartido"
+        
+        # Verificar que utils tiene __init__.py
+        if [ -f "python/utils/__init__.py" ]; then
+            log_info "   ✅ python/utils/__init__.py encontrado"
+        else
+            log_warning "   ⚠️  python/utils/__init__.py NO encontrado"
+        fi
+        
+        # Verificar que PyJWT se instaló correctamente
+        if [ -d "python/lib/python3.12/site-packages/jwt" ]; then
+            log_info "   ✅ PyJWT instalado correctamente"
+        else
+            log_warning "   ⚠️  PyJWT NO se instaló correctamente"
+        fi
     else
         log_error "❌ Estructura del layer incorrecta"
         exit 1

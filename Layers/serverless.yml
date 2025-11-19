@@ -10,19 +10,13 @@ provider:
 
 layers:
   pythonDependencies:
-    path: .
+    path: python
     name: ${self:provider.stage}-chinawok-python-dependencies
     description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
     compatibleRuntimes:
       - python3.12
       - python3.13
     retain: false
-    package:
-      patterns:
-        - 'python/utils/**'
-        - '!python/libs/**'
-        - '!**/__pycache__/**'
-        - '!**/*.pyc'
 
 resources:
   Outputs:
