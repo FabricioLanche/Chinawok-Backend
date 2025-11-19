@@ -17,3 +17,14 @@ layers:
       - python3.12
       - python3.13
     retain: false
+
+package:
+  patterns:
+    # IMPORTANTE: Incluir explícitamente todo el contenido de python/
+    - 'python/**'
+    # Excluir archivos innecesarios
+    - '!python/**/__pycache__/**'
+    - '!python/**/*.pyc'
+    - '!python/**/.pytest_cache/**'
+    - '!.serverless/**'
+    - '!node_modules/**'
