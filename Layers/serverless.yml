@@ -18,12 +18,8 @@ layers:
       - python3.13
     retain: false
     package:
-      patterns:
-        - 'utils/**'
-        - 'libs/**'
-        - '!**/__pycache__/**'
-        - '!**/*.pyc'
-
+      include:
+        - '**/*'
 
 resources:
   Outputs:
