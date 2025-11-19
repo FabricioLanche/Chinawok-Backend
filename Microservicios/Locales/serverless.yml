@@ -38,7 +38,7 @@ functions:
   # GESTIÓN DE LOCALES
   # ============================================================
   localListar:
-    handler: locales/listarLocales.lambda_handler
+    handler: locales.listarLocales.lambda_handler
     name: ${self:service}-listar
     description: Listar todos los locales
     events:
@@ -48,7 +48,7 @@ functions:
           cors: true
   
   localCrear:
-    handler: locales/crearLocal.lambda_handler
+    handler: locales.crearLocal.lambda_handler
     name: ${self:service}-crear
     description: Crear un nuevo local
     events:
@@ -58,7 +58,7 @@ functions:
           cors: true
   
   localObtener:
-    handler: locales/obtenerLocal.lambda_handler
+    handler: locales.obtenerLocal.lambda_handler
     name: ${self:service}-obtener
     description: Obtener un local por ID
     events:
@@ -68,7 +68,7 @@ functions:
           cors: true
   
   localActualizar:
-    handler: locales/editarLocal.lambda_handler
+    handler: locales.editarLocal.lambda_handler
     name: ${self:service}-actualizar
     description: Actualizar un local existente
     events:
@@ -78,7 +78,7 @@ functions:
           cors: true
   
   localEliminar:
-    handler: locales/eliminarLocal.lambda_handler
+    handler: locales.eliminarLocal.lambda_handler
     name: ${self:service}-eliminar
     description: Eliminar un local
     events:
@@ -91,7 +91,7 @@ functions:
   # ANALÍTICA - CONSULTAS ATHENA
   # ============================================================
   analiticaProductosVendidos:
-    handler: analitica/mejorProducto.handler
+    handler: analitica-consultas.mejorProducto.handler
     name: ${self:service}-analitica-productos
     description: Consulta los productos más vendidos por local
     events:
@@ -101,7 +101,7 @@ functions:
           cors: true
   
   analiticaMejorPersonal:
-    handler: analitica/mejorPersonal.handler
+    handler: analitica-consultas.mejorPersonal.handler
     name: ${self:service}-analitica-personal
     description: Ranking del mejor personal por local
     events:
@@ -111,7 +111,7 @@ functions:
           cors: true
   
   analiticaRecordDiario:
-    handler: analitica/recordDiario.handler
+    handler: analitica-consultas.recordDiario.handler
     name: ${self:service}-analitica-diario
     description: Récord diario de pedidos y revenue por mes
     events:
@@ -121,7 +121,7 @@ functions:
           cors: true
   
   analiticaEstadisticasGenerales:
-    handler: analitica/estadisticas.handler
+    handler: analitica-consultas.estadisticas.handler
     name: ${self:service}-analitica-estadisticas
     description: Dashboard con estadísticas generales del local
     events:
@@ -134,7 +134,7 @@ functions:
   # INGESTA DE DATOS - DYNAMODB A S3
   # ============================================================
   ingestAllTables:
-    handler: analitica/ingestarTablas.handler
+    handler: analitica-consultas.ingestarTablas.handler
     name: ${self:service}-ingest-all-tables
     description: Ingesta datos de todas las tablas de DynamoDB a S3
     events:
@@ -151,7 +151,7 @@ functions:
   # WORKFLOW DE ANALÍTICA - STEP FUNCTIONS
   # ============================================================
   workflowAnaliticaActivar:
-    handler: analitica-workflow/activarWorkflow.handler
+    handler: analitica-workflow.activarWorkflow.handler
     name: ${self:service}-workflow-analitica-activar
     description: Activa el workflow de analítica (ingesta + crawler)
     environment:
@@ -163,17 +163,17 @@ functions:
           cors: true
   
   workflowAnaliticaIngestar:
-    handler: analitica-workflow/ingestarTablas.handler
+    handler: analitica-workflow.ingestarTablas.handler
     name: ${self:service}-workflow-analitica-ingestar
     description: Ingesta todas las tablas de DynamoDB a S3
   
   workflowAnaliticaCrawler:
-    handler: analitica-workflow/ejecutarCrawler.handler
+    handler: analitica-workflow.ejecutarCrawler.handler
     name: ${self:service}-workflow-analitica-crawler
     description: Ejecuta el crawler de Glue para crear tablas
   
   workflowAnaliticaVerificarCrawler:
-    handler: analitica-workflow/verificarEstadoCrawler.handler
+    handler: analitica-workflow.verificarEstadoCrawler.handler
     name: ${self:service}-workflow-analitica-verificar-crawler
     description: Verifica el estado del crawler de Glue
 
