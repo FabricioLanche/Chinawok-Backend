@@ -303,77 +303,99 @@ ensure_s3_bucket() {
     
     log "🪣 Verificando bucket S3: $bucket_name"
     
-    # Verificar si el bucket existe
-    if aws s3 ls "s3://$bucket_name" 2>&1 | grep -q 'NoSuchBucket'; then
-        log "📦 Bucket no existe, creándolo..."
+    # Verificar si el bucket existe y es accesible
+    if aws s3 ls "s3://$bucket_name" >/dev/null 2>&1; then
+        log_success "✅ Bucket '$bucket_name' ya existe y es accesible"
         
-        # Crear el bucket
-        if aws s3 mb "s3://$bucket_name" --region us-east-1 2>&1; then
-            log_success "✅ Bucket '$bucket_name' creado exitosamente"
+        # Verificar permisos de escritura
+        log "🔍 Verificando permisos de escritura..."
+        if echo "test" | aws s3 cp - "s3://$bucket_name/.test-write-permission" 2>/dev/null; then
+            aws s3 rm "s3://$bucket_name/.test-write-permission" >/dev/null 2>&1
+            log_success "✅ Permisos de escritura confirmados"
+            return 0
+        else
+            log_error "❌ No tienes permisos de escritura en '$bucket_name'"
+            log_warning "⚠️  En AWS Academy, los buckets deben ser creados con el LabRole"
             
-            # Habilitar versionado
-            log "🔄 Habilitando versionado en el bucket..."
-            aws s3api put-bucket-versioning \
-                --bucket "$bucket_name" \
-                --versioning-configuration Status=Enabled \
-                --region us-east-1
+            # Sugerir nombre alternativo con account ID
+            local account_id=$(aws sts get-caller-identity --query Account --output text)
+            local alt_bucket="chinawok-data-${account_id}"
             
-            # Configurar bloqueo de acceso público
-            log "🔒 Configurando bloqueo de acceso público..."
-            aws s3api put-public-access-block \
-                --bucket "$bucket_name" \
-                --public-access-block-configuration \
-                    "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" \
-                --region us-east-1
+            log_info "💡 Intenta usar un bucket con tu Account ID:"
+            log_info "   Edita .env y cambia S3_BUCKET_NAME a: $alt_bucket"
+            log_info "   Luego ejecuta nuevamente este script"
             
-            # Configurar reglas de ciclo de vida
-            log "♻️  Configurando reglas de ciclo de vida..."
-            cat > /tmp/lifecycle-policy.json << EOF
+            return 1
+        fi
+    fi
+    
+    # El bucket no existe, intentar crearlo
+    log "📦 Bucket no existe, intentando crear..."
+    
+    if aws s3 mb "s3://$bucket_name" --region us-east-1 2>&1; then
+        log_success "✅ Bucket '$bucket_name' creado exitosamente"
+        
+        # Configurar versionado
+        log "🔄 Configurando bucket..."
+        aws s3api put-bucket-versioning \
+            --bucket "$bucket_name" \
+            --versioning-configuration Status=Enabled \
+            --region us-east-1 2>/dev/null
+        
+        # Configurar bloqueo de acceso público
+        aws s3api put-public-access-block \
+            --bucket "$bucket_name" \
+            --public-access-block-configuration \
+                "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" \
+            --region us-east-1 2>/dev/null
+        
+        # Configurar reglas de ciclo de vida
+        cat > /tmp/lifecycle-policy.json << 'EOF'
 {
   "Rules": [
     {
       "Id": "DeleteOldIngestionData",
       "Status": "Enabled",
-      "Filter": {
-        "Prefix": "data-ingestion/"
-      },
-      "Expiration": {
-        "Days": 90
-      }
+      "Filter": {"Prefix": "data-ingestion/"},
+      "Expiration": {"Days": 90}
     },
     {
       "Id": "DeleteOldAthenaResults",
       "Status": "Enabled",
-      "Filter": {
-        "Prefix": "athena-results/"
-      },
-      "Expiration": {
-        "Days": 30
-      }
+      "Filter": {"Prefix": "athena-results/"},
+      "Expiration": {"Days": 30}
     }
   ]
 }
 EOF
-            
-            aws s3api put-bucket-lifecycle-configuration \
-                --bucket "$bucket_name" \
-                --lifecycle-configuration file:///tmp/lifecycle-policy.json \
-                --region us-east-1
-            
-            rm /tmp/lifecycle-policy.json
-            
-            log_success "✅ Bucket configurado completamente"
-            return 0
-        else
-            log_error "❌ Error al crear bucket '$bucket_name'"
-            log_error "   Verifica los permisos del LabRole"
-            return 1
-        fi
-    elif aws s3 ls "s3://$bucket_name" >/dev/null 2>&1; then
-        log_success "✅ Bucket '$bucket_name' ya existe y es accesible"
+        
+        aws s3api put-bucket-lifecycle-configuration \
+            --bucket "$bucket_name" \
+            --lifecycle-configuration file:///tmp/lifecycle-policy.json \
+            --region us-east-1 2>/dev/null
+        
+        rm -f /tmp/lifecycle-policy.json
+        
+        log_success "✅ Bucket configurado completamente"
         return 0
     else
-        log_error "❌ Error al verificar bucket '$bucket_name'"
+        log_error "❌ Error al crear bucket '$bucket_name'"
+        log_warning "⚠️  En AWS Academy, el LabRole tiene permisos limitados"
+        
+        # Obtener Account ID para sugerir nombre alternativo
+        local account_id=$(aws sts get-caller-identity --query Account --output text 2>/dev/null)
+        
+        if [ -n "$account_id" ]; then
+            local alt_bucket="chinawok-data-${account_id}"
+            log_info "💡 Solución: Usa un bucket con tu Account ID"
+            log_info "   1. Edita .env y cambia:"
+            log_info "      S3_BUCKET_NAME=$alt_bucket"
+            log_info "   2. Ejecuta nuevamente este script"
+            log_info ""
+            log_info "   O usa este comando para cambiar automáticamente:"
+            log_info "   sed -i 's/^S3_BUCKET_NAME=.*/S3_BUCKET_NAME=$alt_bucket/' .env"
+        fi
+        
         return 1
     fi
 }
