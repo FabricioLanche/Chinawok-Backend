@@ -1,8 +1,0 @@
-{
-  "name": "chinawok-shared-layer",
-  "version": "1.0.0",
-  "description": "Lambda Layer compartido para ChinaWok Backend",
-  "devDependencies": {
-    "serverless-python-requirements": "^6.1.0"
-  }
-}

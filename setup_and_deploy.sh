@@ -95,39 +95,47 @@ log_success "Credenciales AWS verificadas"
 
 # Función para construir Lambda Layer
 build_layer() {
-    log "🔧 Preparando Lambda Layer compartido..."
+    log "🔧 Construyendo Lambda Layer compartido..."
     
     cd Layers || exit 1
     
-    # Ya NO instalamos dependencias manualmente
-    # Serverless Framework con el plugin serverless-python-requirements lo hará automáticamente
+    # Limpiar build anterior de libs (las dependencias de terceros)
+    log "🗑️  Limpiando python/libs anterior..."
+    rm -rf python/libs/*
     
-    # Solo verificar que la estructura es correcta
-    log "🔍 Verificando estructura del layer..."
-    if [ -d "python/utils" ] && [ -f "python/utils/__init__.py" ]; then
-        log_success "✅ Estructura del layer correcta"
-        log_info "   📂 python/utils/ - Código compartido"
-        log_info "   📄 requirements.txt - Dependencias (Serverless las instalará)"
-    else
-        log_error "❌ Estructura del layer incorrecta"
-        log_error "   Debe existir: python/utils/__init__.py"
+    # Crear estructura si no existe
+    mkdir -p python/libs
+    touch python/libs/__init__.py
+    
+    # Instalar dependencias de terceros en python/libs
+    log "📦 Instalando dependencias de terceros en python/libs..."
+    pip install -r requirements.txt \
+        -t python/libs \
+        --quiet \
+        --upgrade \
+        --no-cache-dir
+    
+    if [ $? -ne 0 ]; then
+        log_error "Error al instalar dependencias del layer"
         exit 1
     fi
     
-    # Instalar plugin de Serverless si no está instalado
-    if [ ! -d "node_modules/serverless-python-requirements" ]; then
-        log "📦 Instalando plugin serverless-python-requirements..."
-        npm install --save-dev serverless-python-requirements
-        
-        if [ $? -ne 0 ]; then
-            log_error "Error al instalar plugin"
-            exit 1
-        fi
-        log_success "Plugin instalado correctamente"
+    log_success "✅ Dependencias instaladas en python/libs/"
+    log_info "ℹ️  Las utilidades compartidas ya están en python/utils/"
+    
+    # Verificar estructura
+    log "🔍 Verificando estructura del layer..."
+    if [ -d "python/libs" ] && [ -d "python/utils" ]; then
+        log_success "✅ Estructura del layer correcta"
+        log_info "   📂 python/libs/ - Dependencias de terceros"
+        log_info "   📂 python/utils/ - Código compartido"
+    else
+        log_error "❌ Estructura del layer incorrecta"
+        exit 1
     fi
 
     cd ..
-    log_success "Lambda Layer preparado correctamente"
+    log_success "Lambda Layer construido correctamente"
 }
 
 # Función para generar y poblar datos

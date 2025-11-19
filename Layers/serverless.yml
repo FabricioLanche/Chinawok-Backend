@@ -8,29 +8,21 @@ provider:
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
-plugins:
-  - serverless-python-requirements
-
-custom:
-  pythonRequirements:
-    dockerizePip: false
-    layer: true
-    slim: true
-    strip: false
-    zip: true
-    usePoetry: false
-    useDownloadCache: true
-    useStaticCache: true
-
 layers:
   pythonDependencies:
-    path: python
+    path: .
     name: ${self:provider.stage}-chinawok-python-dependencies
     description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
     compatibleRuntimes:
       - python3.12
       - python3.13
     retain: false
+    package:
+      patterns:
+        - 'python/utils/**'
+        - '!python/libs/**'
+        - '!**/__pycache__/**'
+        - '!**/*.pyc'
 
 resources:
   Outputs:
