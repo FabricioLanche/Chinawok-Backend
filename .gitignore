@@ -55,16 +55,3 @@ Thumbs.db
 # Node
 node_modules/
 package-lock.json
-
-# Endpoints generados
-endpoints.txt
-
-# Lambda Layer build
-Layers/python-dependencies/python/
-Layers/python-dependencies-layer.zip
-
-# Lambda Layers
-Layers/python/lib/
-Layers/python/libs/
-Layers/.serverless/
-Layers/node_modules/

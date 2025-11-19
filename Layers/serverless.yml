@@ -4,7 +4,7 @@ provider:
   name: aws
   runtime: python3.12
   region: us-east-1
-  stage: ${param:stage, 'dev'}
+  stage: ${param:stage}
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
@@ -12,30 +12,28 @@ layers:
   pythonDependencies:
     path: python
     name: ${self:provider.stage}-chinawok-python-dependencies
-    description: Dependencias Python y utilidades compartidas
+    description: Dependencias Python y utilidades compartidas para todos los microservicios ChinaWok
     compatibleRuntimes:
       - python3.12
       - python3.13
     retain: false
-
-package:
-  patterns:
-    # INCLUIR explícitamente utils
-    - 'python/utils/**'
-    - 'python/lib/**'
-    # Excluir archivos innecesarios
-    - '!python/**/__pycache__/**'
-    - '!python/**/*.pyc'
-    - '!python/**/.pytest_cache/**'
-    - '!.serverless/**'
-    - '!node_modules/**'
-    - '!**/.git/**'
+    package:
+      patterns:
+        # Incluir SOLO lo que necesitamos
+        - 'utils/**'
+        - 'lib/**'
+        # Excluir todo lo demás explícitamente
+        - '!**/__pycache__/**'
+        - '!**/*.pyc'
+        - '!libs/**'
+        - '!.serverless/**'
+        - '!node_modules/**'
 
 resources:
   Outputs:
     PythonDependenciesLayerExport:
-      Description: ARN del Lambda Layer compartido
+      Description: ARN del Lambda Layer compartido de ChinaWok
       Value:
         Ref: PythonDependenciesLambdaLayer
       Export:
-        Name: ${self:provider.stage}-chinawok-python-dependencies-layer
+        Name: ${self:provider.stage}-ChinaWok-Python-Dependencies-Layer
