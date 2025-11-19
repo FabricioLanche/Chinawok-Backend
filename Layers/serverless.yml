@@ -23,8 +23,9 @@ layers:
         - 'libs/**'
         - '!**/__pycache__/**'
         - '!**/*.pyc'
-        - '!.serverless/**'
         - '!node_modules/**'
+        - '!.serverless/**'
+
 
 
 resources:
