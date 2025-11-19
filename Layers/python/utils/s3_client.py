@@ -37,8 +37,8 @@ def upload_to_s3(bucket: str, key: str, data: List[Dict[str, Any]]) -> str:
     Sube datos a S3 en formato JSON
     
     Args:
-        bucket (str): Nombre del bucket S3 (sin prefijo s3://)
-        key (str): Ruta completa del objeto en S3
+        bucket (str): Nombre del bucket S3 (SIN s3:// ni barras, ej: 'chinawok-data')
+        key (str): Ruta completa del objeto en S3 (ej: 'data-ingestion/locales/20241119.json')
         data (List[Dict]): Datos a subir (lista de diccionarios)
         
     Returns:
@@ -58,8 +58,8 @@ def upload_to_s3(bucket: str, key: str, data: List[Dict[str, Any]]) -> str:
     # Subir a S3
     try:
         s3_client.put_object(
-            Bucket=bucket,
-            Key=key,
+            Bucket=bucket,  # ← Debe ser solo el nombre (sin barras)
+            Key=key,        # ← Puede tener barras (es el path)
             Body=json_data.encode('utf-8'),
             ContentType='application/json'
         )

@@ -25,9 +25,13 @@ def handler(event, context):
     results = []
     errors = []
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-    bucket = os.environ['S3_BUCKET_NAME']
+    
+    # Obtener bucket y prefijo de variables de entorno
+    bucket = os.environ.get('S3_BUCKET_NAME', 'chinawok-data')
+    ingestion_prefix = os.environ.get('S3_INGESTION_PREFIX', 'data-ingestion')
     
     logger.info(f'🚀 Iniciando ingesta de {len(TABLES)} tablas - Timestamp: {timestamp}')
+    logger.info(f'📦 Bucket: {bucket}, Prefijo: {ingestion_prefix}')
     
     for table_key, dynamodb_table in TABLES.items():
         try:
@@ -37,17 +41,17 @@ def handler(event, context):
             items = get_table_data(dynamodb_table)
             logger.info(f'✅ Obtenidos {len(items)} items de {dynamodb_table}')
             
-            # Preparar ruta S3
-            s3_key = f'ingesta/{table_key}/{timestamp}.json'
+            # Preparar ruta S3 con prefijo
+            s3_key = f'{ingestion_prefix}/{table_key}/{timestamp}.json'
             
             # Subir datos directamente a S3
-            upload_to_s3(bucket, s3_key, items)
+            s3_uri = upload_to_s3(bucket, s3_key, items)
             
             result = {
                 'table': table_key,
                 'dynamodb_table': dynamodb_table,
                 'records': len(items),
-                's3_location': f's3://{bucket}/{s3_key}',
+                's3_location': s3_uri,
                 'status': 'success'
             }
             
