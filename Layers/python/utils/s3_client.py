@@ -3,90 +3,140 @@ Cliente de S3 para operaciones comunes
 """
 import boto3
 import json
-from typing import List, Dict, Any
+from datetime import datetime
 from decimal import Decimal
 
-
-def get_s3_client():
-    """
-    Retorna un cliente de S3
-    """
-    return boto3.client('s3')
+s3_client = boto3.client('s3')
 
 
-def convert_decimal_to_serializable(obj):
-    """
-    Convierte Decimal a float para que sea serializable en JSON
-    """
-    if isinstance(obj, list):
-        return [convert_decimal_to_serializable(item) for item in obj]
-    elif isinstance(obj, dict):
-        return {k: convert_decimal_to_serializable(v) for k, v in obj.items()}
-    elif isinstance(obj, Decimal):
-        # Convertir Decimal a int si es entero, sino a float
-        if obj % 1 == 0:
-            return int(obj)
-        else:
+class DecimalEncoder(json.JSONEncoder):
+    """Encoder para convertir Decimal a float en JSON"""
+    def default(self, obj):
+        if isinstance(obj, Decimal):
             return float(obj)
-    else:
-        return obj
+        return super(DecimalEncoder, self).default(obj)
 
 
-def upload_to_s3(bucket: str, key: str, data: List[Dict[str, Any]]) -> str:
+def upload_to_s3(bucket: str, key: str, data: list) -> str:
     """
-    Sube datos a S3 en formato JSON
+    Sube datos a S3 en formato JSON Lines (JSONL) para compatibilidad con Glue
+    SOBREESCRIBE el archivo si ya existe (no crea versiones con timestamp)
     
     Args:
-        bucket (str): Nombre del bucket S3 (SIN s3:// ni barras, ej: 'chinawok-data')
-        key (str): Ruta completa del objeto en S3 (ej: 'data-ingestion/locales/20241119.json')
-        data (List[Dict]): Datos a subir (lista de diccionarios)
-        
+        bucket: Nombre del bucket S3
+        key: Ruta completa del archivo en S3 (se recomienda usar nombre fijo)
+        data: Lista de diccionarios a subir
+    
     Returns:
-        str: URI completa del archivo subido (s3://bucket/key)
-        
-    Raises:
-        Exception: Si hay error al subir a S3
+        str: URI completa de S3 (s3://bucket/key)
     """
-    s3_client = get_s3_client()
-    
-    # Convertir Decimal a tipos serializables
-    serializable_data = convert_decimal_to_serializable(data)
-    
-    # Convertir a JSON
-    json_data = json.dumps(serializable_data, indent=2, default=str)
-    
-    # Subir a S3
     try:
+        # Convertir lista de dicts a JSON Lines (una línea por objeto)
+        jsonl_lines = []
+        for item in data:
+            json_line = json.dumps(item, cls=DecimalEncoder, ensure_ascii=False)
+            jsonl_lines.append(json_line)
+        
+        # Unir líneas con salto de línea
+        jsonl_content = '\n'.join(jsonl_lines)
+        
+        # Cambiar extensión a .jsonl para claridad
+        if key.endswith('.json'):
+            key = key.replace('.json', '.jsonl')
+        
+        # Timestamp para metadata (no en el nombre del archivo)
+        upload_timestamp = datetime.utcnow().isoformat() + 'Z'
+        
+        # Subir a S3 (SOBREESCRIBE si ya existe)
         s3_client.put_object(
-            Bucket=bucket,  # ← Debe ser solo el nombre (sin barras)
-            Key=key,        # ← Puede tener barras (es el path)
-            Body=json_data.encode('utf-8'),
-            ContentType='application/json'
+            Bucket=bucket,
+            Key=key,
+            Body=jsonl_content.encode('utf-8'),
+            ContentType='application/x-ndjson',
+            Metadata={
+                'records': str(len(data)),
+                'format': 'jsonl',
+                'upload_timestamp': upload_timestamp,
+                'last_updated': upload_timestamp
+            }
         )
         
-        return f's3://{bucket}/{key}'
+        s3_uri = f's3://{bucket}/{key}'
+        print(f'✅ Archivo subido/actualizado: {s3_uri}')
+        print(f'   Registros: {len(data)}, Formato: JSONL, Última actualización: {upload_timestamp}')
+        
+        return s3_uri
         
     except Exception as e:
+        print(f'❌ Error subiendo archivo a S3: {str(e)}')
         raise Exception(f'Error subiendo archivo a S3: {str(e)}')
 
 
-def download_from_s3(bucket: str, key: str) -> Dict[str, Any]:
+def list_s3_files(bucket: str, prefix: str) -> list:
     """
-    Descarga y parsea un archivo JSON desde S3
+    Lista archivos en un bucket S3 bajo un prefijo
     
     Args:
-        bucket (str): Nombre del bucket S3
-        key (str): Ruta del objeto en S3
-        
-    Returns:
-        Dict: Datos parseados desde JSON
-    """
-    s3_client = get_s3_client()
+        bucket: Nombre del bucket
+        prefix: Prefijo/path para filtrar
     
+    Returns:
+        list: Lista de keys de archivos
+    """
     try:
-        response = s3_client.get_object(Bucket=bucket, Key=key)
-        content = response['Body'].read().decode('utf-8')
-        return json.loads(content)
+        response = s3_client.list_objects_v2(
+            Bucket=bucket,
+            Prefix=prefix
+        )
+        
+        files = []
+        if 'Contents' in response:
+            files = [obj['Key'] for obj in response['Contents']]
+        
+        return files
         
     except Exception as e:
-        raise Exception(f'Error descargando archivo de S3: {str(e)}')
+        print(f'Error listando archivos S3: {str(e)}')
+        return []
+
+def delete_old_versions(bucket: str, prefix: str, keep_latest: int = 1):
+    """
+    Elimina versiones antiguas de archivos en S3, manteniendo solo las más recientes
+    
+    Args:
+        bucket: Nombre del bucket
+        prefix: Prefijo/path de los archivos
+        keep_latest: Número de versiones a mantener (por defecto: 1)
+    
+    Returns:
+        int: Número de archivos eliminados
+    """
+    try:
+        files = list_s3_files(bucket, prefix)
+        
+        if len(files) <= keep_latest:
+            return 0
+        
+        # Ordenar por fecha de modificación (más reciente primero)
+        files_with_metadata = []
+        for key in files:
+            response = s3_client.head_object(Bucket=bucket, Key=key)
+            files_with_metadata.append({
+                'key': key,
+                'last_modified': response['LastModified']
+            })
+        
+        files_with_metadata.sort(key=lambda x: x['last_modified'], reverse=True)
+        
+        # Eliminar archivos antiguos
+        deleted_count = 0
+        for file_info in files_with_metadata[keep_latest:]:
+            s3_client.delete_object(Bucket=bucket, Key=file_info['key'])
+            deleted_count += 1
+            print(f'🗑️  Eliminado archivo antiguo: {file_info["key"]}')
+        
+        return deleted_count
+        
+    except Exception as e:
+        print(f'Error eliminando versiones antiguas: {str(e)}')
+        return 0

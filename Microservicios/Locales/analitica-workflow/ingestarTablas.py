@@ -21,6 +21,7 @@ TABLES = {
 def handler(event, context):
     """
     Handler para ingestar todas las tablas de DynamoDB a S3
+    Usa nombres de archivo FIJOS que se sobreescriben en cada ejecución
     """
     results = []
     errors = []
@@ -31,7 +32,8 @@ def handler(event, context):
     ingestion_prefix = os.environ.get('S3_INGESTION_PREFIX', 'data-ingestion')
     
     logger.info(f'🚀 Iniciando ingesta de {len(TABLES)} tablas - Timestamp: {timestamp}')
-    logger.info(f'📦 Bucket: {bucket}, Prefijo: {ingestion_prefix}')
+    logger.info(f'📦 Bucket: {bucket}, Prefijo: {ingestion_prefix}, Formato: JSONL')
+    logger.info(f'♻️  Modo: SOBREESCRITURA (un solo archivo por tabla)')
     
     for table_key, dynamodb_table in TABLES.items():
         try:
@@ -41,10 +43,11 @@ def handler(event, context):
             items = get_table_data(dynamodb_table)
             logger.info(f'✅ Obtenidos {len(items)} items de {dynamodb_table}')
             
-            # Preparar ruta S3 con prefijo
-            s3_key = f'{ingestion_prefix}/{table_key}/{timestamp}.json'
+            # CAMBIO IMPORTANTE: Usar nombre de archivo FIJO sin timestamp
+            # Esto hace que siempre se sobreescriba el archivo anterior
+            s3_key = f'{ingestion_prefix}/{table_key}/data.jsonl'
             
-            # Subir datos directamente a S3
+            # Subir datos a S3 en formato JSONL (sobreescribe archivo existente)
             s3_uri = upload_to_s3(bucket, s3_key, items)
             
             result = {
@@ -52,11 +55,13 @@ def handler(event, context):
                 'dynamodb_table': dynamodb_table,
                 'records': len(items),
                 's3_location': s3_uri,
-                'status': 'success'
+                'format': 'jsonl',
+                'status': 'success',
+                'overwritten': True  # Indica que se sobreescribió
             }
             
             results.append(result)
-            logger.info(f'✅ Tabla {table_key} procesada exitosamente: {len(items)} registros')
+            logger.info(f'✅ Tabla {table_key} procesada: {len(items)} registros → {s3_key}')
             
         except Exception as e:
             error_msg = f'Error procesando {table_key}: {str(e)}'
@@ -74,6 +79,7 @@ def handler(event, context):
         'total_tables': len(TABLES),
         'successful': len(results),
         'failed': len(errors),
+        'mode': 'overwrite',
         'results': results
     }
     
@@ -82,6 +88,7 @@ def handler(event, context):
         logger.error(f'❌ Ingesta completada con errores: {len(errors)} tablas fallidas')
     else:
         logger.info(f'✅ Ingesta completada exitosamente: {len(results)} tablas procesadas')
+        logger.info(f'♻️  Todos los archivos fueron sobreescritos con datos actualizados')
     
     status_code = 200 if not errors else 207
     
