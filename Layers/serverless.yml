@@ -24,6 +24,7 @@ layers:
         - '!**/__pycache__/**'
         - '!**/*.pyc'
 
+
 resources:
   Outputs:
     PythonDependenciesLayerExport:
