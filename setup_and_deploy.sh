@@ -315,16 +315,6 @@ ensure_s3_bucket() {
             return 0
         else
             log_error "❌ No tienes permisos de escritura en '$bucket_name'"
-            log_warning "⚠️  En AWS Academy, los buckets deben ser creados con el LabRole"
-            
-            # Sugerir nombre alternativo con account ID
-            local account_id=$(aws sts get-caller-identity --query Account --output text)
-            local alt_bucket="chinawok-data-${account_id}"
-            
-            log_info "💡 Intenta usar un bucket con tu Account ID:"
-            log_info "   Edita .env y cambia S3_BUCKET_NAME a: $alt_bucket"
-            log_info "   Luego ejecuta nuevamente este script"
-            
             return 1
         fi
     fi
@@ -335,22 +325,79 @@ ensure_s3_bucket() {
     if aws s3 mb "s3://$bucket_name" --region us-east-1 2>&1; then
         log_success "✅ Bucket '$bucket_name' creado exitosamente"
         
-        # Configurar versionado
-        log "🔄 Configurando bucket..."
-        aws s3api put-bucket-versioning \
-            --bucket "$bucket_name" \
-            --versioning-configuration Status=Enabled \
-            --region us-east-1 2>/dev/null
+        # Configurar bucket
+        configure_bucket "$bucket_name"
+        return 0
+    else
+        # Si falla por nombre duplicado, intentar con UUID corto
+        log_warning "⚠️  Nombre '$bucket_name' no disponible"
         
-        # Configurar bloqueo de acceso público
-        aws s3api put-public-access-block \
-            --bucket "$bucket_name" \
-            --public-access-block-configuration \
-                "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" \
-            --region us-east-1 2>/dev/null
+        # Generar UUID corto (8 caracteres)
+        local uuid_short=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
+        local bucket_with_uuid="${bucket_name}-${uuid_short}"
         
-        # Configurar reglas de ciclo de vida
-        cat > /tmp/lifecycle-policy.json << 'EOF'
+        log_info "💡 Intentando con nombre único: $bucket_with_uuid"
+        
+        if aws s3 mb "s3://$bucket_with_uuid" --region us-east-1 2>&1; then
+            log_success "✅ Bucket '$bucket_with_uuid' creado exitosamente"
+            
+            # Actualizar .env con el nuevo nombre
+            log "📝 Actualizando .env con el nuevo nombre de bucket..."
+            sed -i "s/^S3_BUCKET_NAME=.*/S3_BUCKET_NAME=$bucket_with_uuid/" .env
+            log_success "✅ .env actualizado con S3_BUCKET_NAME=$bucket_with_uuid"
+            
+            # Configurar bucket
+            configure_bucket "$bucket_with_uuid"
+            return 0
+        else
+            log_error "❌ Error al crear bucket con UUID"
+            
+            # Último intento: usar Account ID
+            local account_id=$(aws sts get-caller-identity --query Account --output text 2>/dev/null)
+            if [ -n "$account_id" ]; then
+                local bucket_with_account="chinawok-data-${account_id}"
+                log_info "💡 Último intento con Account ID: $bucket_with_account"
+                
+                if aws s3 mb "s3://$bucket_with_account" --region us-east-1 2>&1; then
+                    log_success "✅ Bucket '$bucket_with_account' creado exitosamente"
+                    
+                    # Actualizar .env
+                    sed -i "s/^S3_BUCKET_NAME=.*/S3_BUCKET_NAME=$bucket_with_account/" .env
+                    log_success "✅ .env actualizado con S3_BUCKET_NAME=$bucket_with_account"
+                    
+                    # Configurar bucket
+                    configure_bucket "$bucket_with_account"
+                    return 0
+                fi
+            fi
+            
+            log_error "❌ No se pudo crear ningún bucket"
+            return 1
+        fi
+    fi
+}
+
+# Función auxiliar para configurar un bucket S3
+configure_bucket() {
+    local bucket_name="$1"
+    
+    log "🔄 Configurando bucket '$bucket_name'..."
+    
+    # Configurar versionado
+    aws s3api put-bucket-versioning \
+        --bucket "$bucket_name" \
+        --versioning-configuration Status=Enabled \
+        --region us-east-1 2>/dev/null
+    
+    # Configurar bloqueo de acceso público
+    aws s3api put-public-access-block \
+        --bucket "$bucket_name" \
+        --public-access-block-configuration \
+            "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" \
+        --region us-east-1 2>/dev/null
+    
+    # Configurar reglas de ciclo de vida
+    cat > /tmp/lifecycle-policy.json << 'EOF'
 {
   "Rules": [
     {
@@ -368,36 +415,15 @@ ensure_s3_bucket() {
   ]
 }
 EOF
-        
-        aws s3api put-bucket-lifecycle-configuration \
-            --bucket "$bucket_name" \
-            --lifecycle-configuration file:///tmp/lifecycle-policy.json \
-            --region us-east-1 2>/dev/null
-        
-        rm -f /tmp/lifecycle-policy.json
-        
-        log_success "✅ Bucket configurado completamente"
-        return 0
-    else
-        log_error "❌ Error al crear bucket '$bucket_name'"
-        log_warning "⚠️  En AWS Academy, el LabRole tiene permisos limitados"
-        
-        # Obtener Account ID para sugerir nombre alternativo
-        local account_id=$(aws sts get-caller-identity --query Account --output text 2>/dev/null)
-        
-        if [ -n "$account_id" ]; then
-            local alt_bucket="chinawok-data-${account_id}"
-            log_info "💡 Solución: Usa un bucket con tu Account ID"
-            log_info "   1. Edita .env y cambia:"
-            log_info "      S3_BUCKET_NAME=$alt_bucket"
-            log_info "   2. Ejecuta nuevamente este script"
-            log_info ""
-            log_info "   O usa este comando para cambiar automáticamente:"
-            log_info "   sed -i 's/^S3_BUCKET_NAME=.*/S3_BUCKET_NAME=$alt_bucket/' .env"
-        fi
-        
-        return 1
-    fi
+    
+    aws s3api put-bucket-lifecycle-configuration \
+        --bucket "$bucket_name" \
+        --lifecycle-configuration file:///tmp/lifecycle-policy.json \
+        --region us-east-1 2>/dev/null
+    
+    rm -f /tmp/lifecycle-policy.json
+    
+    log_success "✅ Bucket configurado completamente"
 }
 
 # Menú de opciones
