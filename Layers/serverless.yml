@@ -18,18 +18,6 @@ layers:
       - python3.13
     retain: false
 
-# NO especificar package.patterns - dejar que suba TODO
-# Serverless debería incluir todo en python/ por defecto
-
-resources:
-  Outputs:
-    PythonDependenciesLayerExport:
-      Description: ARN del Lambda Layer compartido
-      Value:
-        Ref: PythonDependenciesLambdaLayer
-      Export:
-        Name: ${self:provider.stage}-chinawok-python-dependencies-layer
-
 resources:
   Outputs:
     PythonDependenciesLayerExport:
