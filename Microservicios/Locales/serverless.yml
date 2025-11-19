@@ -28,7 +28,8 @@ provider:
     STEP_FUNCTION_ANALITICA_NAME: ${env:STEP_FUNCTION_ANALITICA_NAME, 'ChinaWok-Analitica-Processor'}
     GLUE_CRAWLER_NAME: ${env:GLUE_CRAWLER_NAME, 'chinawok-analytics-crawler'}
     EVENT_BUS_ANALITICA_NAME: ${env:EVENT_BUS_ANALITICA_NAME, 'chinawok-analitica-events'}
-  
+    AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
   
