@@ -48,7 +48,6 @@ class UsuariosGenerator:
             "nombre": Config.ADMIN_NOMBRE,
             "apellido": Config.ADMIN_APELLIDO,
             "correo": Config.ADMIN_EMAIL,
-            "telefono": Config.ADMIN_TELEFONO,
             "contrasena": Config.ADMIN_PASSWORD,
             "role": "Admin",
             "historial_pedidos": []
@@ -61,7 +60,6 @@ class UsuariosGenerator:
             "nombre": gerente_data["nombre"].split()[0],  # Primer nombre
             "apellido": " ".join(gerente_data["nombre"].split()[1:]),  # Apellidos
             "correo": gerente_data["correo"],
-            "telefono": f"+51{random.randint(900000000, 999999999)}",
             "contrasena": gerente_data["contrasena"],
             "role": "Gerente",
             "historial_pedidos": []
