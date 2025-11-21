@@ -4,10 +4,20 @@ Lambda Authorizer para validar tokens JWT en API Gateway
 import json
 import logging
 from utils.jwt_utils import validar_token
-from utils.jwt_utils import _mask_token
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+def _mask_token_local(t: str) -> str:
+    """Versión local de enmascarado para evitar depender de la implementación en el Layer."""
+    if not t:
+        return "<empty>"
+    try:
+        if len(t) <= 12:
+            return t[:3] + "..." + t[-3:]
+        return t[:6] + "..." + t[-6:]
+    except Exception:
+        return "<invalid-token>"
 
 def lambda_handler(event, context):
     """
@@ -20,7 +30,7 @@ def lambda_handler(event, context):
     
     # Log del token recibido (enmascarado) para debugging
     try:
-        masked = _mask_token(token if isinstance(token, str) else (token.decode("utf-8") if isinstance(token, bytes) else None))
+        masked = _mask_token_local(token if isinstance(token, str) else (token.decode("utf-8") if isinstance(token, bytes) else None))
     except Exception:
         masked = "<no-mask-possible>"
     logger.info(f"Authorizer: authorizationToken recibido (enmascarado)={masked}")

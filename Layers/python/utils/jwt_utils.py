@@ -11,15 +11,6 @@ JWT_SECRET = os.getenv("JWT_SECRET", "tu-clave-secreta-super-segura-cambiar-en-p
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
 
-
-def _mask_token(t: str) -> str:
-    if not t:
-        return "<empty>"
-    if len(t) <= 12:
-        return t[:3] + "..." + t[-3:]
-    return t[:6] + "..." + t[-6:]
-
-
 def generar_token(correo, role, nombre):
     """
     Genera un JWT como Spring Boot
