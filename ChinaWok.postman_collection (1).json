@@ -1,0 +1,4098 @@
+{
+	"info": {
+		"_postman_id": "5dcdc738-8f13-43e2-8379-9b3a43ea6b69",
+		"name": "ChinaWok",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43509885",
+		"_collection_link": "https://dark-sunset-246817.postman.co/workspace/DBP~16941fd4-2fc3-45ac-91eb-0146a2c045ea/collection/43509885-5dcdc738-8f13-43e2-8379-9b3a43ea6b69?action=share&source=collection_link&creator=43509885"
+	},
+	"item": [
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "1. Públicos (sin auth)",
+					"item": [
+						{
+							"name": "Crear Cliente (Register)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    var response = pm.response.json();",
+											"    pm.collectionVariables.set('userToken', response.token);",
+											"    pm.collectionVariables.set('correo_cliente', response.usuario.correo);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Fabricio Lanche\",\n  \"correo\": \"fabricio.lanche@utec.edu.pe\",\n  \"contrasena\": \"Cliente123!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/registrar",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"registrar"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Crear Cliente (Register)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"nombre\": \"Fabricio Lanche\",\n  \"correo\": \"fabricio.lanche@utec.edu.pe\",\n  \"contrasena\": \"Cliente123!\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/registrar",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"registrar"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "397"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:48:56 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d038-2e9dc9711dc45e884483f8bc;Parent=2375f8546a555606;Sampled=0;Lineage=1:b773d0c8:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "7d453aa1-f212-4d3c-a4da-dcffa712819a"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaV47EITIAMEnRw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 795b4b6b943fe3d87b1c7e104dc9034c.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "jMdtWedYh_hW6tbtTJjXqFKetzgXmnw6yVqIEfHmKG5tdRDcDVafMw=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario creado correctamente\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJmYWJyaWNpby5sYW5jaGVAdXRlYy5lZHUucGUiLCJyb2xlIjoiQ2xpZW50ZSIsIm5vbWJyZSI6IkZhYnJpY2lvIExhbmNoZSIsImlhdCI6MTc2Mzc1ODEzNiwiZXhwIjoxNzYzODQ0NTM2fQ.LV0MOcvGPXuXqdaoZJww7I_hb6Z1SKBkWQKlj9zrxB0\",\n    \"usuario\": {\n        \"correo\": \"fabricio.lanche@utec.edu.pe\",\n        \"nombre\": \"Fabricio Lanche\",\n        \"role\": \"Cliente\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Login Cliente",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    var response = pm.response.json();",
+											"    pm.collectionVariables.set('userToken', response.token);",
+											"    pm.collectionVariables.set('correo_cliente', response.usuario.correo);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"fabricio.lanche@utec.edu.pe\",\n  \"contrasena\": \"Cliente123!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/login",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"login"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Login Cliente",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"correo\": \"fabricio.lanche@utec.edu.pe\",\n  \"contrasena\": \"Cliente123!\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/login",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"login"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "382"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:49:35 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d05e-3e495c363ce7ea9f3fb75850;Parent=26fddc3d67e51080;Sampled=0;Lineage=1:8d3eb23b:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "59dbee99-e13f-4413-a89d-cfea4720ae27"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaV-wHCwoAMEOvg="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 86ad6dce5c6bd2eccfd339ef94411190.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "W6Illz0mI37SfP4erawvZrj9XLPkArONdvRnpvM8-JN1JXvIoYyySw=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Login exitoso\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJmYWJyaWNpby5sYW5jaGVAdXRlYy5lZHUucGUiLCJyb2xlIjoiQ2xpZW50ZSIsIm5vbWJyZSI6IkZhYnJpY2lvIExhbmNoZSIsImlhdCI6MTc2Mzc1ODE3NSwiZXhwIjoxNzYzODQ0NTc1fQ.4hZTtJZl6sUBCGQJs3e3-VzL955fHh1gr1qRsYlpfhE\",\n    \"usuario\": {\n        \"correo\": \"fabricio.lanche@utec.edu.pe\",\n        \"nombre\": \"Fabricio Lanche\",\n        \"role\": \"Cliente\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Login Gerente",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    var response = pm.response.json();",
+											"    pm.collectionVariables.set('gerenteToken', response.token);",
+											"    pm.collectionVariables.set('correo_gerente', response.usuario.correo);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"gerente.local024@chinawok.pe\",\n  \"contrasena\": \"Gerente024!Pass\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/login",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"login"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Login Gerente",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"correo\": \"gerente.local024@chinawok.pe\",\n  \"contrasena\": \"Gerente024!Pass\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/login",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"login"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "365"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:50:02 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d07a-328aa39255a2b1e05c30aae4;Parent=5c4d873053e64076;Sampled=0;Lineage=1:8d3eb23b:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "135fcbb2-221d-4d9e-bf8c-0b3dd18b2a89"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWDPHd3IAMErBw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 86ad6dce5c6bd2eccfd339ef94411190.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "JVHDaVTaA4a99zIpUa6gH5VWaAeQU2_u1sQCUt-TNjADc3LaOk0lXg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Login exitoso\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJnZXJlbnRlLmxvY2FsMDI0QGNoaW5hd29rLnBlIiwicm9sZSI6IkdlcmVudGUiLCJub21icmUiOiJEYW5pZWxhIiwiaWF0IjoxNzYzNzU4MjAyLCJleHAiOjE3NjM4NDQ2MDJ9.Np2MAf-4oEKoysFBsvSG-U2IB6wPnuov8YlTxeciX5w\",\n    \"usuario\": {\n        \"correo\": \"gerente.local024@chinawok.pe\",\n        \"nombre\": \"Daniela\",\n        \"role\": \"Gerente\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Login Admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    var response = pm.response.json();",
+											"    pm.collectionVariables.set('adminToken', response.token);",
+											"    pm.collectionVariables.set('correo_admin', response.usuario.correo);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"admin@chinawok.pe\",\n  \"contrasena\": \"AdminChinaWok2024!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/login",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"login"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Login Admin",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"correo\": \"admin@chinawok.pe\",\n  \"contrasena\": \"AdminChinaWok2024!\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/login",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"login"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "349"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:50:10 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d082-5fa4d65968b4aea8695d7e28;Parent=0a2a6e2889dc75c3;Sampled=0;Lineage=1:8d3eb23b:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "85b20dde-97a4-437d-b32e-9cf220480bac"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWEZGSloAMEZRw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 0d9fa547d973207140747f5567b6a0fa.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "pA9hV09-pD0Rn4mftNZ6JnTOleIKESyViTX3_3N3rbThVn_VuKY7fA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Login exitoso\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJhZG1pbkBjaGluYXdvay5wZSIsInJvbGUiOiJBZG1pbiIsIm5vbWJyZSI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3NjM3NTgyMTAsImV4cCI6MTc2Mzg0NDYxMH0.t0EuU7eZ9kbEkKkCiPxk1ijOHyD3gPBYWzBfEHsFyZI\",\n    \"usuario\": {\n        \"correo\": \"admin@chinawok.pe\",\n        \"nombre\": \"Administrador\",\n        \"role\": \"Admin\"\n    }\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "2. Obtener Mi Información",
+					"item": [
+						{
+							"name": "Cliente ve su info (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/me",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"me"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Cliente ve su info (OK)",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/me",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"me"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "190"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:50:23 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d08f-1b3c1f2d0b44230e4d0b5d98;Parent=19fca106f0dd3a72;Sampled=0;Lineage=2:7d5f1a49:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "9b9cf961-91c7-4dbd-8084-afc07cbfad3a"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWGbFdMIAMELXQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 0d9fa547d973207140747f5567b6a0fa.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "vtA_4A--Giexjdl_Ez_c5MDlL2TCzlLtWXFytdXg5VQ4plw3vkYYTg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario encontrado\",\n    \"usuario\": {\n        \"nombre\": \"Fabricio Lanche\",\n        \"correo\": \"fabricio.lanche@utec.edu.pe\",\n        \"historial_pedidos\": [],\n        \"role\": \"Cliente\",\n        \"informacion_bancaria\": null\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Cliente intenta ver info de otro (FAIL)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "{{correo_gerente}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Cliente intenta ver info de otro (FAIL)",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "{{correo_gerente}}"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "57"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:50:52 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d0ac-22896bc86196d7836666ed97;Parent=70f0b5e39cca213e;Sampled=0;Lineage=2:92c102a0:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "927d45cd-f776-4f87-a01b-b59b58f6b517"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWK9EZYoAMEfqw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Error from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 c49971ad4f76a00082eb4f604c635cba.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "motwOA_g9xR3cl34r4198PKVMObRcgogGB4ZiJEjyDTfA4_VJ-gMOA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Solo puedes ver tu propia información\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Gerente ve info de cualquier usuario (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{gerenteToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "{{correo_cliente}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Gerente ve info de cualquier usuario (OK)",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "{{correo_cliente}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "190"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:51:06 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d0ba-18d1816362a898652e6410e3;Parent=590c1b47d58736db;Sampled=0;Lineage=2:92c102a0:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "9110f560-f056-4cc2-b583-f03ce5c5a8ef"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWNOEO5IAMEcvQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 795b4b6b943fe3d87b1c7e104dc9034c.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "6L2MRdXokKzftKDFmLR9roMrC1-iZu89LIA_4jGmOSEbl8hipcl9rw=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario encontrado\",\n    \"usuario\": {\n        \"nombre\": \"Fabricio Lanche\",\n        \"correo\": \"fabricio.lanche@utec.edu.pe\",\n        \"historial_pedidos\": [],\n        \"role\": \"Cliente\",\n        \"informacion_bancaria\": null\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Gerente ve su info (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{gerenteToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/me",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"me"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Gerente ve su info (OK)",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/me",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"me"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "179"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:49:21 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d050-2efc0b6b34f008934e4e5d0d;Parent=6657855c56d52e2f;Sampled=0;Lineage=2:7d5f1a49:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "7d878ff7-57f4-4da7-a0f5-5bc9fb201a75"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaV8nF8AoAMECfw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 795b4b6b943fe3d87b1c7e104dc9034c.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "p6h4D17LynSQyOsjMqAHnYBYWqqDOYPlKbm3OXms4k_Ooy-kNyvJ2Q=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario encontrado\",\n    \"usuario\": {\n        \"nombre\": \"Daniela\",\n        \"correo\": \"gerente.local024@chinawok.pe\",\n        \"apellido\": \"Gómez\",\n        \"historial_pedidos\": [],\n        \"role\": \"Gerente\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Admin ve info de cualquiera (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "{{correo_gerente}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Admin ve info de cualquiera (OK)",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "{{correo_gerente}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "179"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:51:21 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d0c9-2c8f35035ec0811f684486df;Parent=3789bbde75e73d82;Sampled=0;Lineage=2:92c102a0:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "2f91e5b2-b7dc-4aea-8453-d1c000ed15eb"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWPhFqcoAMEoOA="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 795b4b6b943fe3d87b1c7e104dc9034c.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "5fpqPnILgaHvAGUsL59HfONva1FhGveTS4jvPpHPb0HeVDnHTAMleA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario encontrado\",\n    \"usuario\": {\n        \"nombre\": \"Daniela\",\n        \"correo\": \"gerente.local024@chinawok.pe\",\n        \"apellido\": \"Gómez\",\n        \"historial_pedidos\": [],\n        \"role\": \"Gerente\"\n    }\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "3. Listar Usuarios (Solo Admin)",
+					"item": [
+						{
+							"name": "Cliente intenta listar (FAIL)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/listar",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"listar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Admin lista todos (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/listar",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"listar"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "4. Actualizar Usuario",
+					"item": [
+						{
+							"name": "Cliente actualiza su perfil (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"fabricio.lanche@utec.edu.pe\",\n  \"nombre\": \"Fabricio Lanche v2\",\n  \"informacion_bancaria\": {\n    \"numero_tarjeta\": \"4532015112830366\",\n    \"cvv\": \"123\",\n    \"fecha_vencimiento\": \"12/25\",\n    \"direccion_delivery\": \"Av. Siempre Viva 742, Springfield\"\n  }\n}\n\n/*\nnumero_tarjeta: 13-19 dígitos\ncvv: 3-4 dígitos\nfecha_vencimiento: formato MM/YY\ndireccion_delivery: string no vacío\nTodos los campos son requeridos dentro de informacion_bancari\n*/"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/editar",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"editar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Cliente intenta cambiar su rol (FAIL)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"cliente@chinawok.pe\",\n  \"role\": \"Admin\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/editar",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"editar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Admin cambia rol de usuario (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"fabricio.lanche@utec.edu.pe\",\n  \"role\": \"Gerente\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/editar",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"editar"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "5. Eliminar Usuario",
+					"item": [
+						{
+							"name": "Cliente intenta eliminar a otro (FAIL)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "{{correo_gerente}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Cliente intenta eliminar a otro (FAIL)",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "{{correo_gerente}}"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "59"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:22:44 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920ca11-1727005a2e508eed6d4e3ced;Parent=02d02c88dd5a11ed;Sampled=0;Lineage=2:deb2ed2d:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "bef070b3-b283-43b7-8f21-97dac37d5225"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaSC3GbKoAMESfA="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Error from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 795b4b6b943fe3d87b1c7e104dc9034c.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "6YPNk-numi0yUPaBkmInYky_F3tsJuQGHArurT_8D032jf_pEBqreg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"No tienes permiso para eliminar este usuario\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Cliente se elimina a sí mismo (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{userToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/me",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										"me"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Cliente se elimina a sí mismo (OK)",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/me",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												"me"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "46"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:48:39 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d027-6acaec264f39ab5f2d8231ae;Parent=75fb20dd59cb1b0c;Sampled=0;Lineage=2:deb2ed2d:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "46e017d3-2a6d-48fb-8912-47087c68db9d"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaV2OFGDoAMEpBA="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 af08bb104c29fffb75d24691c869c256.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "iRwqm60tPQKpsx_CaL-G35wUyqARzvijtvMft_RhnVcMCI6_mdGalQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario eliminado correctamente\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Gerente elimina Cliente (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{gerenteToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "{{correo_cliente}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Gerente elimina Cliente (OK)",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "{{correo_cliente}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "46"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:32:50 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920cc72-4a913f57613013892c89b5b1;Parent=794f229cd42216b0;Sampled=0;Lineage=2:deb2ed2d:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e94f9571-74fc-4642-af50-7db323331a06"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaTiAFFcoAMELFQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 14c14e18d9457c881708b4141ebcdd66.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "ZRia4jYzR9s4TgYZ_PdFgmrmO4nezjZoj7-Q173DeOlYoPBq1hYuUA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario eliminado correctamente\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Gerente intenta eliminar otro Gerente (FAIL)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{gerenteToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"otrogerente@chinawok.pe\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "gerente.local025@chinawok.pe",
+											"description": "Otro gerente"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Gerente intenta eliminar otro Gerente (FAIL)",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"correo\": \"otrogerente@chinawok.pe\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "gerente.local025@chinawok.pe",
+													"description": "Otro gerente"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "51"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:26:12 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920cae4-292d04d540daa1a73f514e2c;Parent=0193ed1b515fe95c;Sampled=0;Lineage=2:deb2ed2d:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "8f6cc0de-e0ad-4c16-a23b-7e544d4064fb"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaSjsHTeoAMEUEg="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Error from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 0d9fa547d973207140747f5567b6a0fa.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "AeSo-8tuQeurSoLVP4TvliP_tnuO2qBsD0Pyh_l5hOkyzQDNpm6oVA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Gerente solo puede eliminar Clientes\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Admin elimina cualquier usuario (OK)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"correo\": \"gerente@chinawok.pe\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_usuarios}}/usuario/:correo",
+									"host": [
+										"{{base_url_usuarios}}"
+									],
+									"path": [
+										"usuario",
+										":correo"
+									],
+									"variable": [
+										{
+											"key": "correo",
+											"value": "gerente.local025@chinawok.pe",
+											"description": "// Puede eliminar sea gerente o cliente"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Admin elimina cualquier usuario (OK)",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"correo\": \"gerente@chinawok.pe\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_usuarios}}/usuario/:correo",
+											"host": [
+												"{{base_url_usuarios}}"
+											],
+											"path": [
+												"usuario",
+												":correo"
+											],
+											"variable": [
+												{
+													"key": "correo",
+													"value": "gerente.local025@chinawok.pe",
+													"description": "// Puede eliminar sea gerente o cliente"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "46"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:32:16 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920cc4d-3a995a9e7c1b89c36ed21577;Parent=6064f7ad74d7a67d;Sampled=0;Lineage=2:deb2ed2d:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "dc818c62-8177-4333-83a7-c21e27ec4087"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaTcJEpzIAMENBw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 6fc72fa6c2eb32c52ac1d02c16e75776.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "PgJQUl46IMQrWdcxRMCe4CRYQgMsOCK1bBuEBSVgIwpWgvPNldd52g=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Usuario eliminado correctamente\"\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Locales",
+			"item": [
+				{
+					"name": "Locales",
+					"item": [
+						{
+							"name": "Local - Crear",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    var jsonData = pm.response.json();",
+											"    pm.collectionVariables.set('local_id', jsonData.local_id);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"direccion\": \"Av. Providencia 1234, Providencia, Santiago\",\n  \"telefono\": \"+56912345678\",\n  \"hora_apertura\": \"10:00\",\n  \"hora_finalizacion\": \"22:00\",\n  \"gerente\": {\n    \"correo\": \"{{correo_cliente}}\"\n  }\n}"
+								},
+								"url": {
+									"raw": "{{base_url_locales}}/local/crear",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"local",
+										"crear"
+									]
+								},
+								"description": "Crea un nuevo local. El ID se genera automáticamente. Guarda el ID en la variable de colección para usar en otras peticiones."
+							},
+							"response": [
+								{
+									"name": "Local - Crear",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"direccion\": \"Av. Providencia 1234, Providencia, Santiago\",\n  \"telefono\": \"+56912345678\",\n  \"hora_apertura\": \"10:00\",\n  \"hora_finalizacion\": \"22:00\",\n  \"gerente\": {\n    \"correo\": \"fabricio.lanche@utec.edu.pe\"\n  }\n}"
+										},
+										"url": {
+											"raw": "{{base_url_locales}}/local/crear",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"local",
+												"crear"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "308"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:51:50 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d0e5-04717675064fd0024aebe6e8;Parent=7ca70f7246b9e990;Sampled=0;Lineage=1:ccf18774:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "5215b803-5479-44f5-9be9-f6f2fcde33e6"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWT5HWXoAMEEhA="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 e7017602a9625d2d0a22386cb8355050.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P6"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "7rAIz8Cd-ceE2yPT7KcrnVD0uIS9OUDFMm5iqH53l7ew_Cf7teXaeA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"75a4f21e-e417-45a0-b37b-016798c7d603\",\n    \"direccion\": \"Av. Providencia 1234, Providencia, Santiago\",\n    \"telefono\": \"+56912345678\",\n    \"hora_apertura\": \"10:00\",\n    \"hora_finalizacion\": \"22:00\",\n    \"gerente\": {\n        \"nombre\": \"Fabricio Lanche\",\n        \"correo\": \"fabricio.lanche@utec.edu.pe\",\n        \"contrasena\": \"Cliente123!\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Local - Listar Todos",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_locales}}/local/listar",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"local",
+										"listar"
+									]
+								},
+								"description": "Obtiene la lista completa de todos los locales registrados"
+							},
+							"response": [
+								{
+									"name": "Local - Listar Todos",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{base_url_locales}}/local/listar",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"local",
+												"listar"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "30517"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:52:10 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d0f8-691df4f7121e15626f1a1ae9;Parent=16ef6d900aaec7aa;Sampled=0;Lineage=1:2c592b8d:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "2c2dc937-c0fa-428b-81da-25ed6b488f65"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWW9Fq8oAMEFhQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 a12dd72d92e3f1ca9cddeb72bfc4ba56.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P6"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "05NnQ8ubKkMWcY1Lccp8wz0e_sTJxEDi_7mnxDXFkxpXj5403_1jkA=="
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"local_id\": \"bcff6b6d-3513-46cd-a827-1d317041a767\",\n        \"telefono\": \"+51974316461\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Daniela Herrera\",\n            \"contrasena\": \"Gerente099!Pass\",\n            \"correo\": \"gerente.local099@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"13f2237f-c584-4732-87e4-0f671b6a6c0f\",\n        \"telefono\": \"+51933956271\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Daniela Gómez\",\n            \"contrasena\": \"Gerente024!Pass\",\n            \"correo\": \"gerente.local024@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"98858817-2331-42fb-a523-0fd6059d3ae5\",\n        \"telefono\": \"+51905744398\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carlos Herrera\",\n            \"contrasena\": \"Gerente074!Pass\",\n            \"correo\": \"gerente.local074@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"376b74dc-65b3-43db-8522-3fbecd57cb05\",\n        \"telefono\": \"+51904999980\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Sofía González\",\n            \"contrasena\": \"Gerente019!Pass\",\n            \"correo\": \"gerente.local019@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"df11489d-8f56-4405-a478-bac7dceb2861\",\n        \"telefono\": \"+51934378201\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Raúl Flores\",\n            \"contrasena\": \"Gerente023!Pass\",\n            \"correo\": \"gerente.local023@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"06f65565-d36f-4e9e-a053-997d44be0fb7\",\n        \"telefono\": \"+51973090698\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"José Sánchez\",\n            \"contrasena\": \"Gerente064!Pass\",\n            \"correo\": \"gerente.local064@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"cbd23156-2d7f-4b9d-9312-a21b123a2a24\",\n        \"telefono\": \"+51913233612\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Lucía Vargas\",\n            \"contrasena\": \"Gerente007!Pass\",\n            \"correo\": \"gerente.local007@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"204efda2-fb50-4fd1-a4d7-566a643e8f07\",\n        \"telefono\": \"+51961597615\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Rodríguez\",\n            \"contrasena\": \"Gerente020!Pass\",\n            \"correo\": \"gerente.local020@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"5651194f-8cd1-4abb-9370-7208418bc828\",\n        \"telefono\": \"+51977568766\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Raúl Vargas\",\n            \"contrasena\": \"Gerente008!Pass\",\n            \"correo\": \"gerente.local008@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"c9d9aebe-9fc5-43a8-86e4-e8d1f1ef1ced\",\n        \"telefono\": \"+51909136765\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Flores\",\n            \"contrasena\": \"Gerente045!Pass\",\n            \"correo\": \"gerente.local045@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"2409f7e4-0dae-424e-87e5-30e169b17f0c\",\n        \"telefono\": \"+51973744331\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Javier Cruz\",\n            \"contrasena\": \"Gerente077!Pass\",\n            \"correo\": \"gerente.local077@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"430304f4-31b7-4b0a-8d49-6af449f1954e\",\n        \"telefono\": \"+51913289092\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Sánchez\",\n            \"contrasena\": \"Gerente091!Pass\",\n            \"correo\": \"gerente.local091@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"ec5de273-7d9f-4b00-8762-ff1f7795854e\",\n        \"telefono\": \"+51921911781\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Fernando Gutiérrez\",\n            \"contrasena\": \"Gerente049!Pass\",\n            \"correo\": \"gerente.local049@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"10fe746b-5e53-42fb-995f-ddfe47a7e46e\",\n        \"telefono\": \"+51908362457\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Roberto Gómez\",\n            \"contrasena\": \"Gerente010!Pass\",\n            \"correo\": \"gerente.local010@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"df158a15-77df-4c62-bdbc-c40d1484e5db\",\n        \"telefono\": \"+51982397673\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Valentina Díaz\",\n            \"contrasena\": \"Gerente065!Pass\",\n            \"correo\": \"gerente.local065@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"546223dd-d194-489b-80e9-daff78615bd0\",\n        \"telefono\": \"+51916816080\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Javier Rodríguez\",\n            \"contrasena\": \"Gerente067!Pass\",\n            \"correo\": \"gerente.local067@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"6389ac34-45d7-4921-b1ba-6e1d6fafa2c8\",\n        \"telefono\": \"+51980981485\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Luis Cruz\",\n            \"contrasena\": \"Gerente057!Pass\",\n            \"correo\": \"gerente.local057@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"773204cc-9dd7-4721-8dfc-492019975a93\",\n        \"telefono\": \"+51994153654\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Pedro López\",\n            \"contrasena\": \"Gerente011!Pass\",\n            \"correo\": \"gerente.local011@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"52a5b66d-9fa6-43b4-987c-09dd040696b1\",\n        \"telefono\": \"+51953113225\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ana López\",\n            \"contrasena\": \"Gerente089!Pass\",\n            \"correo\": \"gerente.local089@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"ab14ddfd-18fe-44e9-bf51-5e100e3c8c97\",\n        \"telefono\": \"+51919283009\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"José Cruz\",\n            \"contrasena\": \"Gerente009!Pass\",\n            \"correo\": \"gerente.local009@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"32811a2f-556c-454a-b1d3-d3fd60fc4e67\",\n        \"telefono\": \"+51963829630\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Gómez\",\n            \"contrasena\": \"Gerente088!Pass\",\n            \"correo\": \"gerente.local088@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"c712e28e-33be-417a-97f8-70a1816dc173\",\n        \"telefono\": \"+51953114133\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Pedro Morales\",\n            \"contrasena\": \"Gerente100!Pass\",\n            \"correo\": \"gerente.local100@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"a055a596-02d9-4303-b4b7-122da7edfbb5\",\n        \"telefono\": \"+51941054000\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Isabel Martínez\",\n            \"contrasena\": \"Gerente002!Pass\",\n            \"correo\": \"gerente.local002@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"f5cc714f-fe00-45d1-be5e-3531f36ffbac\",\n        \"telefono\": \"+51958542092\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Lucía Castillo\",\n            \"contrasena\": \"Gerente085!Pass\",\n            \"correo\": \"gerente.local085@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"457b3101-6902-4829-9210-0822e5669bc0\",\n        \"telefono\": \"+51966991545\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Laura Rodríguez\",\n            \"contrasena\": \"Gerente055!Pass\",\n            \"correo\": \"gerente.local055@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"83afcb61-21f2-4c70-a1a7-fd7ec84f330c\",\n        \"telefono\": \"+51958491692\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Pérez\",\n            \"contrasena\": \"Gerente052!Pass\",\n            \"correo\": \"gerente.local052@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"74b3ac88-672f-4726-9d8a-47339ba786e5\",\n        \"telefono\": \"+51980139835\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Pedro Morales\",\n            \"contrasena\": \"Gerente033!Pass\",\n            \"correo\": \"gerente.local033@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"266182e5-6a74-40a2-90ed-787d86c3d451\",\n        \"telefono\": \"+51909191383\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Lucía Gutiérrez\",\n            \"contrasena\": \"Gerente001!Pass\",\n            \"correo\": \"gerente.local001@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"fa970ef7-3022-46bd-aee6-e313993b0116\",\n        \"telefono\": \"+51990393874\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Elena Mendoza\",\n            \"contrasena\": \"Gerente027!Pass\",\n            \"correo\": \"gerente.local027@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"a40c6be6-32ed-425c-ac57-65f905dd69eb\",\n        \"telefono\": \"+51934402920\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Gutiérrez\",\n            \"contrasena\": \"Gerente026!Pass\",\n            \"correo\": \"gerente.local026@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"16b3bd46-9d4a-4b61-83d1-953660da7b9d\",\n        \"telefono\": \"+51937888662\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carmen Gómez\",\n            \"contrasena\": \"Gerente053!Pass\",\n            \"correo\": \"gerente.local053@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"cf60a22e-f142-46b9-ae51-b50e565870d1\",\n        \"telefono\": \"+51907830357\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Laura Reyes\",\n            \"contrasena\": \"Gerente016!Pass\",\n            \"correo\": \"gerente.local016@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"91937c91-deff-4377-a391-baa4b976ea4a\",\n        \"telefono\": \"+51983391325\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Jorge Castillo\",\n            \"contrasena\": \"Gerente036!Pass\",\n            \"correo\": \"gerente.local036@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"ab62574d-d887-46d2-bdfd-cc0360425ba3\",\n        \"telefono\": \"+51926296080\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ana García\",\n            \"contrasena\": \"Gerente041!Pass\",\n            \"correo\": \"gerente.local041@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"1f76517c-57e3-4e0e-beab-c12f2741c97b\",\n        \"telefono\": \"+51961057867\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Elena Reyes\",\n            \"contrasena\": \"Gerente015!Pass\",\n            \"correo\": \"gerente.local015@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"22c85d5b-16a4-44c4-b769-08104150ca73\",\n        \"telefono\": \"+51930593307\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Jiménez\",\n            \"contrasena\": \"Gerente059!Pass\",\n            \"correo\": \"gerente.local059@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"0fcd5bab-b3f4-4835-a4ca-5035e3918ce9\",\n        \"telefono\": \"+51992043320\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Herrera\",\n            \"contrasena\": \"Gerente078!Pass\",\n            \"correo\": \"gerente.local078@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"b26c63c8-a6b6-46e8-ac61-6d7aeebed273\",\n        \"telefono\": \"+51957244925\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ricardo Díaz\",\n            \"contrasena\": \"Gerente031!Pass\",\n            \"correo\": \"gerente.local031@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"13125a18-47af-4f91-800a-e6445f516db4\",\n        \"telefono\": \"+51975075693\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ana González\",\n            \"contrasena\": \"Gerente071!Pass\",\n            \"correo\": \"gerente.local071@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"605143a9-9996-401b-b672-693b371e6c8a\",\n        \"telefono\": \"+51930172345\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Isabel Jiménez\",\n            \"contrasena\": \"Gerente083!Pass\",\n            \"correo\": \"gerente.local083@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"06b6399f-71b1-43ec-8d6f-5e7a6b5dc1da\",\n        \"telefono\": \"+51964306387\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Patricia Pérez\",\n            \"contrasena\": \"Gerente073!Pass\",\n            \"correo\": \"gerente.local073@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"12c83745-a16f-4800-8a75-8f268c228ffa\",\n        \"telefono\": \"+51997643900\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Morales\",\n            \"contrasena\": \"Gerente030!Pass\",\n            \"correo\": \"gerente.local030@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"9ad2d3d8-17a6-4972-b3ec-b97e738ec27f\",\n        \"telefono\": \"+51904908265\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Jorge Díaz\",\n            \"contrasena\": \"Gerente014!Pass\",\n            \"correo\": \"gerente.local014@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"39ef33fe-57f2-480b-8d38-85fe135d2107\",\n        \"telefono\": \"+51901728557\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Romero\",\n            \"contrasena\": \"Gerente093!Pass\",\n            \"correo\": \"gerente.local093@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"627321cd-ea1f-4646-b8da-1c3974c0636b\",\n        \"telefono\": \"+51901472165\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Elena Vargas\",\n            \"contrasena\": \"Gerente076!Pass\",\n            \"correo\": \"gerente.local076@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"c0ab398d-c2e1-413c-8dca-7f0dd7c5b3a4\",\n        \"telefono\": \"+51989139822\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Valentina Rodríguez\",\n            \"contrasena\": \"Gerente042!Pass\",\n            \"correo\": \"gerente.local042@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"0512e4c8-0af0-4a58-be24-4979eb29e941\",\n        \"telefono\": \"+51975522869\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carmen Flores\",\n            \"contrasena\": \"Gerente037!Pass\",\n            \"correo\": \"gerente.local037@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"bc343631-6c47-469e-98b1-48eee0763cc0\",\n        \"telefono\": \"+51929726867\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Elena Jiménez\",\n            \"contrasena\": \"Gerente029!Pass\",\n            \"correo\": \"gerente.local029@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"5b0b8abc-3c8c-4970-bd24-98c3ef451bf1\",\n        \"telefono\": \"+51939731147\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carmen Rodríguez\",\n            \"contrasena\": \"Gerente035!Pass\",\n            \"correo\": \"gerente.local035@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"432712a8-2309-4a45-8dec-91cd35b20c39\",\n        \"telefono\": \"+51991791346\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Gutiérrez\",\n            \"contrasena\": \"Gerente061!Pass\",\n            \"correo\": \"gerente.local061@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"f77b2fcc-aaa7-4735-97ac-491bc39d6e6b\",\n        \"telefono\": \"+51947329349\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carlos Ortiz\",\n            \"contrasena\": \"Gerente048!Pass\",\n            \"correo\": \"gerente.local048@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"068104c6-5c7b-4419-a509-22e862367b91\",\n        \"telefono\": \"+51949845324\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Elena Ramírez\",\n            \"contrasena\": \"Gerente017!Pass\",\n            \"correo\": \"gerente.local017@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"2d6f0364-b79d-4cdc-9039-44cd7f7328eb\",\n        \"telefono\": \"+51945158061\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"José Cruz\",\n            \"contrasena\": \"Gerente090!Pass\",\n            \"correo\": \"gerente.local090@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"0dc78b77-9589-4da3-9ee8-cf2d49d70130\",\n        \"telefono\": \"+51951892590\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Jiménez\",\n            \"contrasena\": \"Gerente012!Pass\",\n            \"correo\": \"gerente.local012@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"31450e55-ebae-4c22-96e7-27a675d1974a\",\n        \"telefono\": \"+51917009643\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Roberto Ortiz\",\n            \"contrasena\": \"Gerente040!Pass\",\n            \"correo\": \"gerente.local040@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"16360543-c603-4d75-aba6-b8af53c4eb5e\",\n        \"telefono\": \"+51955865794\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Fernando Morales\",\n            \"contrasena\": \"Gerente092!Pass\",\n            \"correo\": \"gerente.local092@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"cdf6101b-cec6-49ff-bea4-a2b0cfa51b29\",\n        \"telefono\": \"+51925466235\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Mendoza\",\n            \"contrasena\": \"Gerente044!Pass\",\n            \"correo\": \"gerente.local044@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"82809bea-4b02-4c34-a774-5eee02626bbb\",\n        \"telefono\": \"+51930899072\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Isabel Rodríguez\",\n            \"contrasena\": \"Gerente094!Pass\",\n            \"correo\": \"gerente.local094@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"09cbe026-9af6-45f5-b0d5-f5295a4d94da\",\n        \"telefono\": \"+51919243323\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Patricia Morales\",\n            \"contrasena\": \"Gerente050!Pass\",\n            \"correo\": \"gerente.local050@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"e35d3d96-cecc-4495-990b-218cad90e429\",\n        \"telefono\": \"+51915172386\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ricardo García\",\n            \"contrasena\": \"Gerente072!Pass\",\n            \"correo\": \"gerente.local072@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"ceb00102-bd52-499c-8784-1fdfab00df72\",\n        \"telefono\": \"+51992556850\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carmen Mendoza\",\n            \"contrasena\": \"Gerente032!Pass\",\n            \"correo\": \"gerente.local032@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"a2f22a94-8ed8-42ab-9c75-d2ab2f65f001\",\n        \"telefono\": \"+51972223514\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Laura Herrera\",\n            \"contrasena\": \"Gerente063!Pass\",\n            \"correo\": \"gerente.local063@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"dea83abc-f882-415b-b938-0944a4a2722b\",\n        \"telefono\": \"+51938364481\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ricardo Morales\",\n            \"contrasena\": \"Gerente095!Pass\",\n            \"correo\": \"gerente.local095@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"6fc5c2f3-d871-4236-bf11-ea060a413d43\",\n        \"telefono\": \"+51976953528\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Lucía García\",\n            \"contrasena\": \"Gerente006!Pass\",\n            \"correo\": \"gerente.local006@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"f64f5033-3eab-4793-9c55-ac04687a96d5\",\n        \"telefono\": \"+51941133216\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Patricia Flores\",\n            \"contrasena\": \"Gerente013!Pass\",\n            \"correo\": \"gerente.local013@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"878b222d-e31a-40f0-a536-326b64ad9017\",\n        \"telefono\": \"+51914760369\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"José Jiménez\",\n            \"contrasena\": \"Gerente056!Pass\",\n            \"correo\": \"gerente.local056@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"311fb42d-f9ae-41b3-911e-c557b9f661c5\",\n        \"telefono\": \"+51951645181\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Carlos Vargas\",\n            \"contrasena\": \"Gerente096!Pass\",\n            \"correo\": \"gerente.local096@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"1a64b6d0-3eba-44b4-a071-12b4bb9e334b\",\n        \"telefono\": \"+51992266917\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Gómez\",\n            \"contrasena\": \"Gerente021!Pass\",\n            \"correo\": \"gerente.local021@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"e3eae04f-84df-43f2-bccb-97fdb9ea2669\",\n        \"telefono\": \"+51963026286\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Vargas\",\n            \"contrasena\": \"Gerente022!Pass\",\n            \"correo\": \"gerente.local022@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"60c0cc1d-4450-4fe0-a308-4f68dd350355\",\n        \"telefono\": \"+51944598343\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Miguel Martínez\",\n            \"contrasena\": \"Gerente005!Pass\",\n            \"correo\": \"gerente.local005@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"1c94533b-ab0c-4585-9b9c-eb5b30544e9a\",\n        \"telefono\": \"+51972109358\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Conquistadores 890, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Raúl Rivera\",\n            \"contrasena\": \"Gerente018!Pass\",\n            \"correo\": \"gerente.local018@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"487dda71-056e-467c-8ab7-4181e8c50083\",\n        \"telefono\": \"+51996223649\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"María Romero\",\n            \"contrasena\": \"Gerente062!Pass\",\n            \"correo\": \"gerente.local062@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"3a55a998-4f07-45f7-b3b6-ca51bdbc25f7\",\n        \"telefono\": \"+51926877834\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Mendoza\",\n            \"contrasena\": \"Gerente069!Pass\",\n            \"correo\": \"gerente.local069@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"506943f8-98ca-4520-92ad-1964f6bbeba3\",\n        \"telefono\": \"+51923800510\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Andrea González\",\n            \"contrasena\": \"Gerente046!Pass\",\n            \"correo\": \"gerente.local046@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"842bb6a2-6e76-474c-98e4-2e782fc9828b\",\n        \"telefono\": \"+51927243828\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Roberto Gómez\",\n            \"contrasena\": \"Gerente081!Pass\",\n            \"correo\": \"gerente.local081@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"033046b0-e4d3-45e0-83c3-5bb214858f5f\",\n        \"telefono\": \"+51929708788\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Daniela Jiménez\",\n            \"contrasena\": \"Gerente054!Pass\",\n            \"correo\": \"gerente.local054@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"a5d7903b-d323-4834-81cf-cc65cdf7c8ea\",\n        \"telefono\": \"+51990362063\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"María Ortiz\",\n            \"contrasena\": \"Gerente028!Pass\",\n            \"correo\": \"gerente.local028@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"38db0b8e-8d03-4146-8481-440dbd230b41\",\n        \"telefono\": \"+51985218600\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Cruz\",\n            \"contrasena\": \"Gerente060!Pass\",\n            \"correo\": \"gerente.local060@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"12d9c86f-3a7b-4be3-b021-98189db4b9e7\",\n        \"telefono\": \"+51921560337\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Pedro Pérez\",\n            \"contrasena\": \"Gerente039!Pass\",\n            \"correo\": \"gerente.local039@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"31b33c56-d2c0-4120-9fd7-0acb02e779a7\",\n        \"telefono\": \"+51927136646\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Reyes\",\n            \"contrasena\": \"Gerente004!Pass\",\n            \"correo\": \"gerente.local004@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"19fd08ed-39d6-4d50-9cbb-fe0170594aad\",\n        \"telefono\": \"+51936430931\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Laura Herrera\",\n            \"contrasena\": \"Gerente066!Pass\",\n            \"correo\": \"gerente.local066@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"45951add-1e98-48f8-9d6a-63079410dba4\",\n        \"telefono\": \"+51952086500\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Javier Prado Este 456, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Raúl Pérez\",\n            \"contrasena\": \"Gerente003!Pass\",\n            \"correo\": \"gerente.local003@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"d50506e3-a349-4ca5-8be2-188a723a6765\",\n        \"telefono\": \"+51928755268\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ana Castillo\",\n            \"contrasena\": \"Gerente047!Pass\",\n            \"correo\": \"gerente.local047@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"8db7b817-7d21-4d63-95b9-dec56d1dfe73\",\n        \"telefono\": \"+51942338108\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"María Flores\",\n            \"contrasena\": \"Gerente080!Pass\",\n            \"correo\": \"gerente.local080@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"2807b373-317d-4848-ba3b-25640c3b1e3e\",\n        \"telefono\": \"+51942419556\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Pedro Flores\",\n            \"contrasena\": \"Gerente097!Pass\",\n            \"correo\": \"gerente.local097@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"75a4f21e-e417-45a0-b37b-016798c7d603\",\n        \"telefono\": \"+56912345678\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Providencia 1234, Providencia, Santiago\",\n        \"hora_apertura\": \"10:00\",\n        \"gerente\": {\n            \"nombre\": \"Fabricio Lanche\",\n            \"contrasena\": \"Cliente123!\",\n            \"correo\": \"fabricio.lanche@utec.edu.pe\"\n        }\n    },\n    {\n        \"local_id\": \"18059e99-9002-4c9b-8747-e687b06ded6a\",\n        \"telefono\": \"+51996214480\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Valentina Romero\",\n            \"contrasena\": \"Gerente058!Pass\",\n            \"correo\": \"gerente.local058@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"a89a1fb6-a891-4d0b-8c36-aa9591a52415\",\n        \"telefono\": \"+51903391279\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Diego Mendoza\",\n            \"contrasena\": \"Gerente087!Pass\",\n            \"correo\": \"gerente.local087@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"9587d50f-ef91-41db-89e6-246eeedc47e4\",\n        \"telefono\": \"+51914840906\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Luis Sánchez\",\n            \"contrasena\": \"Gerente070!Pass\",\n            \"correo\": \"gerente.local070@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"2863b479-b849-4ba5-88ea-35d948759725\",\n        \"telefono\": \"+51985450733\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ana Pérez\",\n            \"contrasena\": \"Gerente079!Pass\",\n            \"correo\": \"gerente.local079@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"38657f4f-25d7-405a-8396-4744fcc2561f\",\n        \"telefono\": \"+51964146398\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Shell 123, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Juan Castillo\",\n            \"contrasena\": \"Gerente098!Pass\",\n            \"correo\": \"gerente.local098@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"6f59c683-2757-4224-913f-0a8122a36872\",\n        \"telefono\": \"+51951720496\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Benavides 345, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Rosa Jiménez\",\n            \"contrasena\": \"Gerente034!Pass\",\n            \"correo\": \"gerente.local034@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"920f441b-fc00-4e27-9055-cfd190dcabae\",\n        \"telefono\": \"+51917750372\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Arequipa 1234, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Ana González\",\n            \"contrasena\": \"Gerente051!Pass\",\n            \"correo\": \"gerente.local051@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"cc51c35d-9c82-40fd-9dfe-f51c809a8de0\",\n        \"telefono\": \"+51941361170\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Camila Gutiérrez\",\n            \"contrasena\": \"Gerente025!Pass\",\n            \"correo\": \"gerente.local025@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"d9961a35-762e-4cf5-9399-380dec45643b\",\n        \"telefono\": \"+51993465782\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Las Begonias 234, San Isidro\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Alberto Martínez\",\n            \"contrasena\": \"Gerente086!Pass\",\n            \"correo\": \"gerente.local086@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"f228e422-38df-4c10-aa83-d998e0892eaa\",\n        \"telefono\": \"+51969758420\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Roberto Jiménez\",\n            \"contrasena\": \"Gerente082!Pass\",\n            \"correo\": \"gerente.local082@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"c6731602-1d78-41af-a76d-edc3762a5ae5\",\n        \"telefono\": \"+51988312680\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Angamos 678, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Andrea García\",\n            \"contrasena\": \"Gerente068!Pass\",\n            \"correo\": \"gerente.local068@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"e14609ee-51fc-49d4-9ee7-53cedb676241\",\n        \"telefono\": \"+51958821054\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Javier Mendoza\",\n            \"contrasena\": \"Gerente043!Pass\",\n            \"correo\": \"gerente.local043@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"10809b9e-e871-4659-bcb6-1a58d91447ea\",\n        \"telefono\": \"+51987110863\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Calle Los Olivos 789, San Borja\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Lucía Castillo\",\n            \"contrasena\": \"Gerente038!Pass\",\n            \"correo\": \"gerente.local038@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"95255240-f759-4b3e-ac17-0651f4bbfea9\",\n        \"telefono\": \"+51950283683\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. Larco 567, Miraflores\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Javier Gómez\",\n            \"contrasena\": \"Gerente075!Pass\",\n            \"correo\": \"gerente.local075@chinawok.pe\"\n        }\n    },\n    {\n        \"local_id\": \"80d6e621-2a0d-4fe8-a2f3-b98a8517545e\",\n        \"telefono\": \"+51911246341\",\n        \"hora_finalizacion\": \"22:00\",\n        \"direccion\": \"Av. República de Panamá 456, Surquillo\",\n        \"hora_apertura\": \"08:00\",\n        \"gerente\": {\n            \"nombre\": \"Roberto Rivera\",\n            \"contrasena\": \"Gerente084!Pass\",\n            \"correo\": \"gerente.local084@chinawok.pe\"\n        }\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Local - Obtener por ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_locales}}/local/obtener/:local_id",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"local",
+										"obtener",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Obtiene los detalles de un local específico por su ID. Usa la variable {{local_id}} guardada de la creación."
+							},
+							"response": [
+								{
+									"name": "Local - Obtener por ID",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{base_url_locales}}/local/obtener/:local_id",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"local",
+												"obtener",
+												":local_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "308"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:52:29 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d10b-535850c87d23c446120dda50;Parent=69c8722b15e535ac;Sampled=0;Lineage=1:9ab7213c:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "71d3d5e2-20fc-47c8-929a-658804aa77c2"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWZ7EM0IAMEhxA="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 4a082ac654c5bc5479525f2415fc7070.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P6"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "EGjeFFkl5vvoYDdlP9yXd08R1VJvyoYYmdJcak-taAaHCtC8vDFefQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"75a4f21e-e417-45a0-b37b-016798c7d603\",\n    \"telefono\": \"+56912345678\",\n    \"hora_finalizacion\": \"22:00\",\n    \"direccion\": \"Av. Providencia 1234, Providencia, Santiago\",\n    \"hora_apertura\": \"10:00\",\n    \"gerente\": {\n        \"nombre\": \"Fabricio Lanche\",\n        \"contrasena\": \"Cliente123!\",\n        \"correo\": \"fabricio.lanche@utec.edu.pe\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Local - Actualizar Completo",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"direccion\": \"Av. Providencia 1234, Oficina 501, Providencia, Santiago\",\n  \"telefono\": \"+56987654321\",\n  \"hora_apertura\": \"09:00\",\n  \"hora_finalizacion\": \"23:00\",\n  \"gerente\": {\n    \"correo\": \"{{correo_cliente}}\"\n  }\n}"
+								},
+								"url": {
+									"raw": "{{base_url_locales}}/local/actualizar/:local_id",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"local",
+										"actualizar",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Actualiza todos los campos de un local existente"
+							},
+							"response": [
+								{
+									"name": "Local - Actualizar Completo",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"direccion\": \"Av. Providencia 1234, Oficina 501, Providencia, Santiago\",\n  \"telefono\": \"+56987654321\",\n  \"hora_apertura\": \"09:00\",\n  \"hora_finalizacion\": \"23:00\",\n  \"gerente\": {\n    \"correo\": \"{{correo_cliente}}\"\n  }\n}"
+										},
+										"url": {
+											"raw": "{{base_url_locales}}/local/actualizar/:local_id",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"local",
+												"actualizar",
+												":local_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "314"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:54:27 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d182-195fa8656f8c25bb413df100;Parent=58456bb385373b7c;Sampled=0;Lineage=1:9ad1a13c:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "5d7dc163-31f9-4668-b17e-2a76bbedb194"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWshFF_IAMEtjw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 3525759642f1523427a2cbcea262ddba.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P6"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "MFwSVQDwwkzbueNbnwp_7X3mxXPMKx6gYIbAr2qA3xwCCYWrOn1d3w=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Local actualizado\",\n    \"updated\": {\n        \"telefono\": \"+56987654321\",\n        \"hora_finalizacion\": \"23:00\",\n        \"direccion\": \"Av. Providencia 1234, Oficina 501, Providencia, Santiago\",\n        \"hora_apertura\": \"09:00\",\n        \"gerente\": {\n            \"contrasena\": \"Cliente123!\",\n            \"correo\": \"fabricio.lanche@utec.edu.pe\",\n            \"nombre\": \"Fabricio Lanche\"\n        }\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Local - Eliminar",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_locales}}/local/eliminar/:local_id",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"local",
+										"eliminar",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Elimina un local por su ID"
+							},
+							"response": [
+								{
+									"name": "Local - Eliminar",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{base_url_locales}}/local/eliminar/:local_id",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"local",
+												"eliminar",
+												":local_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "62"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 21 Nov 2025 20:54:46 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6920d194-22711d992d9a82f970903c44;Parent=34bdd9bd7ea06b1d;Sampled=0;Lineage=1:68ed80ca:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "de2bfa8c-a96f-433a-a2c8-9d4b776aaad6"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UaWvRGjOoAMERDw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 b7cdad11a8da074c3364a379749f7320.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "IAD61-P6"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "06pOr-kgGz680FFyaGY2ArYcNHTm_OjojVlJYbY80lY1IBtWckcJaQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Local eliminado y gerente actualizado a Cliente\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Analitica",
+					"item": [
+						{
+							"name": "Iniciar Worflow de Analitica",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_locales}}/workflow/analitica/activar",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"workflow",
+										"analitica",
+										"activar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Productos Más Vendidos",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"local_id\": \"{{local_id}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_locales}}/analitica/productos",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"analitica",
+										"productos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Mejor Personal",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"local_id\": \"{{local_id}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_locales}}/analitica/personal",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"analitica",
+										"personal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Record Diario",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"local_id\": \"{{local_id}}\",\r\n  \"year\": 2025,\r\n  \"month\": 11\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_locales}}/analitica/diario",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"analitica",
+										"diario"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Estadisticas generales",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"local_id\": \"{{local_id}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_locales}}/analitica/estadisticas",
+									"host": [
+										"{{base_url_locales}}"
+									],
+									"path": [
+										"analitica",
+										"estadisticas"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Pedidos",
+			"item": [
+				{
+					"name": "Productos",
+					"item": [
+						{
+							"name": "Crear Producto - Arroz",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"pm.collectionVariables.set(\"producto_nombre\", response.data.nombre);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"nombre\": \"Arroz Chaufa Especial Nuevo\",\n  \"precio\": 18,\n  \"descripcion\": \"Arroz frito al estilo chino con pollo, cerdo, huevo y vegetales\",\n  \"categoria\": \"Arroces\",\n  \"stock\": 50\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Producto - Tallarin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"pm.collectionVariables.set(\"producto_nombre\", response.data.nombre);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"nombre\": \"Tallarín Saltado Nuevo\",\n  \"precio\": 16.00,\n  \"descripcion\": \"Tallarines salteados con carne de res y vegetales\",\n  \"categoria\": \"Tallarines\",\n  \"stock\": 45\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Todos los Productos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos?local_id={{local_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Producto Específico",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos?local_id={{local_id}}&nombre={{producto_nombre}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "nombre",
+											"value": "{{producto_nombre}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Producto - Precio y Stock",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"nombre\": \"{{producto_nombre}}\",\n  \"precio\": 19.50,\n  \"stock\": 45\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Producto - Solo Stock",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"nombre\": \"{{producto_nombre}}\",\n  \"stock\": 25\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Producto",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/productos?local_id={{local_id}}&nombre={{producto_nombre}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"productos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "nombre",
+											"value": "{{producto_nombre}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Combos",
+					"item": [
+						{
+							"name": "Crear Combo",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"pm.collectionVariables.set(\"combo_id\", response.data.combo_id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"nombre\": \"Combo Familiar\",\n  \"productos_nombres\": [\n    \"Arroz Chaufa Especial\",\n    \"Tallarín Saltado\",\n    \"Wantán Frito\"\n  ],\n  \"descripcion\": \"Combo perfecto para 4 personas con los platos más populares\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/combos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"combos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Todos los Combos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/combos?local_id={{local_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"combos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Combo Específico",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/combos?local_id={{local_id}}&combo_id={{combo_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"combos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "combo_id",
+											"value": "{{combo_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Combo",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "//La actualización de los combos opera como una sobreescritura\n\n{\n  \"local_id\": \"{{local_id}}\",\n  \"combo_id\": \"{{combo_id}}\",\n  \"nombre\": \"Combo Familiar Plus\",\n  \"productos_nombres\": [\n    \"Arroz Chaufa Especial\",\n    \"Pollo Chi Jau Kay\"\n  ],\n  \"descripcion\": \"Ahora incluye bebidas y postre gratis\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/combos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"combos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Combo",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/combos?local_id={{local_id}}&combo_id={{combo_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"combos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "combo_id",
+											"value": "{{combo_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ofertas",
+					"item": [
+						{
+							"name": "Crear Oferta - Producto",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"pm.collectionVariables.set(\"oferta_id\", response.data.oferta_id);\r",
+											"pm.collectionVariables.set(\"producto_nombre\", response.data.producto_nombre);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"producto_nombre\": \"Arroz Chaufa Especial\",\n  \"fecha_inicio\": \"2025-11-10T00:00:00Z\",\n  \"fecha_limite\": \"2025-11-30T23:59:59Z\",\n  \"porcentaje_descuento\": 20\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Oferta - Combo",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"pm.collectionVariables.set(\"oferta_id\", response.data.oferta_id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"combo_id\": \"{{combo_id}}\",\n  \"fecha_inicio\": \"2025-11-15T00:00:00Z\",\n  \"fecha_limite\": \"2025-12-15T23:59:59Z\",\n  \"porcentaje_descuento\": 15\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Todas las Ofertas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas?local_id={{local_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Oferta Específica",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas?local_id={{local_id}}&oferta_id={{oferta_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "oferta_id",
+											"value": "{{oferta_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Oferta - Producto",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\n{\n  \"local_id\": \"{{local_id}}\",\n  \"oferta_id\": \"{{oferta_id}}\",\n  \"producto_nombre\": \"{{producto_nombre}}\",\n  \"porcentaje_descuento\": 25,\n  \"fecha_limite\": \"2025-12-31T23:59:59Z\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Oferta - Combo",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\n{\n  \"local_id\": \"{{local_id}}\",\n  \"oferta_id\": \"{{oferta_id}}\",\n  \"combo_id\": \"{{combo_id}}\", \n  \"porcentaje_descuento\": 25,\n  \"fecha_limite\": \"2025-12-31T23:59:59Z\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Oferta",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/ofertas?local_id={{local_id}}&oferta_id={{oferta_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"ofertas"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "oferta_id",
+											"value": "{{oferta_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Pedidos",
+					"item": [
+						{
+							"name": "Crear Pedido - Con Productos",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var id = response.data.pedido_id;\r",
+											"pm.collectionVariables.set(\"pedido_id\", id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let body = pm.request.body.raw;\r",
+											"let bodyJson = JSON.parse(body);\r",
+											"pm.collectionVariables.set(\"correo_cliente\", bodyJson.usuario_correo);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"usuario_correo\": \"fernando.ramírez547@email.com\",\n  \"productos\": [\n    {\n      \"nombre\": \"Agua Mineral 625ml\",\n      \"cantidad\": 2\n    },\n    {\n      \"nombre\": \"Arroz Blanco\",\n      \"cantidad\": 1\n    }\n  ],\n  \"costo\": 45.50,\n  \"direccion\": \"Av. Principal 123, San Isidro\",\n  \"fecha_entrega_aproximada\": \"2025-11-10T14:30:00Z\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Pedido - Con Combos",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var id = response.data.pedido_id;\r",
+											"pm.collectionVariables.set(\"pedido_id\", id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"usuario_correo\": \"{{correo_cliente}}\",\n  \"combos\": [\n    {\n      \"combo_id\": \"{{combo_id}}\",\n      \"cantidad\": 1\n    }\n  ],\n  \"costo\": 65.00,\n  \"direccion\": \"Jr. Los Olivos 456, Miraflores\",\n  \"fecha_entrega_aproximada\": \"2025-11-10T14:30:00Z\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Crear Pedido - Productos y Combos",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var id = response.data.pedido_id;\r",
+											"pm.collectionVariables.set(\"pedido_id\", id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"usuario_correo\": \"{{correo_cliente}}\",\n  \"productos\": [\n    {\n      \"nombre\": \"Agua Mineral 625ml\",\n      \"cantidad\": 3\n    }\n  ],\n  \"combos\": [\n    {\n      \"combo_id\": \"1b888303-b350-4542-b067-3b704c23b596\",\n      \"cantidad\": 2\n    }\n  ],\n  \"costo\": 145.50,\n  \"direccion\": \"Av. Larco 789, Miraflores\",\n  \"fecha_entrega_aproximada\": \"2025-11-10T15:00:00Z\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Todos los Pedidos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos?local_id={{local_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Leer Pedido Específico",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos?local_id={{local_id}}&pedido_id={{pedido_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "pedido_id",
+											"value": "{{pedido_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Pedido - Cambiar Pedidos",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id}}\",\n  \"estado\": \"cocinando\",\n  \"historial_estados\": [\n    {\n      \"estado\": \"procesando\",\n      \"hora_inicio\": \"2025-11-10T12:00:00Z\",\n      \"hora_fin\": \"2025-11-10T12:15:00Z\",\n      \"activo\": false,\n      \"empleado\": null\n    },\n    {\n      \"estado\": \"cocinando\",\n      \"hora_inicio\": \"2025-11-10T12:15:00Z\",\n      \"hora_fin\": \"2025-11-10T12:15:00Z\",\n      \"activo\": true,\n      \"empleado\": {\n        \"dni\": \"d0b6064f-89a3-498c-8ab9-2f10bf5aae4b\"\n      }\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Pedido",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_pedidos}}/pedidos?local_id={{local_id}}&pedido_id={{pedido_id}}",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"pedidos"
+									],
+									"query": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "pedido_id",
+											"value": "{{pedido_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Workflow",
+					"item": [
+						{
+							"name": "Debug",
+							"item": [
+								{
+									"name": "Cocinar - Asignar Cocinero",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"local_id\": \"72dbcd5f-ec16-44e8-ac1d-43cfe1dd31c9\",\n    \"pedido_id\": \"{{pedido_id}}\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url_pedidos}}/workflow/cocinar",
+											"host": [
+												"{{base_url_pedidos}}"
+											],
+											"path": [
+												"workflow",
+												"cocinar"
+											]
+										},
+										"description": "Asigna un cocinero disponible y actualiza el pedido a estado 'cocinando'"
+									},
+									"response": []
+								},
+								{
+									"name": "Empacar - Asignar Despachador",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {},
+												"requests": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"local_id\": \"72dbcd5f-ec16-44e8-ac1d-43cfe1dd31c9\",\n    \"pedido_id\": \"{{pedido_id}}\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url_pedidos}}/workflow/empacar",
+											"host": [
+												"{{base_url_pedidos}}"
+											],
+											"path": [
+												"workflow",
+												"empacar"
+											]
+										},
+										"description": "Libera al cocinero, asigna un despachador disponible y actualiza el pedido a estado 'empacando'"
+									},
+									"response": []
+								},
+								{
+									"name": "Enviar - Asignar Repartidor",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"local_id\": \"72dbcd5f-ec16-44e8-ac1d-43cfe1dd31c9\",\n    \"pedido_id\": \"{{pedido_id}}\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url_pedidos}}/workflow/enviar",
+											"host": [
+												"{{base_url_pedidos}}"
+											],
+											"path": [
+												"workflow",
+												"enviar"
+											]
+										},
+										"description": "Libera al despachador, asigna un repartidor disponible y actualiza el pedido a estado 'enviando'"
+									},
+									"response": []
+								},
+								{
+									"name": "Confirmar Entrega",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"local_id\": \"72dbcd5f-ec16-44e8-ac1d-43cfe1dd31c9\",\n    \"pedido_id\": \"{{pedido_id}}\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url_pedidos}}/workflow/confirmar",
+											"host": [
+												"{{base_url_pedidos}}"
+											],
+											"path": [
+												"workflow",
+												"confirmar"
+											]
+										},
+										"description": "Confirma la entrega del pedido, libera al repartidor y actualiza el historial del usuario"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Inciar Workflow",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"local_id\": \"{{local_id}}\",\n    \"pedido_id\": \"{{pedido_id}}\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/workflow/iniciar",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"workflow",
+										"iniciar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Confirmar Recepción Usuario",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"local_id\": \"{{local_id}}\",\n    \"pedido_id\": \"{{pedido_id}}\",\n    \"confirmado\": true //opcional\n}\n"
+								},
+								"url": {
+									"raw": "{{base_url_pedidos}}/workflow/confirmar-recepcion",
+									"host": [
+										"{{base_url_pedidos}}"
+									],
+									"path": [
+										"workflow",
+										"confirmar-recepcion"
+									]
+								},
+								"description": "Endpoint para que el usuario confirme la recepción del pedido. Envía la señal al Step Function en espera."
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Personal",
+			"item": [
+				{
+					"name": "Empleados",
+					"item": [
+						{
+							"name": "Crear Empleado",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var dni = response.empleado.dni;\r",
+											"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"12345678\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"role\": \"Cocinero\",\n  \"sueldo\": 1500\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados"
+									]
+								},
+								"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Empleado",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Obtiene la información de un empleado específico por local_id y dni."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Empleados por Local",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/local/:local_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										"local",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Lista todos los empleados de un local específico."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar Empleados por Local y Rol",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/local/:local_id/rol/:rol",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										"local",
+										":local_id",
+										"rol",
+										":rol"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "rol",
+											"value": "Cocinero"
+										}
+									]
+								},
+								"description": "Lista empleados filtrados por local y rol. Roles válidos: Cocinero, Despachador, Repartidor."
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Empleado",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Perez\",\n  \"calificacion_prom\": 4.5,\n  \"sueldo\": 1800\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Actualiza la información de un empleado. Solo se actualizan los campos enviados en el body."
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Empleado",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Elimina un empleado del sistema."
+							},
+							"response": []
+						}
+					],
+					"description": "Endpoints para la gestión CRUD de empleados"
+				},
+				{
+					"name": "Reseñas",
+					"item": [
+						{
+							"name": "Registrar Reseña de Pedido",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var resena_id = response.resena.id;\r",
+											"pm.collectionVariables.set(\"resena_id\", resena_id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id}}\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas"
+									]
+								},
+								"description": "Registra una reseña de pedido. Los DNIs de empleados (cocinero, despachador, repartidor) se extraen automáticamente del historial de estados del pedido. Valida que el local y pedido existan en DynamoDB."
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Reseñas por Local",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/local/:local_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										"local",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Obtiene todas las reseñas de un local específico."
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Reseñas de Empleado",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/empleado/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										"empleado",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Obtiene todas las reseñas de un empleado específico. El body puede incluir opcionalmente el campo 'rol' (cocinero, despachador, repartidor). Si no se proporciona, se busca el rol en la tabla de empleados."
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Reseña",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"resena\": \"Servicio excelente, muy recomendado\",\n  \"calificacion\": 5\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										":local_id",
+										":resena_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "resena_id",
+											"value": "{{resena_id}}"
+										}
+									]
+								},
+								"description": "Actualiza una reseña específica. Solo se actualizan los campos 'resena' y 'calificacion'."
+							},
+							"response": []
+						},
+						{
+							"name": "Eliminar Reseña",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										":local_id",
+										":resena_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "4f0504f0-b708-4d44-8ed1-334a7e2d807f"
+										},
+										{
+											"key": "resena_id",
+											"value": "434ee39a-5cc1-4a23-b366-cb48d1669230"
+										}
+									]
+								},
+								"description": "Elimina una reseña específica del sistema."
+							},
+							"response": []
+						}
+					],
+					"description": "Endpoints para la gestión de reseñas de empleados por pedido"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url_locales",
+			"value": ""
+		},
+		{
+			"key": "base_url_usuarios",
+			"value": ""
+		},
+		{
+			"key": "base_url_pedidos",
+			"value": ""
+		},
+		{
+			"key": "base_url_empleados",
+			"value": ""
+		},
+		{
+			"key": "local_id",
+			"value": ""
+		},
+		{
+			"key": "combo_id",
+			"value": ""
+		},
+		{
+			"key": "oferta_id",
+			"value": ""
+		},
+		{
+			"key": "pedido_id",
+			"value": ""
+		},
+		{
+			"key": "producto_nombre",
+			"value": ""
+		},
+		{
+			"key": "userToken",
+			"value": ""
+		},
+		{
+			"key": "gerenteToken",
+			"value": ""
+		},
+		{
+			"key": "adminToken",
+			"value": ""
+		},
+		{
+			"key": "correo_cliente",
+			"value": ""
+		},
+		{
+			"key": "dni_empleado",
+			"value": ""
+		},
+		{
+			"key": "resena_id",
+			"value": ""
+		},
+		{
+			"key": "correo_gerente",
+			"value": ""
+		},
+		{
+			"key": "correo_admin",
+			"value": ""
+		}
+	]
+}
