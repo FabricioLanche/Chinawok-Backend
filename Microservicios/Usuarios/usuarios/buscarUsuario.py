@@ -9,22 +9,31 @@ usuarios_table = dynamodb.Table(TABLE_USUARIOS_NAME)
 
 
 def lambda_handler(event, context):
-    body = {}
-    if isinstance(event, dict) and "body" in event:
-        raw_body = event.get("body")
-        if isinstance(raw_body, str):
-            if raw_body:
-                body = json.loads(raw_body)
-            else:
-                body = {}
-        elif isinstance(raw_body, dict):
-            body = raw_body
-    elif isinstance(event, dict):
-        body = event
-    elif isinstance(event, str):
-        body = json.loads(event)
+    # Preferir path parameter: /usuarios/{correo}
+    correo = None
+    if isinstance(event, dict):
+        path_params = event.get("pathParameters") or {}
+        correo = path_params.get("correo")
 
-    correo = body.get("correo")
+    # Fallback a body antiguo (compatibilidad)
+    if not correo:
+        body = {}
+        if isinstance(event, dict) and "body" in event:
+            raw_body = event.get("body")
+            if isinstance(raw_body, str):
+                if raw_body:
+                    body = json.loads(raw_body)
+                else:
+                    body = {}
+            elif isinstance(raw_body, dict):
+                body = raw_body
+        elif isinstance(event, dict):
+            body = event
+        elif isinstance(event, str):
+            body = json.loads(event)
+
+        correo = body.get("correo")
+
     if not correo:
         return {
             "statusCode": 400,
@@ -33,19 +42,19 @@ def lambda_handler(event, context):
 
     try:
         resp = usuarios_table.get_item(Key={"correo": correo})
-        
+
         if "Item" not in resp:
             return {
                 "statusCode": 404,
                 "body": json.dumps({"message": "Usuario no encontrado"})
             }
-        
+
         usuario = resp["Item"]
-        
+
         # Remover contraseña de la respuesta
         if "contrasena" in usuario:
             del usuario["contrasena"]
-        
+
         return {
             "statusCode": 200,
             "body": json.dumps({

@@ -1,4 +1,5 @@
 import json
+import os
 from data_generator_utils.config import Config
 from data_generator_utils.generators import (
     LocalesGenerator,
@@ -17,10 +18,12 @@ from data_generator_utils.generators import (
 
 def guardar_json(filename, data):
     """Guarda datos en formato JSON"""
-    filepath = f"{Config.OUTPUT_DIR}/{filename}"
+    out_dir = os.path.join(os.path.dirname(__file__), "dynamodb_data")
+    os.makedirs(out_dir, exist_ok=True)
+    filepath = os.path.join(out_dir, filename)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"  ✅ {filename} generado ({len(data)} registros)")
+    print(f"  ✅ {filename} generado y sobrescrito en {filepath} ({len(data)} registros)")
 
 
 def main():

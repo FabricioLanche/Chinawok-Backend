@@ -64,17 +64,22 @@ def lambda_handler(event, context):
     
     # Obtener usuario autenticado del authorizer
     authorizer = event.get("requestContext", {}).get("authorizer", {})
-    usuario_autenticado = {
-        "correo": authorizer.get("correo"),
-        "role": authorizer.get("role")
-    }
+    usuario_autenticado = {"correo": authorizer.get("correo"), "role": authorizer.get("role")}
 
-    correo = body.get("correo")
+    # Determinar el correo objetivo: preferir path parameter /usuarios/{correo} o /usuarios/me
+    path_params = event.get("pathParameters") or {}
+    path_correo = path_params.get("correo")
+    if path_correo:
+        if path_correo == "me":
+            correo = usuario_autenticado["correo"]
+        else:
+            correo = path_correo
+    else:
+        # Fallback antiguo: body.correo
+        correo = body.get("correo")
+
     if not correo:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"message": "correo es obligatorio"})
-        }
+        return {"statusCode": 400, "body": json.dumps({"message": "correo es obligatorio (path /usuarios/{correo} o body)")}}
 
     # 🔒 Verificar permisos: Admin puede modificar a cualquiera, otros solo a sí mismos
     es_admin = verificar_rol(usuario_autenticado, ["Admin"])

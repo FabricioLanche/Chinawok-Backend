@@ -12,32 +12,36 @@ usuarios_table = dynamodb.Table(TABLE_USUARIOS_NAME)
 def lambda_handler(event, context):
     # Obtener usuario autenticado
     authorizer = event.get("requestContext", {}).get("authorizer", {})
-    usuario_autenticado = {
-        "correo": authorizer.get("correo"),
-        "role": authorizer.get("role")
-    }
-    
-    body = {}
-    if isinstance(event, dict) and "body" in event:
-        raw_body = event.get("body")
-        if isinstance(raw_body, str):
-            if raw_body:
-                body = json.loads(raw_body)
-            else:
-                body = {}
-        elif isinstance(raw_body, dict):
-            body = raw_body
-    elif isinstance(event, dict):
-        body = event
-    elif isinstance(event, str):
-        body = json.loads(event)
+    usuario_autenticado = {"correo": authorizer.get("correo"), "role": authorizer.get("role")}
 
-    correo_a_eliminar = body.get("correo")
+    # Determinar correo a eliminar: preferir path /usuarios/{correo} o /usuarios/me
+    path_params = event.get("pathParameters") or {}
+    path_correo = path_params.get("correo")
+    if path_correo:
+        if path_correo == "me":
+            correo_a_eliminar = usuario_autenticado["correo"]
+        else:
+            correo_a_eliminar = path_correo
+    else:
+        # Fallback antiguo por compatibilidad
+        body = {}
+        if isinstance(event, dict) and "body" in event:
+            raw_body = event.get("body")
+            if isinstance(raw_body, str):
+                if raw_body:
+                    body = json.loads(raw_body)
+                else:
+                    body = {}
+            elif isinstance(raw_body, dict):
+                body = raw_body
+        elif isinstance(event, dict):
+            body = event
+        elif isinstance(event, str):
+            body = json.loads(event)
+        correo_a_eliminar = body.get("correo")
+
     if not correo_a_eliminar:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"message": "correo es obligatorio"})
-        }
+        return {"statusCode": 400, "body": json.dumps({"message": "correo es obligatorio (path /usuarios/{correo} o body)"})}
 
     # Obtener información del usuario a eliminar
     resp = usuarios_table.get_item(Key={"correo": correo_a_eliminar})

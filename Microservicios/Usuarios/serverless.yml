@@ -84,10 +84,10 @@ functions:
   obtenerMiInfo:
     handler: usuarios/obtenerMiUsuario.lambda_handler
     name: ${self:service}-obtener-mi-info
-    description: Obtener información del usuario autenticado o de otro usuario
+    description: Obtener información del usuario autenticado (GET /usuario/me)
     events:
       - http:
-          path: usuario/mi-info
+          path: usuario/me
           method: get
           cors: true
           authorizer:
@@ -99,11 +99,11 @@ functions:
   buscar:
     handler: usuarios/buscarUsuario.lambda_handler
     name: ${self:service}-buscar
-    description: Buscar usuario por correo
+    description: Buscar usuario por correo (GET /usuario/{correo})
     events:
       - http:
-          path: usuario/buscar
-          method: post
+          path: usuario/{correo}
+          method: get
           cors: true
           authorizer:
             name: authorizer
@@ -114,10 +114,19 @@ functions:
   editar:
     handler: usuarios/editarUsuario.lambda_handler
     name: ${self:service}-editar
-    description: Editar información de un usuario
+    description: Editar información de un usuario (PUT /usuario/me y PUT /usuario/{correo})
     events:
       - http:
-          path: usuario/editar
+          path: usuario/me
+          method: put
+          cors: true
+          authorizer:
+            name: authorizer
+            type: request
+            identitySource: method.request.header.Authorization
+            resultTtlInSeconds: 0
+      - http:
+          path: usuario/{correo}
           method: put
           cors: true
           authorizer:
@@ -129,10 +138,19 @@ functions:
   eliminar:
     handler: usuarios/eliminarUsuario.lambda_handler
     name: ${self:service}-eliminar
-    description: Eliminar un usuario
+    description: Eliminar un usuario (DELETE /usuario/me y DELETE /usuario/{correo})
     events:
       - http:
-          path: usuario/eliminar
+          path: usuario/me
+          method: delete
+          cors: true
+          authorizer:
+            name: authorizer
+            type: request
+            identitySource: method.request.header.Authorization
+            resultTtlInSeconds: 0
+      - http:
+          path: usuario/{correo}
           method: delete
           cors: true
           authorizer:
