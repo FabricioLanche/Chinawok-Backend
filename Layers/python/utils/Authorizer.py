@@ -1,5 +1,5 @@
 import json
-from jwt_utils import validar_token
+from utils.jwt_utils import validar_token
 
 def lambda_handler(event, context):
     """
