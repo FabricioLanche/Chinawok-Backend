@@ -41,8 +41,7 @@ def lambda_handler(event, context):
     Este authorizer valida el token JWT y retorna una política IAM
     que permite o deniega el acceso al endpoint solicitado.
     """
--    token = event.get("authorizationToken", "") or ""
-+    token = _get_token_from_event(event) or ""
+    token = _get_token_from_event(event) or ""
     
     # Log del token recibido (enmascarado) para debugging
     try:

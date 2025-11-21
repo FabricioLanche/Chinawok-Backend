@@ -6,6 +6,17 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+def _mask_token(t: str) -> str:
+    """Enmascara el token para logging seguro (no exponer el token completo)."""
+    if not t:
+        return "<empty>"
+    try:
+        if len(t) <= 12:
+            return t[:3] + "..." + t[-3:]
+        return t[:6] + "..." + t[-6:]
+    except Exception:
+        return "<invalid-token>"
+
 # Solo necesitamos JWT_SECRET, no tablas de DynamoDB
 JWT_SECRET = os.getenv("JWT_SECRET", "tu-clave-secreta-super-segura-cambiar-en-produccion")
 JWT_ALGORITHM = "HS256"
