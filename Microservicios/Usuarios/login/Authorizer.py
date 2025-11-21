@@ -19,6 +19,21 @@ def _mask_token_local(t: str) -> str:
     except Exception:
         return "<invalid-token>"
 
+def _get_token_from_event(event):
+    """Extrae el token desde varias ubicaciones comunes del evento."""
+    if not isinstance(event, dict):
+        return None
+    # Token authorizer clásico
+    token = event.get("authorizationToken")
+    if token:
+        return token
+    # Token puede venir en headers (API Gateway HTTP/API V2)
+    headers = event.get("headers") or {}
+    if isinstance(headers, dict):
+        # comprobar mayúsculas/minúsculas
+        return headers.get("authorization") or headers.get("Authorization")
+    return None
+
 def lambda_handler(event, context):
     """
     Lambda Authorizer con validación de JWT
@@ -26,7 +41,8 @@ def lambda_handler(event, context):
     Este authorizer valida el token JWT y retorna una política IAM
     que permite o deniega el acceso al endpoint solicitado.
     """
-    token = event.get("authorizationToken", "") or ""
+-    token = event.get("authorizationToken", "") or ""
++    token = _get_token_from_event(event) or ""
     
     # Log del token recibido (enmascarado) para debugging
     try:
