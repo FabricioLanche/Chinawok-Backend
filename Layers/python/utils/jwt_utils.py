@@ -1,6 +1,10 @@
 import jwt
 import os
 from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # Solo necesitamos JWT_SECRET, no tablas de DynamoDB
 JWT_SECRET = os.getenv("JWT_SECRET", "tu-clave-secreta-super-segura-cambiar-en-produccion")
@@ -8,19 +12,34 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
 
 
+def _mask_token(t: str) -> str:
+    if not t:
+        return "<empty>"
+    if len(t) <= 12:
+        return t[:3] + "..." + t[-3:]
+    return t[:6] + "..." + t[-6:]
+
+
 def generar_token(correo, role, nombre):
     """
     Genera un JWT como Spring Boot
     """
+    # Usar timestamps enteros en lugar de objetos datetime para compatibilidad consistente
+    now = datetime.utcnow()
+    exp = now + timedelta(hours=JWT_EXPIRATION_HOURS)
+
     payload = {
         "correo": correo,
         "role": role,
         "nombre": nombre,
-        "iat": datetime.utcnow(),
-        "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+        "iat": int(now.timestamp()),
+        "exp": int(exp.timestamp())
     }
     
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    # PyJWT v1 puede devolver bytes; asegurarse de devolver str
+    if isinstance(token, bytes):
+        token = token.decode("utf-8")
     return token
 
 
@@ -38,7 +57,21 @@ def validar_token(token):
         }
     """
     if not token:
+        logger.info("validar_token: token ausente")
         return {"valido": False, "error": "Token es obligatorio"}
+
+    # Normalizar token (acepta bytes, y 'Bearer <token>')
+    if isinstance(token, bytes):
+        try:
+            token = token.decode("utf-8")
+        except Exception:
+            logger.info("validar_token: decodificación de bytes fallida")
+            return {"valido": False, "error": "Token inválido (decodificación)"}
+    token = token.strip()
+    masked = _mask_token(token)
+    if token.lower().startswith("bearer "):
+        token = token.split(" ", 1)[1].strip()
+        logger.info(f"validar_token: token con prefijo Bearer recibido (enmascarado)={masked}")
 
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
@@ -50,8 +83,10 @@ def validar_token(token):
             "nombre": payload.get("nombre", "")
         }
     except jwt.ExpiredSignatureError:
+        logger.info(f"validar_token: token expirado (enmascarado)={_mask_token(token)}")
         return {"valido": False, "error": "Token expirado"}
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        logger.info(f"validar_token: token inválido (enmascarado)={_mask_token(token)} error={str(e)}")
         return {"valido": False, "error": "Token inválido"}
 
 
