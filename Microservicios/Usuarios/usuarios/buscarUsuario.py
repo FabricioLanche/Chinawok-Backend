@@ -1,6 +1,7 @@
 import json
 import boto3
 import os
+from utils.authentication_utils import obtener_usuario_autenticado, validar_acceso_usuario
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
@@ -38,6 +39,15 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             "body": json.dumps({"message": "correo es obligatorio"})
+        }
+
+    # Validar permisos según reglas de negocio (Admin / Gerente / Cliente)
+    usuario_autenticado = obtener_usuario_autenticado(event)
+    tiene_acceso, error = validar_acceso_usuario(usuario_autenticado, correo)
+    if not tiene_acceso:
+        return {
+            "statusCode": 403,
+            "body": json.dumps({"message": error})
         }
 
     try:

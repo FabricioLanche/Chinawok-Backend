@@ -2,7 +2,7 @@ import boto3
 import os
 import json
 import re
-from utils.jwt_utils import verificar_rol
+from utils.authentication_utils import obtener_usuario_autenticado, verificar_rol
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
@@ -61,10 +61,8 @@ def validar_informacion_bancaria(info_bancaria):
 
 def lambda_handler(event, context):
     body = _parse_body(event)
-    
-    # Obtener usuario autenticado del authorizer
-    authorizer = event.get("requestContext", {}).get("authorizer", {})
-    usuario_autenticado = {"correo": authorizer.get("correo"), "role": authorizer.get("role")}
+    # Obtener usuario autenticado de forma centralizada
+    usuario_autenticado = obtener_usuario_autenticado(event)
 
     # Determinar el correo objetivo: preferir path parameter /usuarios/{correo} o /usuarios/me
     path_params = event.get("pathParameters") or {}
@@ -84,7 +82,6 @@ def lambda_handler(event, context):
     # 🔒 Verificar permisos: Admin puede modificar a cualquiera, otros solo a sí mismos
     es_admin = verificar_rol(usuario_autenticado, ["Admin"])
     es_mismo_usuario = usuario_autenticado["correo"] == correo
-    
     if not (es_admin or es_mismo_usuario):
         return {
             "statusCode": 403,
