@@ -35,7 +35,7 @@ functions:
   # LAMBDA AUTHORIZER COMPARTIDO
   # ============================================================
   authorizer:
-    handler: utils.Authorizer.lambda_handler
+    handler: login.Authorizer.lambda_handler
     name: ${self:service}-authorizer
     description: Lambda Authorizer compartido con validación JWT
     timeout: 30

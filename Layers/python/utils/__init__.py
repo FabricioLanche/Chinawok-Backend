@@ -31,10 +31,11 @@ __all__ = [
     'get_table_data',
     # S3
     'upload_to_s3',
-    'download_from_s3',
+    'list_s3_files',
+    'delete_old_versions',
     # Athena
     'AthenaQueryExecutor',
-    # JWT
+    # JWT (NO incluir Authorizer, es un Lambda handler)
     'generar_token',
     'validar_token',
     'verificar_rol',
