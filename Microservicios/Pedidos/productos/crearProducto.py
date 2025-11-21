@@ -2,7 +2,6 @@ import json
 import boto3
 import os
 from decimal import Decimal
-from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 
 # Cliente DynamoDB
@@ -10,38 +9,11 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_PRODUCTOS', 'ChinaWok-Productos')
 table = dynamodb.Table(table_name)
 
-# Schema de validación
-PRODUCTO_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Productos",
-    "type": "object",
-    "properties": {
-        "local_id": {"type": "string"},
-        "nombre": {"type": "string", "minLength": 1},
-        "precio": {"type": "number", "minimum": 0},
-        "descripcion": {"type": "string"},
-        "categoria": {
-            "type": "string",
-            "enum": [
-                "Arroces",
-                "Tallarines",
-                "Pollo al wok",
-                "Carne de res",
-                "Cerdo",
-                "Mariscos",
-                "Entradas",
-                "Guarniciones",
-                "Sopas",
-                "Combos",
-                "Bebidas",
-                "Postres"
-            ]
-        },
-        "stock": {"type": "integer", "minimum": 0}
-    },
-    "required": ["local_id", "nombre", "precio", "categoria", "stock"],
-    "additionalProperties": False
-}
+# Categorías válidas
+CATEGORIAS_VALIDAS = [
+    "Arroces", "Tallarines", "Pollo al wok", "Carne de res", "Cerdo",
+    "Mariscos", "Entradas", "Guarniciones", "Sopas", "Combos", "Bebidas", "Postres"
+]
 
 
 def convertir_floats_a_decimal(obj):
@@ -68,8 +40,47 @@ def handler(event, context):
         else:
             body = event.get('body', event)
         
-        # Validar schema
-        validate(instance=body, schema=PRODUCTO_SCHEMA)
+        # Validación manual de campos requeridos
+        campos_requeridos = ['local_id', 'nombre', 'precio', 'categoria', 'stock']
+        for campo in campos_requeridos:
+            if campo not in body:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': f'Campo requerido faltante: {campo}'})
+                }
+        
+        # Validar nombre no vacío
+        if not body['nombre'].strip():
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'nombre no puede estar vacío'})
+            }
+        
+        # Validar precio
+        if not isinstance(body['precio'], (int, float)) or body['precio'] < 0:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'precio debe ser un número positivo'})
+            }
+        
+        # Validar categoría
+        if body['categoria'] not in CATEGORIAS_VALIDAS:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': f'categoria debe ser una de: {", ".join(CATEGORIAS_VALIDAS)}'})
+            }
+        
+        # Validar stock
+        if not isinstance(body['stock'], int) or body['stock'] < 0:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'stock debe ser un entero positivo'})
+            }
         
         local_id = body.get('local_id')
         nombre = body.get('nombre')
@@ -111,9 +122,6 @@ def handler(event, context):
         # Convertir floats a Decimal para DynamoDB
         body_decimal = convertir_floats_a_decimal(body)
         
-        # Convertir floats a Decimal para DynamoDB
-        body_decimal = convertir_floats_a_decimal(body)
-        
         # Insertar en DynamoDB
         table.put_item(Item=body_decimal)
         
@@ -129,28 +137,9 @@ def handler(event, context):
             })
         }
         
-    except ValidationError as e:
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error de validación',
-                'message': str(e.message)
-            })
-        }
-        
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error interno del servidor',
-                'message': str(e)
-            })
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
         }

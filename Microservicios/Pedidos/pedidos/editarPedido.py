@@ -1,7 +1,6 @@
 import json
 import boto3
 import os
-from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 from decimal import Decimal
 
@@ -321,13 +320,8 @@ def handler(event, context):
         if not local_id or not pedido_id:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Se requieren local_id y pedido_id'
-                })
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Se requieren local_id y pedido_id'})
             }
         
         # Crear una copia sin las keys para validar solo los campos actualizables
@@ -336,17 +330,37 @@ def handler(event, context):
         if not update_data:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'No se proporcionaron campos para actualizar'
-                })
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'No se proporcionaron campos para actualizar'})
             }
         
-        # Validar schema
-        validate(instance=update_data, schema=PEDIDO_UPDATE_SCHEMA)
+        # Validar productos si se están actualizando
+        if 'productos' in update_data:
+            if not isinstance(update_data['productos'], list) or len(update_data['productos']) == 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'productos debe ser un array no vacío'})
+                }
+        
+        # Validar combos si se están actualizando
+        if 'combos' in update_data:
+            if not isinstance(update_data['combos'], list) or len(update_data['combos']) == 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'combos debe ser un array no vacío'})
+                }
+        
+        # Validar estado si se está actualizando
+        if 'estado' in update_data:
+            estados_validos = ['procesando', 'cocinando', 'empacando', 'enviando', 'recibido']
+            if update_data['estado'] not in estados_validos:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': f'estado debe ser uno de: {", ".join(estados_validos)}'})
+                }
         
         # Obtener el pedido actual para verificaciones
         try:
@@ -360,13 +374,8 @@ def handler(event, context):
             if 'Item' not in pedido_actual:
                 return {
                     'statusCode': 404,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': json.dumps({
-                        'error': 'Pedido no encontrado'
-                    })
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Pedido no encontrado'})
                 }
             
             pedido = pedido_actual['Item']
@@ -375,10 +384,7 @@ def handler(event, context):
         except ClientError as e:
             return {
                 'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'error': 'Error al obtener pedido',
                     'message': str(e)
@@ -390,10 +396,7 @@ def handler(event, context):
         if not exito:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'error': 'Error de validación de local',
                     'message': error_msg
@@ -405,10 +408,7 @@ def handler(event, context):
         if not exito:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'error': 'Error de validación de usuario',
                     'message': error_msg
@@ -421,10 +421,7 @@ def handler(event, context):
             if not exito:
                 return {
                     'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({
                         'error': 'Error de validación de productos',
                         'message': error_msg
@@ -437,10 +434,7 @@ def handler(event, context):
             if not exito:
                 return {
                     'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({
                         'error': 'Error de validación de combos',
                         'message': error_msg
@@ -453,10 +447,7 @@ def handler(event, context):
             if historial_enriquecido is None:
                 return {
                     'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({
                         'error': 'Error al enriquecer datos de empleados',
                         'message': error_msg
@@ -490,38 +481,16 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({
                 'message': 'Pedido actualizado exitosamente',
                 'data': data_respuesta
             })
         }
         
-    except ValidationError as e:
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error de validación',
-                'message': str(e.message)
-            })
-        }
-        
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error interno del servidor',
-                'message': str(e)
-            })
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
         }

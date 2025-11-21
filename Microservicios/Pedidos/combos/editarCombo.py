@@ -1,30 +1,11 @@
 import json
 import boto3
 import os
-from jsonschema import validate, ValidationError
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_COMBOS', 'ChinaWok-Combos')
 table = dynamodb.Table(table_name)
-
-# Schema de validación (sin requerir todas las propiedades para update parcial)
-COMBO_UPDATE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "CombosUpdate",
-    "type": "object",
-    "properties": {
-        "nombre": {"type": "string"},
-        "productos_nombres": {
-            "type": "array",
-            "items": {"type": "string"},
-            "minItems": 1
-        },
-        "descripcion": {"type": "string"}
-    },
-    "additionalProperties": False,
-    "minProperties": 1
-}
 
 
 def handler(event, context):
@@ -54,8 +35,9 @@ def handler(event, context):
                 })
             }
         
-        # Crear una copia sin las keys para validar solo los campos actualizables
-        update_data = {k: v for k, v in body.items() if k not in ['local_id', 'combo_id']}
+        # Crear una copia sin las keys para actualizar solo los campos permitidos
+        campos_permitidos = ['nombre', 'productos_nombres', 'descripcion']
+        update_data = {k: v for k, v in body.items() if k in campos_permitidos}
         
         if not update_data:
             return {
@@ -69,8 +51,19 @@ def handler(event, context):
                 })
             }
         
-        # Validar schema
-        validate(instance=update_data, schema=COMBO_UPDATE_SCHEMA)
+        # Validar productos_nombres si se está actualizando
+        if 'productos_nombres' in update_data:
+            if not isinstance(update_data['productos_nombres'], list) or len(update_data['productos_nombres']) == 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({
+                        'error': 'productos_nombres debe ser un array con al menos un elemento'
+                    })
+                }
         
         # Construir expresión de actualización
         update_expression = "SET " + ", ".join([f"#{k} = :{k}" for k in update_data.keys()])
@@ -99,19 +92,6 @@ def handler(event, context):
                 'message': 'Combo actualizado exitosamente',
                 'data': response['Attributes']
             }, default=str)
-        }
-        
-    except ValidationError as e:
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error de validación',
-                'message': str(e.message)
-            })
         }
         
     except Exception as e:

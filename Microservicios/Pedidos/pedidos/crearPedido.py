@@ -3,7 +3,6 @@ import boto3
 import os
 import uuid
 from datetime import datetime, timedelta
-from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 from decimal import Decimal
 
@@ -31,60 +30,6 @@ usuarios_table = dynamodb.Table(usuarios_table_name)
 # Agregar cliente de EventBridge
 eventbridge = boto3.client('events')
 EVENT_BUS_NAME = os.environ.get('EVENT_BUS_NAME', 'chinawok-pedidos-events')
-
-# Schema de validación (sin estado ni historial_estados en el request)
-PEDIDO_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Pedidos",
-    "type": "object",
-    "properties": {
-        "local_id": {"type": "string"},
-        "usuario_correo": {"type": "string", "format": "email"},
-        "productos": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "nombre": {"type": "string"},
-                    "cantidad": {"type": "integer", "minimum": 1}
-                },
-                "required": ["nombre", "cantidad"],
-                "additionalProperties": False
-            },
-            "minItems": 1
-        },
-        "combos": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "combo_id": {"type": "string"},
-                    "cantidad": {"type": "integer", "minimum": 1}
-                },
-                "required": ["combo_id", "cantidad"],
-                "additionalProperties": False
-            },
-            "minItems": 1
-        },
-        "costo": {"type": "number", "minimum": 0},
-        "direccion": {"type": "string"},
-        "fecha_entrega_aproximada": {
-            "type": ["string", "null"],
-            "format": "date-time"
-        }
-    },
-    "required": [
-        "local_id",
-        "usuario_correo",
-        "direccion",
-        "costo"
-    ],
-    "anyOf": [
-        {"required": ["productos"]},
-        {"required": ["combos"]}
-    ],
-    "additionalProperties": False
-}
 
 
 def verificar_local_existe(local_id):
@@ -235,8 +180,75 @@ def handler(event, context):
         else:
             body = event.get('body', event)
         
-        # Validar schema (sin pedido_id, estado ni historial_estados)
-        validate(instance=body, schema=PEDIDO_SCHEMA)
+        # Validación manual de campos requeridos
+        campos_requeridos = ['local_id', 'usuario_correo', 'direccion', 'costo']
+        for campo in campos_requeridos:
+            if campo not in body:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': f'Campo requerido faltante: {campo}'})
+                }
+        
+        # Validar que tenga productos o combos
+        if 'productos' not in body and 'combos' not in body:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Debe especificar al menos productos o combos'})
+            }
+        
+        # Validar productos si existen
+        if 'productos' in body:
+            if not isinstance(body['productos'], list) or len(body['productos']) == 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'productos debe ser un array no vacío'})
+                }
+            for prod in body['productos']:
+                if 'nombre' not in prod or 'cantidad' not in prod:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Cada producto debe tener nombre y cantidad'})
+                    }
+                if not isinstance(prod['cantidad'], int) or prod['cantidad'] < 1:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'cantidad debe ser un entero mayor a 0'})
+                    }
+        
+        # Validar combos si existen
+        if 'combos' in body:
+            if not isinstance(body['combos'], list) or len(body['combos']) == 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'combos debe ser un array no vacío'})
+                }
+            for combo in body['combos']:
+                if 'combo_id' not in combo or 'cantidad' not in combo:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Cada combo debe tener combo_id y cantidad'})
+                    }
+                if not isinstance(combo['cantidad'], int) or combo['cantidad'] < 1:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'cantidad debe ser un entero mayor a 0'})
+                    }
+        
+        # Validar costo
+        if not isinstance(body['costo'], (int, float)) or body['costo'] < 0:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'costo debe ser un número positivo'})
+            }
         
         # Generar pedido_id automáticamente
         body['pedido_id'] = str(uuid.uuid4())
@@ -256,19 +268,6 @@ def handler(event, context):
                 'empleado': None
             }
         ]
-        
-        # Validar que tenga productos o combos
-        if 'productos' not in body and 'combos' not in body:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Debe especificar al menos productos o combos'
-                })
-            }
         
         local_id = body.get('local_id')
         usuario_correo = body.get('usuario_correo')
@@ -377,28 +376,9 @@ def handler(event, context):
             })
         }
         
-    except ValidationError as e:
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error de validación',
-                'message': str(e.message)
-            })
-        }
-        
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error interno del servidor',
-                'message': str(e)
-            })
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
         }

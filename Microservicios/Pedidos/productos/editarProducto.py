@@ -2,43 +2,17 @@ import json
 import boto3
 import os
 from decimal import Decimal
-from jsonschema import validate, ValidationError
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_PRODUCTOS', 'ChinaWok-Productos')
 table = dynamodb.Table(table_name)
 
-# Schema de validación (sin requerir todas las propiedades para update parcial)
-PRODUCTO_UPDATE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "ProductosUpdate",
-    "type": "object",
-    "properties": {
-        "precio": {"type": "number", "minimum": 0},
-        "descripcion": {"type": "string"},
-        "categoria": {
-            "type": "string",
-            "enum": [
-                "Arroces",
-                "Tallarines",
-                "Pollo al wok",
-                "Carne de res",
-                "Cerdo",
-                "Mariscos",
-                "Entradas",
-                "Guarniciones",
-                "Sopas",
-                "Combos",
-                "Bebidas",
-                "Postres"
-            ]
-        },
-        "stock": {"type": "integer", "minimum": 0}
-    },
-    "additionalProperties": False,
-    "minProperties": 1
-}
+# Categorías válidas
+CATEGORIAS_VALIDAS = [
+    "Arroces", "Tallarines", "Pollo al wok", "Carne de res", "Cerdo",
+    "Mariscos", "Entradas", "Guarniciones", "Sopas", "Combos", "Bebidas", "Postres"
+]
 
 
 def convertir_floats_a_decimal(obj):
@@ -72,13 +46,8 @@ def handler(event, context):
         if not local_id or not nombre:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Se requieren local_id y nombre'
-                })
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Se requieren local_id y nombre'})
             }
         
         # Crear una copia sin las keys para validar solo los campos actualizables
@@ -87,17 +56,36 @@ def handler(event, context):
         if not update_data:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'No se proporcionaron campos para actualizar'
-                })
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'No se proporcionaron campos para actualizar'})
             }
         
-        # Validar schema
-        validate(instance=update_data, schema=PRODUCTO_UPDATE_SCHEMA)
+        # Validar precio si se está actualizando
+        if 'precio' in update_data:
+            if not isinstance(update_data['precio'], (int, float)) or update_data['precio'] < 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'precio debe ser un número positivo'})
+                }
+        
+        # Validar categoría si se está actualizando
+        if 'categoria' in update_data:
+            if update_data['categoria'] not in CATEGORIAS_VALIDAS:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': f'categoria debe ser una de: {", ".join(CATEGORIAS_VALIDAS)}'})
+                }
+        
+        # Validar stock si se está actualizando
+        if 'stock' in update_data:
+            if not isinstance(update_data['stock'], int) or update_data['stock'] < 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'stock debe ser un entero positivo'})
+                }
         
         # Verificar que el producto existe antes de actualizar
         existing_product = table.get_item(
@@ -110,14 +98,8 @@ def handler(event, context):
         if 'Item' not in existing_product:
             return {
                 'statusCode': 404,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Producto no encontrado',
-                    'message': f"El producto '{nombre}' no existe en el local {local_id}"
-                })
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Producto no encontrado', 'message': f"El producto '{nombre}' no existe en el local {local_id}"})
             }
         
         # Convertir floats a Decimal para DynamoDB
@@ -142,38 +124,13 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'message': 'Producto actualizado exitosamente',
-                'data': response['Attributes']
-            }, default=str)
-        }
-        
-    except ValidationError as e:
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error de validación',
-                'message': str(e.message)
-            })
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'message': 'Producto actualizado exitosamente', 'data': response['Attributes']}, default=str)
         }
         
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error interno del servidor',
-                'message': str(e)
-            })
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
         }
