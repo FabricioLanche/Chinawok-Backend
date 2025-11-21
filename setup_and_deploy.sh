@@ -49,7 +49,7 @@ if ! command -v serverless &> /dev/null; then
     fi
     
     # Instalar serverless
-    npm install -g serverless
+    sudo npm install -g serverless
     
     if [ $? -eq 0 ]; then
         log_success "Serverless Framework instalado correctamente"
