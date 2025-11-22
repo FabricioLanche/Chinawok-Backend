@@ -4,19 +4,33 @@ from utils.athena_client import AthenaQueryExecutor
 
 def handler(event, context):
     """Lambda para consultar los productos más vendidos por local"""
+    # Headers CORS
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Content-Type': 'application/json'
+    }
+    
+    # Manejar preflight request
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'message': 'CORS preflight successful'})
+        }
+    
     try:
-        # Parsear body
         body = json.loads(event.get('body', '{}'))
-        local_id = body.get('local_id', 'LOCAL-0001')  # Por defecto LOCAL-0001
+        local_id = body.get('local_id', 'LOCAL-0001')
         
         if not local_id:
             return {
                 'statusCode': 400,
-                'headers': {'Content-Type': 'application/json'},
+                'headers': headers,
                 'body': json.dumps({'error': 'local_id es requerido'})
             }
         
-        # Query SQL
         query = f"""
         WITH productos_expandidos AS (
             SELECT 
@@ -52,13 +66,12 @@ def handler(event, context):
         LIMIT 20;
         """
         
-        # Ejecutar query
         executor = AthenaQueryExecutor()
         results = executor.execute_query(query)
         
         return {
             'statusCode': 200,
-            'headers': {'Content-Type': 'application/json'},
+            'headers': headers,
             'body': json.dumps({
                 'local_id': local_id,
                 'total_productos': len(results),
@@ -70,6 +83,6 @@ def handler(event, context):
         print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
-            'headers': {'Content-Type': 'application/json'},
+            'headers': headers,
             'body': json.dumps({'error': str(e)})
         }

@@ -13,34 +13,73 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
+    # Headers CORS
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
+    }
+    
+    # Manejar preflight request
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'message': 'CORS preflight successful'})
+        }
+    
     body = json.loads(event['body'])
 
     required = ["local_id", "dni", "nombre", "apellido", "role", "sueldo"]
     for field in required:
         if field not in body:
-            return {'statusCode': 400, 'body': json.dumps({'error': f"Falta el campo requerido: {field}"})}
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': f"Falta el campo requerido: {field}"})
+            }
 
     # Validar existencia del local
     try:
         response = table_locales.get_item(Key={'local_id': body['local_id']})
         if 'Item' not in response:
-            return {'statusCode': 400, 'body': json.dumps({'error': 'El local_id no existe en la tabla de locales'})}
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'El local_id no existe en la tabla de locales'})
+            }
     except ClientError as e:
-        return {'statusCode': 500, 'body': json.dumps({'error': f"Error al verificar local: {str(e)}"})}
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'error': f"Error al verificar local: {str(e)}"})
+        }
 
     # Validar formato DNI peruano (8 dígitos numéricos)
     if not re.match(r'^\d{8}$', body['dni']):
-        return {'statusCode': 400, 'body': json.dumps({'error': 'El DNI debe tener exactamente 8 dígitos numéricos'})}
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'El DNI debe tener exactamente 8 dígitos numéricos'})
+        }
 
     # Validar rol
     roles_validos = ["Repartidor", "Cocinero", "Despachador"]
     if body['role'] not in roles_validos:
-        return {'statusCode': 400, 'body': json.dumps({'error': f"El rol debe ser uno de: {', '.join(roles_validos)}"})}
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': f"El rol debe ser uno de: {', '.join(roles_validos)}"})
+        }
 
     # Validar sueldo
     sueldo = Decimal(str(body['sueldo']))
     if sueldo < 0:
-        return {'statusCode': 400, 'body': json.dumps({'error': 'El sueldo no puede ser negativo'})}
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': 'El sueldo no puede ser negativo'})
+        }
 
     item = {
         'local_id': body['local_id'],
@@ -54,4 +93,8 @@ def lambda_handler(event, context):
     }
 
     table.put_item(Item=item)
-    return {'statusCode': 201, 'body': json.dumps({'message': 'Empleado creado', 'empleado': item}, cls=DecimalEncoder)}
+    return {
+        'statusCode': 201,
+        'headers': headers,
+        'body': json.dumps({'message': 'Empleado creado', 'empleado': item}, cls=DecimalEncoder)
+    }
