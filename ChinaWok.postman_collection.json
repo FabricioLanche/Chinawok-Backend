@@ -4126,7 +4126,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id}}\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id_1}}\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
 								},
 								"url": {
 									"raw": "{{base_url_empleados}}/resenas",
