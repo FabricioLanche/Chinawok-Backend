@@ -241,40 +241,8 @@ functions:
 
 resources:
   Resources:
-    # EventBridge Event Bus - USA LA VARIABLE DE ENTORNO
-    ChinaWokPedidosEventBus:
-      Type: AWS::Events::EventBus
-      Properties:
-        Name: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
-
-    # EventBridge Rule para PedidoCreado
-    PedidoCreadoEventRule:
-      Type: AWS::Events::Rule
-      Properties:
-        Name: ${self:service}-pedido-creado-rule
-        Description: Regla para enviar pedidos creados al Step Function
-        EventBusName: !Ref ChinaWokPedidosEventBus
-        EventPattern:
-          source:
-            - chinawok.pedidos
-          detail-type:
-            - PedidoCreado
-        State: ENABLED
-        Targets:
-          - Arn: !GetAtt ChinaWokPedidosStateMachine.Arn
-            Id: PedidoCreadoStepFunction
-            RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-
-    # Step Functions State Machine - EXACTO AL MODELO ORIGINAL
     ChinaWokPedidosStateMachine:
       Type: AWS::StepFunctions::StateMachine
-      DependsOn:
-        - WorkflowStepCocinarLambdaFunction
-        - WorkflowStepEmpacarLambdaFunction
-        - WorkflowStepEnviarLambdaFunction
-        - WorkflowNotificarUsuarioLambdaFunction
-        - WorkflowConfirmarRecepcionLambdaFunction
-        - WorkflowLiberarPedidoLambdaFunction
       Properties:
         StateMachineName: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
         RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
@@ -296,14 +264,17 @@ resources:
                   },
                   "InicializarContadores": {
                     "Type": "Pass",
-                    "Result": {"intentos_cocinar": 0, "intentos_empacar": 0, "intentos_enviar": 0, "modo_realista": false},
+                    "Result": {"intentos_cocinar": 0, "intentos_empacar": 0, "intentos_enviar": 0, "modo_realista": "false"},
                     "ResultPath": "$.contadores",
                     "Next": "IntentarCocinar"
                   },
                   "IntentarCocinar": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${CocinarArn}", "Payload.$": "$"},
+                    "Parameters": {
+                      "FunctionName": "${CocinarArn}",
+                      "Payload.$": "$"
+                    },
                     "ResultPath": "$.resultado_cocinar",
                     "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
                     "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosCocinar"}],
@@ -324,8 +295,19 @@ resources:
                   },
                   "IncrementarIntentosCocinar": {
                     "Type": "Pass",
-                    "Parameters": {"intentos_cocinar.$": "States.MathAdd($.contadores.intentos_cocinar, 1)", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "$.contadores.intentos_enviar"},
-                    "ResultPath": "$.contadores",
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "contadores": {
+                        "intentos_cocinar.$": "States.MathAdd(States.JsonToString($.contadores.intentos_cocinar), 1)",
+                        "intentos_empacar.$": "$.contadores.intentos_empacar",
+                        "intentos_enviar.$": "$.contadores.intentos_enviar",
+                        "modo_realista.$": "$.contadores.modo_realista"
+                      },
+                      "error.$": "$.error"
+                    },
+                    "ResultPath": "$",
                     "Next": "VerificarMaximoIntentosCocinar"
                   },
                   "VerificarMaximoIntentosCocinar": {
@@ -344,7 +326,10 @@ resources:
                   "IntentarEmpacar": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${EmpacarArn}", "Payload.$": "$"},
+                    "Parameters": {
+                      "FunctionName": "${EmpacarArn}",
+                      "Payload.$": "$"
+                    },
                     "ResultPath": "$.resultado_empacar",
                     "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
                     "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosEmpacar"}],
@@ -365,8 +350,19 @@ resources:
                   },
                   "IncrementarIntentosEmpacar": {
                     "Type": "Pass",
-                    "Parameters": {"intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "States.MathAdd($.contadores.intentos_empacar, 1)", "intentos_enviar.$": "$.contadores.intentos_enviar"},
-                    "ResultPath": "$.contadores",
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "contadores": {
+                        "intentos_cocinar.$": "$.contadores.intentos_cocinar",
+                        "intentos_empacar.$": "States.MathAdd(States.JsonToString($.contadores.intentos_empacar), 1)",
+                        "intentos_enviar.$": "$.contadores.intentos_enviar",
+                        "modo_realista.$": "$.contadores.modo_realista"
+                      },
+                      "error.$": "$.error"
+                    },
+                    "ResultPath": "$",
                     "Next": "EsperarReintentoEmpleadoEmpacar"
                   },
                   "EsperarReintentoEmpleadoEmpacar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEmpacar"},
@@ -380,7 +376,10 @@ resources:
                   "IntentarEnviar": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${EnviarArn}", "Payload.$": "$"},
+                    "Parameters": {
+                      "FunctionName": "${EnviarArn}",
+                      "Payload.$": "$"
+                    },
                     "ResultPath": "$.resultado_enviar",
                     "Retry": [{"ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 0}],
                     "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "IncrementarIntentosEnviar"}],
@@ -401,8 +400,19 @@ resources:
                   },
                   "IncrementarIntentosEnviar": {
                     "Type": "Pass",
-                    "Parameters": {"intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "States.MathAdd($.contadores.intentos_enviar, 1)"},
-                    "ResultPath": "$.contadores",
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "contadores": {
+                        "intentos_cocinar.$": "$.contadores.intentos_cocinar",
+                        "intentos_empacar.$": "$.contadores.intentos_empacar",
+                        "intentos_enviar.$": "States.MathAdd(States.JsonToString($.contadores.intentos_enviar), 1)",
+                        "modo_realista.$": "$.contadores.modo_realista"
+                      },
+                      "error.$": "$.error"
+                    },
+                    "ResultPath": "$",
                     "Next": "EsperarReintentoEmpleadoEnviar"
                   },
                   "EsperarReintentoEmpleadoEnviar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEnviar"},
@@ -416,7 +426,16 @@ resources:
                   "EsperarConfirmacionUsuario": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
-                    "Parameters": {"FunctionName": "${NotificarUsuarioArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "repartidor_dni.$": "$.repartidor_dni", "taskToken.$": "$$.Task.Token"}},
+                    "Parameters": {
+                      "FunctionName": "${NotificarUsuarioArn}",
+                      "Payload": {
+                        "local_id.$": "$.local_id",
+                        "pedido_id.$": "$.pedido_id",
+                        "usuario_correo.$": "$.usuario_correo",
+                        "repartidor_dni.$": "$.repartidor_dni",
+                        "taskToken.$": "$$.Task.Token"
+                      }
+                    },
                     "ResultPath": "$.confirmacion_usuario",
                     "TimeoutSeconds": 3600,
                     "Catch": [{"ErrorEquals": ["States.Timeout"], "ResultPath": "$.error", "Next": "ConfirmacionAutomatica"}],
@@ -431,7 +450,10 @@ resources:
                   "ConfirmarEntrega": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${ConfirmarArn}", "Payload.$": "$"},
+                    "Parameters": {
+                      "FunctionName": "${ConfirmarArn}",
+                      "Payload.$": "$"
+                    },
                     "ResultPath": "$.resultado_final",
                     "Next": "PedidoCompletado"
                   },
@@ -439,7 +461,15 @@ resources:
                   "ServicioSaturado": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${LiberarPedidoArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "motivo": "servicio_saturado"}},
+                    "Parameters": {
+                      "FunctionName": "${LiberarPedidoArn}",
+                      "Payload": {
+                        "local_id.$": "$.local_id",
+                        "pedido_id.$": "$.pedido_id",
+                        "motivo": "servicio_saturado",
+                        "resetear_estado": false
+                      }
+                    },
                     "ResultPath": "$.limpieza",
                     "Next": "ServicioSaturadoFinal",
                     "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "ServicioSaturadoFinal"}]

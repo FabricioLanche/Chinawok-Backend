@@ -33,29 +33,52 @@ def lambda_handler(event, context):
         if pedido.get('estado') != 'enviando':
             raise ValueError(f'El pedido debe estar en estado "enviando", actualmente está en "{pedido.get("estado")}"')
         
-        # Buscar el repartidor activo en el historial si no se proporcionó
-        if not repartidor_dni:
-            historial = pedido.get('historial_estados', [])
-            for estado in historial:
-                if estado.get('activo') and estado.get('empleado'):
-                    empleado = estado['empleado']
-                    if empleado.get('rol', '').lower() == 'repartidor':
-                        repartidor_dni = empleado.get('dni')
-                        break
+        # Buscar TODOS los empleados activos en el historial y liberarlos
+        historial = pedido.get('historial_estados', [])
+        empleados_liberados = []
         
-        # Liberar al repartidor explícitamente antes de finalizar
-        if repartidor_dni:
-            marcar_empleado_libre(local_id, repartidor_dni)
-            print(f'Repartidor {repartidor_dni} liberado')
+        for estado in historial:
+            if estado.get('activo') and estado.get('empleado'):
+                empleado = estado['empleado']
+                empleado_dni = empleado.get('dni')
+                empleado_rol = empleado.get('rol', '').lower()
+                
+                try:
+                    marcar_empleado_libre(local_id, empleado_dni)
+                    empleados_liberados.append({
+                        'dni': empleado_dni,
+                        'rol': empleado_rol
+                    })
+                    print(f'Empleado {empleado_rol} {empleado_dni} liberado')
+                except Exception as e:
+                    print(f'Error liberando empleado {empleado_dni}: {str(e)}')
+        
+        # Si se proporcionó un repartidor_dni específico y no fue liberado arriba, liberarlo
+        if repartidor_dni and not any(e['dni'] == repartidor_dni for e in empleados_liberados):
+            try:
+                marcar_empleado_libre(local_id, repartidor_dni)
+                empleados_liberados.append({
+                    'dni': repartidor_dni,
+                    'rol': 'repartidor'
+                })
+                print(f'Repartidor adicional {repartidor_dni} liberado')
+            except Exception as e:
+                print(f'Error liberando repartidor adicional {repartidor_dni}: {str(e)}')
+        
+        if not empleados_liberados:
+            print('Advertencia: No se encontraron empleados activos para liberar')
         else:
-            print('Advertencia: No se encontró repartidor para liberar')
+            print(f'Total empleados liberados: {len(empleados_liberados)}')
         
         # Finalizar pedido (actualizar estado a recibido y cerrar historial)
         pedido_actualizado = finalizar_pedido(local_id, pedido_id)
         
         # Agregar pedido al historial del usuario
         if usuario_correo:
-            agregar_pedido_a_usuario(usuario_correo, pedido_id)
+            try:
+                agregar_pedido_a_usuario(usuario_correo, pedido_id)
+            except Exception as e:
+                print(f'Error agregando pedido al historial del usuario: {str(e)}')
         
         print(f'Pedido confirmado y completado: {pedido_id}')
         
@@ -64,6 +87,7 @@ def lambda_handler(event, context):
             'pedido_id': pedido_id,
             'local_id': local_id,
             'estado': 'recibido',
+            'empleados_liberados': len(empleados_liberados),
             'historial_estados': pedido_actualizado.get('historial_estados', pedido.get('historial_estados', [])),
             'pedido_completo': pedido_actualizado
         }
@@ -79,6 +103,8 @@ def lambda_handler(event, context):
         
     except Exception as e:
         print(f'Error en lambda confirmar: {str(e)}')
+        import traceback
+        print(f'Traceback: {traceback.format_exc()}')
         
         if 'body' in event:
             return {

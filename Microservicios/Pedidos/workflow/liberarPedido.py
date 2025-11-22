@@ -28,59 +28,76 @@ def lambda_handler(event, context):
         
         empleados_liberados = []
         
-        # Buscar en el historial los empleados que estaban activos
+        # Buscar en el historial TODOS los empleados (activos o no)
+        # para asegurar que liberamos a todos
+        empleados_vistos = set()
+        
         for estado in historial:
-            if estado.get('activo') and estado.get('empleado'):
+            if estado.get('empleado'):
                 empleado_dni = estado['empleado'].get('dni')
                 empleado_rol = estado['empleado'].get('rol')
+                
+                # Evitar liberar el mismo empleado dos veces
+                if empleado_dni in empleados_vistos:
+                    continue
+                    
+                empleados_vistos.add(empleado_dni)
                 
                 try:
                     marcar_empleado_libre(local_id, empleado_dni)
                     empleados_liberados.append({
                         'dni': empleado_dni,
-                        'rol': empleado_rol
+                        'rol': empleado_rol,
+                        'estaba_activo': estado.get('activo', False)
                     })
                     print(f'Empleado {empleado_rol} {empleado_dni} liberado por {motivo}')
                 except Exception as e:
                     print(f'Error liberando empleado {empleado_dni}: {str(e)}')
         
-        #  --- NUEVO: marcar pedido como "cancelado" y cerrar historial activo ---
-        # Solo si el pedido existe
+        # Actualizar el estado del pedido
         try:
             pedidos_table_name = os.environ.get('TABLE_PEDIDOS', 'ChinaWok-Pedidos')
             dynamodb = boto3.resource('dynamodb')
             pedidos_table = dynamodb.Table(pedidos_table_name)
-
-            # Cerrar entradas activas del historial (activo -> False) y asegurar hora_fin
+            
             ahora_iso = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
             nuevo_historial = []
+            
+            # Cerrar todas las entradas activas del historial
             for estado in historial:
                 estado_n = dict(estado)
                 if estado_n.get('activo'):
                     estado_n['activo'] = False
-                    # Si no tiene hora_fin, poner ahora
                     if not estado_n.get('hora_fin'):
                         estado_n['hora_fin'] = ahora_iso
                 nuevo_historial.append(estado_n)
-
-            # Actualizar el pedido: estado='cancelado' y historial_estados actualizado
-            update_expr = "SET #estado = :estado, historial_estados = :hist"
+            
+            # Si es por servicio saturado o reintento, marcar como cancelado
+            # Si no, solo cerrar el historial sin cambiar estado
+            if motivo in ['servicio_saturado', 'reintento_workflow']:
+                update_expr = "SET #estado = :estado, historial_estados = :hist REMOVE task_token, esperando_confirmacion"
+                estado_final = 'cancelado'
+            else:
+                update_expr = "SET historial_estados = :hist REMOVE task_token, esperando_confirmacion"
+                estado_final = pedido.get('estado', 'procesando')
+            
             pedidos_table.update_item(
                 Key={'local_id': local_id, 'pedido_id': pedido_id},
                 UpdateExpression=update_expr,
-                ExpressionAttributeNames={'#estado': 'estado'},
+                ExpressionAttributeNames={'#estado': 'estado'} if motivo in ['servicio_saturado', 'reintento_workflow'] else None,
                 ExpressionAttributeValues={
-                    ':estado': 'cancelado',
+                    ':estado': estado_final,
+                    ':hist': nuevo_historial
+                } if motivo in ['servicio_saturado', 'reintento_workflow'] else {
                     ':hist': nuevo_historial
                 }
             )
-            print(f"Pedido {pedido_id} marcado como 'cancelado' y historial cerrado.")
+            print(f"Pedido {pedido_id} actualizado - estado: {estado_final}, historial cerrado")
         except Exception as e:
-            print(f"Error actualizando estado del pedido a 'cancelado': {str(e)}")
-        # ----------------------------------------------------------------------
-
-        # Resetear el pedido a estado inicial si se solicita (mantener comportamiento previo)
-        if resetear_estado:
+            print(f"Error actualizando estado del pedido: {str(e)}")
+        
+        # Resetear el pedido a estado inicial solo si se solicita Y no es servicio saturado
+        if resetear_estado and motivo != 'servicio_saturado':
             try:
                 resetear_pedido_a_inicial(local_id, pedido_id)
                 print(f'Pedido {pedido_id} reseteado a estado "procesando"')
@@ -92,11 +109,13 @@ def lambda_handler(event, context):
         return {
             'liberados': len(empleados_liberados),
             'empleados': empleados_liberados,
-            'pedido_cancelado': True,
-            'pedido_reseteado': resetear_estado,
+            'pedido_cancelado': motivo in ['servicio_saturado', 'reintento_workflow'],
+            'pedido_reseteado': resetear_estado and motivo != 'servicio_saturado',
             'motivo': motivo
         }
         
     except Exception as e:
         print(f'Error al liberar empleados: {str(e)}')
+        import traceback
+        print(f'Traceback: {traceback.format_exc()}')
         return {'liberados': 0, 'error': str(e)}
