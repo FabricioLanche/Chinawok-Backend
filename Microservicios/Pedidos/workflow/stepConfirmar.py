@@ -33,10 +33,22 @@ def lambda_handler(event, context):
         if pedido.get('estado') != 'enviando':
             raise ValueError(f'El pedido debe estar en estado "enviando", actualmente está en "{pedido.get("estado")}"')
         
+        # Buscar el repartidor activo en el historial si no se proporcionó
+        if not repartidor_dni:
+            historial = pedido.get('historial_estados', [])
+            for estado in historial:
+                if estado.get('activo') and estado.get('empleado'):
+                    empleado = estado['empleado']
+                    if empleado.get('rol', '').lower() == 'repartidor':
+                        repartidor_dni = empleado.get('dni')
+                        break
+        
         # Liberar al repartidor explícitamente antes de finalizar
         if repartidor_dni:
             marcar_empleado_libre(local_id, repartidor_dni)
             print(f'Repartidor {repartidor_dni} liberado')
+        else:
+            print('Advertencia: No se encontró repartidor para liberar')
         
         # Finalizar pedido (actualizar estado a recibido y cerrar historial)
         pedido_actualizado = finalizar_pedido(local_id, pedido_id)
