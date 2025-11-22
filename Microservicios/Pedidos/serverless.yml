@@ -218,10 +218,15 @@ functions:
     name: ${self:service}-workflow-step-enviar
     description: Step 4 - Enviar pedido
   
-  workflowConfirmarRecepcion:
-    handler: workflow/confirmarRecepcion.lambda_handler
-    name: ${self:service}-workflow-confirmar-recepcion
-    description: Step 5 - Confirmar recepción del pedido
+workflowConfirmarRecepcion:
+  handler: workflow/confirmarRecepcion.lambda_handler
+  name: ${self:service}-workflow-confirmar-recepcion
+  description: Step 5 - Confirmar recepción del pedido
+  events:
+    - http:
+        path: workflow/confirmar
+        method: post
+        cors: true
   
   workflowLiberarPedido:
     handler: workflow/liberarPedido.lambda_handler
