@@ -331,7 +331,7 @@ resources:
                       "pedido_id.$": "$.pedido_id",
                       "usuario_correo.$": "$.usuario_correo",
                       "contadores": {
-                        "intentos_cocinar.$": "States.MathAdd(States.JsonToString($.contadores.intentos_cocinar), 1)",
+                        "intentos_cocinar.$": "States.MathAdd($.contadores.intentos_cocinar, 1)",
                         "intentos_empacar.$": "$.contadores.intentos_empacar",
                         "intentos_enviar.$": "$.contadores.intentos_enviar",
                         "modo_realista.$": "$.contadores.modo_realista"
@@ -346,7 +346,27 @@ resources:
                     "Choices": [{"Variable": "$.contadores.intentos_cocinar", "NumericLessThan": 5, "Next": "EsperarReintentoEmpleadoCocinar"}],
                     "Default": "ServicioSaturado"
                   },
-                  "EsperarReintentoEmpleadoCocinar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarCocinar"},
+                  "EsperarReintentoEmpleadoCocinar": {
+                    "Type": "Wait",
+                    "Seconds": 30,
+                    "Next": "LiberarEmpleadosAntesDeCocinar"
+                  },
+                  "LiberarEmpleadosAntesDeCocinar": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {
+                      "FunctionName": "${LiberarPedidoArn}",
+                      "Payload": {
+                        "local_id.$": "$.local_id",
+                        "pedido_id.$": "$.pedido_id",
+                        "motivo": "reintento_empleado",
+                        "resetear_estado": false
+                      }
+                    },
+                    "ResultPath": "$.limpieza_previa",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error_limpieza", "Next": "IntentarCocinar"}],
+                    "Next": "IntentarCocinar"
+                  },
                   "EsperarTiempoCocinar": {
                     "Type": "Choice",
                     "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaCocinar"}],
@@ -387,7 +407,7 @@ resources:
                       "usuario_correo.$": "$.usuario_correo",
                       "contadores": {
                         "intentos_cocinar.$": "$.contadores.intentos_cocinar",
-                        "intentos_empacar.$": "States.MathAdd(States.JsonToString($.contadores.intentos_empacar), 1)",
+                        "intentos_empacar.$": "States.MathAdd($.contadores.intentos_empacar, 1)",
                         "intentos_enviar.$": "$.contadores.intentos_enviar",
                         "modo_realista.$": "$.contadores.modo_realista"
                       },
@@ -396,7 +416,27 @@ resources:
                     "ResultPath": "$",
                     "Next": "EsperarReintentoEmpleadoEmpacar"
                   },
-                  "EsperarReintentoEmpleadoEmpacar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEmpacar"},
+                  "EsperarReintentoEmpleadoEmpacar": {
+                    "Type": "Wait",
+                    "Seconds": 30,
+                    "Next": "LiberarEmpleadosAntesDeEmpacar"
+                  },
+                  "LiberarEmpleadosAntesDeEmpacar": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {
+                      "FunctionName": "${LiberarPedidoArn}",
+                      "Payload": {
+                        "local_id.$": "$.local_id",
+                        "pedido_id.$": "$.pedido_id",
+                        "motivo": "reintento_empleado",
+                        "resetear_estado": false
+                      }
+                    },
+                    "ResultPath": "$.limpieza_previa",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error_limpieza", "Next": "IntentarEmpacar"}],
+                    "Next": "IntentarEmpacar"
+                  },
                   "EsperarTiempoEmpacar": {
                     "Type": "Choice",
                     "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaEmpacar"}],
@@ -438,15 +478,40 @@ resources:
                       "contadores": {
                         "intentos_cocinar.$": "$.contadores.intentos_cocinar",
                         "intentos_empacar.$": "$.contadores.intentos_empacar",
-                        "intentos_enviar.$": "States.MathAdd(States.JsonToString($.contadores.intentos_enviar), 1)",
+                        "intentos_enviar.$": "States.MathAdd($.contadores.intentos_enviar, 1)",
                         "modo_realista.$": "$.contadores.modo_realista"
                       },
                       "error.$": "$.error"
                     },
                     "ResultPath": "$",
-                    "Next": "EsperarReintentoEmpleadoEnviar"
+                    "Next": "VerificarMaximoIntentosEnviar"
                   },
-                  "EsperarReintentoEmpleadoEnviar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEnviar"},
+                  "VerificarMaximoIntentosEnviar": {
+                    "Type": "Choice",
+                    "Choices": [{"Variable": "$.contadores.intentos_enviar", "NumericLessThan": 5, "Next": "EsperarReintentoEmpleadoEnviar"}],
+                    "Default": "ServicioSaturado"
+                  },
+                  "EsperarReintentoEmpleadoEnviar": {
+                    "Type": "Wait",
+                    "Seconds": 30,
+                    "Next": "LiberarEmpleadosAntesDeEnviar"
+                  },
+                  "LiberarEmpleadosAntesDeEnviar": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {
+                      "FunctionName": "${LiberarPedidoArn}",
+                      "Payload": {
+                        "local_id.$": "$.local_id",
+                        "pedido_id.$": "$.pedido_id",
+                        "motivo": "reintento_empleado",
+                        "resetear_estado": false
+                      }
+                    },
+                    "ResultPath": "$.limpieza_previa",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error_limpieza", "Next": "IntentarEnviar"}],
+                    "Next": "IntentarEnviar"
+                  },
                   "EsperarTiempoEnviar": {
                     "Type": "Choice",
                     "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaEnviar"}],
@@ -486,7 +551,29 @@ resources:
                       "Payload.$": "$"
                     },
                     "ResultPath": "$.resultado_final",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "LiberarPorErrorConfirmacion"}],
                     "Next": "PedidoCompletado"
+                  },
+                  "LiberarPorErrorConfirmacion": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Parameters": {
+                      "FunctionName": "${LiberarPedidoArn}",
+                      "Payload": {
+                        "local_id.$": "$.local_id",
+                        "pedido_id.$": "$.pedido_id",
+                        "motivo": "error_confirmacion",
+                        "resetear_estado": false
+                      }
+                    },
+                    "ResultPath": "$.limpieza",
+                    "Next": "ErrorConfirmacion",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "ErrorConfirmacion"}]
+                  },
+                  "ErrorConfirmacion": {
+                    "Type": "Fail",
+                    "Error": "ErrorConfirmacion",
+                    "Cause": "Error al confirmar la entrega del pedido"
                   },
                   "PedidoCompletado": {"Type": "Succeed", "OutputPath": "$.resultado_final.Payload"},
                   "ServicioSaturado": {
