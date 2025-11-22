@@ -194,42 +194,42 @@ functions:
 
   # ==================== WORKFLOW - STEP FUNCTIONS ====================
   workflowIniciar:
-    handler: worflow/iniciarWorkflow.handler
+    handler: workflow/iniciarWorkflow.lambda_handler
     name: ${self:service}-workflow-iniciar
     description: Iniciar el workflow de procesamiento de pedidos
   
   workflowStepConfirmar:
-    handler: worflow/stepConfirmar.handler
+    handler: workflow/stepConfirmar.lambda_handler
     name: ${self:service}-workflow-step-confirmar
     description: Step 1 - Confirmar pedido
   
   workflowStepCocinar:
-    handler: worflow/stepCocinar.handler
+    handler: workflow/stepCocinar.lambda_handler
     name: ${self:service}-workflow-step-cocinar
     description: Step 2 - Cocinar pedido
   
   workflowStepEmpacar:
-    handler: worflow/stepEmpacar.handler
+    handler: workflow/stepEmpacar.lambda_handler
     name: ${self:service}-workflow-step-empacar
     description: Step 3 - Empacar pedido
   
   workflowStepEnviar:
-    handler: worflow/stepEnviar.handler
+    handler: workflow/stepEnviar.lambda_handler
     name: ${self:service}-workflow-step-enviar
     description: Step 4 - Enviar pedido
   
   workflowConfirmarRecepcion:
-    handler: worflow/confirmarRecepcion.handler
+    handler: workflow/confirmarRecepcion.lambda_handler
     name: ${self:service}-workflow-confirmar-recepcion
     description: Step 5 - Confirmar recepción del pedido
   
   workflowLiberarPedido:
-    handler: worflow/liberarPedido.handler
+    handler: workflow/liberarPedido.lambda_handler
     name: ${self:service}-workflow-liberar-pedido
     description: Liberar empleados asignados al pedido
   
   workflowNotificarUsuario:
-    handler: worflow/notificarUsuario.handler
+    handler: workflow/notificarUsuario.lambda_handler
     name: ${self:service}-workflow-notificar-usuario
     description: Notificar usuario sobre el estado del pedido
 
@@ -458,4 +458,4 @@ package:
     - 'ofertas/**'
     - 'pedidos/**'
     - 'productos/**'
-    - 'worflow/**'
+    - 'workflow/**'
