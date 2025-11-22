@@ -2653,7 +2653,89 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Iniciar Worflow de Analitica",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_locales}}/workflow/analitica/activar",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"workflow",
+												"analitica",
+												"activar"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "243"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 16:51:31 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921ea12-4a2b4d9b62e87d1552311c12;Parent=61c0c325aeb7e694;Sampled=0;Lineage=1:e27c7f39:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "b4a6747b-2ef1-4626-9279-c2a02114948f"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,Authorization"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdGC8HywoAMEXjA="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 58830509aaa39326281f1a32f0d7f954.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "zOM0iziOcnRtorNk2ghf7l51VOp68doLxRKvCmNSJgeL9h6zhMhuKA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Workflow de analítica iniciado exitosamente\",\n    \"executionArn\": \"arn:aws:states:us-east-1:724129139067:execution:ChinaWok-Analitica-Processor:analitica-workflow-20251122_165131\",\n    \"startDate\": \"2025-11-22T16:51:31.765000+00:00\"\n}"
+								}
+							]
 						},
 						{
 							"name": "Productos Más Vendidos",
@@ -2680,7 +2762,97 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Productos Más Vendidos",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"local_id\": \"{{local_id}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url_locales}}/analitica/productos",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"analitica",
+												"productos"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "393"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 17:57:50 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921f99a-771ad2d17acd69fa1e77aea1;Parent=6da93414330bcb1e;Sampled=0;Lineage=1:3d213a14:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "9f8ec0d0-6d56-4d9c-8ac0-d909b3e2b45b"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,Authorization"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdPwNHMWIAMEhQw="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 3601b3583b8fa2c1ff5a4060892d24b2.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "8oMb7RRf0mIuwNnRV5OvQsNWouvhOJikOOs_580xZoSWeer0PDii_Q=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"total_productos\": 1,\n    \"productos\": [\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"producto_nombre\": \"Arroz Chaufa Especial Nuevo\",\n            \"pedidos_que_lo_incluyen\": \"15\",\n            \"unidades_vendidas\": \"45\",\n            \"categoria\": \"Arroces\",\n            \"precio_unitario_actual\": \"18.0\",\n            \"revenue_total\": \"810.0\",\n            \"stock_disponible\": \"50\",\n            \"porcentaje_ventas\": \"100.0\"\n        }\n    ]\n}"
+								}
+							]
 						},
 						{
 							"name": "Mejor Personal",
@@ -2707,7 +2879,97 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Mejor Personal",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"local_id\": \"{{local_id}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url_locales}}/analitica/personal",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"analitica",
+												"personal"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "987"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 18:29:04 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-692200ec-70978d783661cb93681ceec2;Parent=45138983f73ba139;Sampled=0;Lineage=1:b1585b01:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "ebd53748-d29b-470e-9090-1457a79196d6"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,Authorization"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdUU-FYqoAMEfRw="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 e9ca790c177fd72d240e2c2ced6f13ae.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "qCpIQXcA2Wm-rU59Ou9Ytrzcoe54SV3knI4owXASv_oA5cgkVv5x0A=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"total_empleados\": 3,\n    \"empleados\": [\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"dni\": \"12345678\",\n            \"nombre_completo\": \"Juan Carlos Perez\",\n            \"rol\": \"Cocinero\",\n            \"sueldo_mensual\": \"1800.0\",\n            \"calificacion_promedio\": \"4.5\",\n            \"total_resenas\": \"0\",\n            \"pedidos_atendidos\": \"6\",\n            \"revenue_generado\": \"273.0\",\n            \"score_performance\": \"2.79\"\n        },\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"dni\": \"23456789\",\n            \"nombre_completo\": \"Ana Lucía\",\n            \"rol\": \"Despachador\",\n            \"sueldo_mensual\": \"1500.0\",\n            \"calificacion_promedio\": \"0.0\",\n            \"total_resenas\": \"0\",\n            \"pedidos_atendidos\": \"5\",\n            \"revenue_generado\": \"227.5\",\n            \"score_performance\": \"0.08\"\n        },\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"dni\": \"34567891\",\n            \"nombre_completo\": \"Juanito Limaña\",\n            \"rol\": \"Repartidor\",\n            \"sueldo_mensual\": \"1500.0\",\n            \"calificacion_promedio\": \"0.0\",\n            \"total_resenas\": \"0\",\n            \"pedidos_atendidos\": \"5\",\n            \"revenue_generado\": \"227.5\",\n            \"score_performance\": \"0.08\"\n        }\n    ]\n}"
+								}
+							]
 						},
 						{
 							"name": "Record Diario",
@@ -2734,7 +2996,97 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Record Diario",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"local_id\": \"{{local_id}}\",\r\n  \"year\": 2025,\r\n  \"month\": 11\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url_locales}}/analitica/diario",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"analitica",
+												"diario"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "270"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 17:58:14 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921f9b2-270481f013e382b73a327c00;Parent=2e2c65203c97da1a;Sampled=0;Lineage=1:6792a484:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "11f273f7-2cca-4294-9b83-a0a55bfaa3f6"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,Authorization"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdPz4HjMoAMEjsw="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 3601b3583b8fa2c1ff5a4060892d24b2.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "ab1vPt307E0bJhsoyfkIqBoQyGP7K7FuiBczgbO9Z_XdnlJtc8r-aQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"year\": 2025,\n    \"month\": 11,\n    \"total_dias\": 1,\n    \"record_diario\": [\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"fecha\": \"2025-11-10\",\n            \"total_pedidos\": \"17\",\n            \"revenue_diario\": \"812.5\",\n            \"ticket_promedio\": \"47.79\"\n        }\n    ]\n}"
+								}
+							]
 						},
 						{
 							"name": "Estadisticas generales",
@@ -2761,9 +3113,1635 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Estadisticas generales",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n  \"local_id\": \"{{local_id}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url_locales}}/analitica/estadisticas",
+											"host": [
+												"{{base_url_locales}}"
+											],
+											"path": [
+												"analitica",
+												"estadisticas"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1134"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 17:58:26 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921f9bc-06fd416e01cca50855691516;Parent=275cffb7f73fcd84;Sampled=0;Lineage=1:e1e6b284:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "11fc7d36-d16e-4e95-9acc-241ca666d587"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,Authorization"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdP1jE60oAMEUCw="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 3601b3583b8fa2c1ff5a4060892d24b2.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "j4LrfJE2bow20X4collawyeihOxxb6ga0Qla-BFf3mjQDptx9zTizQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"estadisticas\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"direccion\": \"Av. Providencia 1234, Oficina 501, Providencia, Santiago\",\n        \"telefono\": \"+56987654321\",\n        \"hora_apertura\": \"09:00\",\n        \"hora_finalizacion\": \"23:00\",\n        \"gerente_nombre\": \"Fabricio Lanche\",\n        \"gerente_correo\": \"fabricio.lanche@utec.edu.pe\",\n        \"total_pedidos\": \"17\",\n        \"clientes_unicos\": \"1\",\n        \"revenue_total\": \"812.5\",\n        \"ticket_promedio\": \"47.79\",\n        \"pedido_minimo\": \"45.5\",\n        \"pedido_maximo\": \"65.0\",\n        \"pedidos_completados\": \"0\",\n        \"pedidos_en_envio\": \"5\",\n        \"pedidos_empacando\": \"0\",\n        \"pedidos_cocinando\": \"1\",\n        \"pedidos_eligiendo\": \"0\",\n        \"tasa_completado_pct\": \"0.0\",\n        \"total_productos\": \"2\",\n        \"inventario_total\": \"95\",\n        \"productos_stock_bajo\": \"0\",\n        \"productos_sin_stock\": \"0\",\n        \"total_empleados\": \"3\",\n        \"cocineros\": \"1\",\n        \"despachadores\": \"1\",\n        \"repartidores\": \"1\",\n        \"calificacion_staff\": \"1.5\",\n        \"nomina_mensual\": \"4800.0\",\n        \"ofertas_activas\": \"2\",\n        \"descuento_promedio_pct\": \"20.0\",\n        \"total_combos\": \"1\",\n        \"combos_disponibles\": \"0\",\n        \"total_resenas\": \"0\",\n        \"calificacion_cliente\": \"0.0\",\n        \"resenas_excelentes\": \"0\",\n        \"resenas_malas\": \"0\"\n    }\n}"
+								}
+							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"name": "Personal",
+			"item": [
+				{
+					"name": "Empleados",
+					"item": [
+						{
+							"name": "Crear Empleado - Cocinero",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var dni = response.empleado.dni;\r",
+											"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"12345678\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"role\": \"Cocinero\",\n  \"sueldo\": 1500\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados"
+									]
+								},
+								"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
+							},
+							"response": [
+								{
+									"name": "Crear Empleado",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"12345678\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"role\": \"Cocinero\",\n  \"sueldo\": 1500\n}"
+										},
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "241"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 12:58:18 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921b369-6333fb6c64a6ca095023ca87;Parent=570d3f1d7675a632;Sampled=0;Lineage=1:5047b852:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "c092109d-8f3c-4038-8d30-b77eef717131"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Ucj4hGEToAMEHcQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "ZqgdNP5PjDN3_DbZ_xs926-tyjhuC2BAJ-w3Wze35OIBCDkWSKRe-g=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Empleado creado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"12345678\",\n        \"nombre\": \"Juan\",\n        \"apellido\": \"Pérez\",\n        \"role\": \"Cocinero\",\n        \"calificacion_prom\": 0,\n        \"sueldo\": 1500,\n        \"ocupado\": false\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Crear Empleado - Despachador",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var dni = response.empleado.dni;\r",
+											"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"23456789\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Lucía\",\n  \"role\": \"Despachador\",\n  \"sueldo\": 1500\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados"
+									]
+								},
+								"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
+							},
+							"response": [
+								{
+									"name": "Crear Empleado - Empaquetador",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"23456789\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Lucía\",\n  \"role\": \"Despachador\",\n  \"sueldo\": 1500\n}"
+										},
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "243"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 14:05:46 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921c33a-75c5986843bd74b904bd0cd7;Parent=720d70ad90f1c806;Sampled=0;Lineage=1:5047b852:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "eeb10d30-878a-4d2f-bba4-27f474bb0a84"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UctxJFXvIAMENSg="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8e549689daceb1adfb27c798bb377b52.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "pl5EXRWRa_fii1LHSukH6wFMsPxkLzfmIbPe9MOKfa7LWvTwRNnF-g=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Empleado creado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"23456789\",\n        \"nombre\": \"Ana\",\n        \"apellido\": \"Lucía\",\n        \"role\": \"Despachador\",\n        \"calificacion_prom\": 0,\n        \"sueldo\": 1500,\n        \"ocupado\": false\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Crear Empleado - Repartidor",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var dni = response.empleado.dni;\r",
+											"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"34567891\",\n  \"nombre\": \"Juanito\",\n  \"apellido\": \"Limaña\",\n  \"role\": \"Repartidor\",\n  \"sueldo\": 1500\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados"
+									]
+								},
+								"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
+							},
+							"response": [
+								{
+									"name": "Crear Empleado - Repartidor",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"34567891\",\n  \"nombre\": \"Juanito\",\n  \"apellido\": \"Limaña\",\n  \"role\": \"Repartidor\",\n  \"sueldo\": 1500\n}"
+										},
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "247"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 14:06:05 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921c34d-3c688351585d72943d1c778b;Parent=68290a8266e58eda;Sampled=0;Lineage=1:5047b852:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "364cb71b-cc88-4114-8689-c753274d4c07"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Uct0LGnyIAMEdJw="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8e549689daceb1adfb27c798bb377b52.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "MtI6E9fbGvfMxk2cnULDsOfE-UnLQQnhJ9ieNXoerl42v63lz_knZA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Empleado creado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"34567891\",\n        \"nombre\": \"Juanito\",\n        \"apellido\": \"Limaña\",\n        \"role\": \"Repartidor\",\n        \"calificacion_prom\": 0,\n        \"sueldo\": 1500,\n        \"ocupado\": false\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Obtener Empleado",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Obtiene la información de un empleado específico por local_id y dni."
+							},
+							"response": [
+								{
+									"name": "Obtener Empleado",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados",
+												":local_id",
+												":dni"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												},
+												{
+													"key": "dni",
+													"value": "{{dni_empleado}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "197"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 12:58:25 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921b370-509032bf1f23f9af3f1386ec;Parent=3e158c109767eae7;Sampled=0;Lineage=1:e769dc3f:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "39111ef2-b885-4812-bb4f-aad81e54cc17"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Ucj5lGtBIAMENBQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "E9eIeohf8QUe2NajpjXGY-SU99B-2HS7ck5mI5gum0aZdnfi2H7UFg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Pérez\",\n    \"role\": \"Cocinero\",\n    \"ocupado\": false,\n    \"sueldo\": 1500,\n    \"calificacion_prom\": 0,\n    \"dni\": \"12345678\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Listar Empleados por Local",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/local/:local_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										"local",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Lista todos los empleados de un local específico."
+							},
+							"response": [
+								{
+									"name": "Listar Empleados por Local",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados/local/:local_id",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados",
+												"local",
+												":local_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "199"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 12:58:31 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921b376-6ca6dd5618fd587572899b44;Parent=028c33cc8996de2e;Sampled=0;Lineage=1:f1421045:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "7df2b560-206a-4ae5-944e-2557beadd436"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Ucj6jHsFIAMEq5g="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "96T8rGSATDtNa3ilIKCEW5hvv-SDgM3JYipOM0Ssv1-N9RQwGGG6nw=="
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"nombre\": \"Juan\",\n        \"apellido\": \"Pérez\",\n        \"role\": \"Cocinero\",\n        \"ocupado\": false,\n        \"sueldo\": 1500,\n        \"calificacion_prom\": 0,\n        \"dni\": \"12345678\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Listar Empleados por Local y Rol",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/local/:local_id/rol/:rol",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										"local",
+										":local_id",
+										"rol",
+										":rol"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "rol",
+											"value": "Cocinero"
+										}
+									]
+								},
+								"description": "Lista empleados filtrados por local y rol. Roles válidos: Cocinero, Despachador, Repartidor."
+							},
+							"response": [
+								{
+									"name": "Listar Empleados por Local y Rol",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados/local/:local_id/rol/:rol",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados",
+												"local",
+												":local_id",
+												"rol",
+												":rol"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												},
+												{
+													"key": "rol",
+													"value": "Cocinero"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "199"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 12:58:38 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921b37d-1dabf04a427c875e7950a99f;Parent=6f44e32418f5d40e;Sampled=0;Lineage=1:1ee4e510:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "46776b82-b22c-4e5e-a08f-8e2098f371df"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Ucj7oHumIAMEj1w="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "xFfeKK4PXdkHbfxfyoRpiT9jS6mJdjzxZV6JCiuoP61qHQ3KncSVEw=="
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"nombre\": \"Juan\",\n        \"apellido\": \"Pérez\",\n        \"role\": \"Cocinero\",\n        \"ocupado\": false,\n        \"sueldo\": 1500,\n        \"calificacion_prom\": 0,\n        \"dni\": \"12345678\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Actualizar Empleado",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Perez\",\n  \"calificacion_prom\": 4.5,\n  \"sueldo\": 1800\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Actualiza la información de un empleado. Solo se actualizan los campos enviados en el body."
+							},
+							"response": [
+								{
+									"name": "Actualizar Empleado",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Perez\",\n  \"calificacion_prom\": 4.5,\n  \"sueldo\": 1800\n}"
+										},
+										"url": {
+											"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"empleados",
+												":local_id",
+												":dni"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												},
+												{
+													"key": "dni",
+													"value": "{{dni_empleado}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "248"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 12:58:45 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921b383-58f62eeb163c03a46fd1d8f6;Parent=5cb8a3919a70c04e;Sampled=0;Lineage=1:4157f5f0:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "a52489f3-af3e-40f6-ac5e-2f1eb9b2a3fd"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Ucj8pHIVIAMEXNg="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "sJ6yQCH_-2DkytpVWPdFYmS3d0o9kpXBlDK4lbpI_xlVbra_n8C7DQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Empleado actualizado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"nombre\": \"Juan Carlos\",\n        \"apellido\": \"Perez\",\n        \"role\": \"Cocinero\",\n        \"ocupado\": false,\n        \"sueldo\": 1800,\n        \"calificacion_prom\": 4.5,\n        \"dni\": \"12345678\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Eliminar Empleado",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"empleados",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Elimina un empleado del sistema."
+							},
+							"response": []
+						}
+					],
+					"description": "Endpoints para la gestión CRUD de empleados"
+				},
+				{
+					"name": "Reseñas",
+					"item": [
+						{
+							"name": "Registrar Reseña de Pedido",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = pm.response.json();\r",
+											"var resena_id = response.resena.id;\r",
+											"pm.collectionVariables.set(\"resena_id\", resena_id);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id}}\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas"
+									]
+								},
+								"description": "Registra una reseña de pedido. Los DNIs de empleados (cocinero, despachador, repartidor) se extraen automáticamente del historial de estados del pedido. Valida que el local y pedido existan en DynamoDB."
+							},
+							"response": [
+								{
+									"name": "Registrar Reseña de Pedido",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id_1}}\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
+										},
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "402"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 18:29:56 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-69220124-37ec374a59904de86b21b2fa;Parent=179e4f9e28bf67d5;Sampled=0;Lineage=1:08fc540b:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "99ab60f1-3464-4847-9b04-b63a9b2fe5f7"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdUd0E8zoAMEe1w="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 fa3530beeb0001c7dfc54ff5a427fa96.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "m2Sg64Y2guWqRQs5Tp9wh7fBCHXmD-ByOKokmO19ncjEBBAg0ZpXlA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Reseña registrada exitosamente\",\n    \"resena\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"resena_id\": \"ec6a9b5d-3bc7-427b-905e-b723c6d66ca4\",\n        \"pedido_id\": \"501e7405-f14f-4d48-bf32-7251249ed933\",\n        \"cocinero_dni\": \"12345678\",\n        \"despachador_dni\": \"23456789\",\n        \"repartidor_dni\": \"34567891\",\n        \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n        \"calificacion\": 5\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Obtener Reseñas por Local",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/local/:local_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										"local",
+										":local_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										}
+									]
+								},
+								"description": "Obtiene todas las reseñas de un local específico."
+							},
+							"response": [
+								{
+									"name": "Obtener Reseñas por Local",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas/local/:local_id",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas",
+												"local",
+												":local_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "427"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 18:30:12 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-69220132-04b0208215feca451c5290aa;Parent=0539df8d681efcf3;Sampled=0;Lineage=1:7c826b53:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "9c6e7e51-92fb-4834-9f7c-37527fffc7c0"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdUf_EJYoAMETBA="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 fa3530beeb0001c7dfc54ff5a427fa96.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "hUe6ZdstyGKuoQu1ue19PltpUIPRHDBA-zpw6S6SWcOgCJCZMl2omg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"total_resenas\": 1,\n    \"resenas\": [\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"calificacion\": 5,\n            \"pedido_id\": \"501e7405-f14f-4d48-bf32-7251249ed933\",\n            \"cocinero_dni\": \"12345678\",\n            \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n            \"repartidor_dni\": \"34567891\",\n            \"despachador_dni\": \"23456789\",\n            \"resena_id\": \"ec6a9b5d-3bc7-427b-905e-b723c6d66ca4\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Obtener Reseñas de Empleado",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/empleado/:local_id/:dni",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										"empleado",
+										":local_id",
+										":dni"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "dni",
+											"value": "{{dni_empleado}}"
+										}
+									]
+								},
+								"description": "Obtiene todas las reseñas de un empleado específico. El body puede incluir opcionalmente el campo 'rol' (cocinero, despachador, repartidor). Si no se proporciona, se busca el rol en la tabla de empleados."
+							},
+							"response": [
+								{
+									"name": "Obtener Reseñas de Empleado",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas/empleado/:local_id/:dni",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas",
+												"empleado",
+												":local_id",
+												":dni"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												},
+												{
+													"key": "dni",
+													"value": "{{dni_empleado}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "481"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 18:30:22 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6922013d-5b80039c4910add633ebab36;Parent=441b530c6324769e;Sampled=0;Lineage=1:f305d580:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "7b827a4a-d162-4368-9eb7-1b3317e7ff15"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdUhpEMXIAMEiew="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 fa3530beeb0001c7dfc54ff5a427fa96.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "TTitkzLn98xMFYfx3wNUnITP3cp6q7F2i3rQRf3F7QEDhs9cwKB0Hg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"34567891\",\n        \"rol\": \"repartidor\"\n    },\n    \"total_resenas\": 1,\n    \"resenas\": [\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"calificacion\": 5,\n            \"pedido_id\": \"501e7405-f14f-4d48-bf32-7251249ed933\",\n            \"cocinero_dni\": \"12345678\",\n            \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n            \"repartidor_dni\": \"34567891\",\n            \"despachador_dni\": \"23456789\",\n            \"resena_id\": \"ec6a9b5d-3bc7-427b-905e-b723c6d66ca4\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Actualizar Reseña",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"resena\": \"Servicio excelente, muy recomendado\",\n  \"calificacion\": 5\n}"
+								},
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										":local_id",
+										":resena_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "{{local_id}}"
+										},
+										{
+											"key": "resena_id",
+											"value": "{{resena_id}}"
+										}
+									]
+								},
+								"description": "Actualiza una reseña específica. Solo se actualizan los campos 'resena' y 'calificacion'."
+							},
+							"response": [
+								{
+									"name": "Actualizar Reseña",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"resena\": \"Servicio excelente, muy recomendado\",\n  \"calificacion\": 5\n}"
+										},
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas",
+												":local_id",
+												":resena_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "{{local_id}}"
+												},
+												{
+													"key": "resena_id",
+													"value": "{{resena_id}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "193"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 18:30:34 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-69220149-084d47424e1c0d2a22a900f7;Parent=75a05ff685115573;Sampled=0;Lineage=1:fefde8de:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "52b1ddaf-e4f5-4d6f-b8d7-a7447cb06772"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdUjfGvcIAMEZ6g="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 fa3530beeb0001c7dfc54ff5a427fa96.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "xTMg8uNYcw5-Ui9f2_CWzRKdH1xFoJiWMgfJuzjIIhjDQoq-isavcQ=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Reseña actualizada\",\n    \"resena\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"resena\": \"Servicio excelente, muy recomendado\",\n        \"resena_id\": \"null\",\n        \"calificacion\": 5\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Eliminar Reseña",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										":local_id",
+										":resena_id"
+									],
+									"variable": [
+										{
+											"key": "local_id",
+											"value": "4f0504f0-b708-4d44-8ed1-334a7e2d807f"
+										},
+										{
+											"key": "resena_id",
+											"value": "434ee39a-5cc1-4a23-b366-cb48d1669230"
+										}
+									]
+								},
+								"description": "Elimina una reseña específica del sistema."
+							},
+							"response": [
+								{
+									"name": "Eliminar Reseña",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas",
+												":local_id",
+												":resena_id"
+											],
+											"variable": [
+												{
+													"key": "local_id",
+													"value": "4f0504f0-b708-4d44-8ed1-334a7e2d807f"
+												},
+												{
+													"key": "resena_id",
+													"value": "434ee39a-5cc1-4a23-b366-cb48d1669230"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "36"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 18:30:44 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-69220152-6d576ff5702df1831f7787c2;Parent=1c771bfa85f06e71;Sampled=0;Lineage=1:745fa6ba:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e17271b6-0be3-4388-97bc-d0fd44ed41fb"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "UdUk9ExsIAMEBvA="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 fa3530beeb0001c7dfc54ff5a427fa96.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P1"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "gzlHljajzdOBvBx8wqG5yzt4RifS-jbiWQcEs6pZYDnoWY5V0pz1CA=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Reseña eliminada\"\n}"
+								}
+							]
+						}
+					],
+					"description": "Endpoints para la gestión de reseñas de empleados por pedido"
 				}
 			]
 		},
@@ -5851,7 +7829,7 @@
 									},
 									"status": "OK",
 									"code": 200,
-									"_postman_previewlanguage": "",
+									"_postman_previewlanguage": null,
 									"header": [
 										{
 											"key": "Content-Type",
@@ -5960,7 +7938,7 @@
 									},
 									"status": "OK",
 									"code": 200,
-									"_postman_previewlanguage": "",
+									"_postman_previewlanguage": null,
 									"header": [
 										{
 											"key": "Content-Type",
@@ -6163,60 +8141,24 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"local_id\": \"{{local_id}}\",\n    \"pedido_id\": \"{{pedido_id_1}}\",\n    \"confirmado\": true //opcional\n}\n"
+									"raw": "{\n    \"local_id\": \"{{local_id}}\",\n    \"pedido_id\": \"{{pedido_id_1}}\",\n    \"confirmado\": true\n}\n"
 								},
 								"url": {
-									"raw": "{{base_url_pedidos}}/workflow/confirmar-recepcion",
+									"raw": "{{base_url_pedidos}}/workflow/confirmar",
 									"host": [
 										"{{base_url_pedidos}}"
 									],
 									"path": [
 										"workflow",
-										"confirmar-recepcion"
+										"confirmar"
 									]
 								},
 								"description": "Endpoint para que el usuario confirme la recepción del pedido. Envía la señal al Step Function en espera."
 							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Personal",
-					"item": [
-						{
-							"name": "Empleados",
-							"item": [
+							"response": [
 								{
-									"name": "Crear Empleado - Cocinero",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"var response = pm.response.json();\r",
-													"var dni = response.empleado.dni;\r",
-													"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
-										},
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
-										}
-									],
-									"request": {
+									"name": "Confirmar Recepción Usuario",
+									"originalRequest": {
 										"method": "POST",
 										"header": [
 											{
@@ -6226,128 +8168,74 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"12345678\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"role\": \"Cocinero\",\n  \"sueldo\": 1500\n}"
+											"raw": "{\n    \"local_id\": \"{{local_id}}\",\n    \"pedido_id\": \"{{pedido_id_1}}\",\n    \"confirmado\": true\n}\n"
 										},
 										"url": {
-											"raw": "{{base_url_empleados}}/empleados",
+											"raw": "{{base_url_pedidos}}/workflow/confirmar",
 											"host": [
-												"{{base_url_empleados}}"
+												"{{base_url_pedidos}}"
 											],
 											"path": [
-												"empleados"
+												"workflow",
+												"confirmar"
 											]
-										},
-										"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
-									},
-									"response": [
-										{
-											"name": "Crear Empleado",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"12345678\",\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"role\": \"Cocinero\",\n  \"sueldo\": 1500\n}"
-												},
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados"
-													]
-												}
-											},
-											"status": "Created",
-											"code": 201,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "241"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 12:58:18 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921b369-6333fb6c64a6ca095023ca87;Parent=570d3f1d7675a632;Sampled=0;Lineage=1:5047b852:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "c092109d-8f3c-4038-8d30-b77eef717131"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "Ucj4hGEToAMEHcQ="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "ZqgdNP5PjDN3_DbZ_xs926-tyjhuC2BAJ-w3Wze35OIBCDkWSKRe-g=="
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"message\": \"Empleado creado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"12345678\",\n        \"nombre\": \"Juan\",\n        \"apellido\": \"Pérez\",\n        \"role\": \"Cocinero\",\n        \"calificacion_prom\": 0,\n        \"sueldo\": 1500,\n        \"ocupado\": false\n    }\n}"
 										}
-									]
-								},
-								{
-									"name": "Crear Empleado - Despachador",
-									"event": [
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"var response = pm.response.json();\r",
-													"var dni = response.empleado.dni;\r",
-													"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
+											"key": "Content-Type",
+											"value": "application/json"
 										},
 										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
+											"key": "Content-Length",
+											"value": "108"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 15:46:02 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921dab8-2e13fcb711c553a35e305cac;Parent=653aa0f6c2502e25;Sampled=0;Lineage=1:e1c46525:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "fdae3505-953d-4531-964f-7fe7bcb3fac5"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Uc8c7FFYoAMETzQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 9c2aead96bd3177f92a03e01a6804fc6.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P2"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "2PoPF2I6DMqEtSBvVOTcZ8sSeaTiz7qFEcCpDa_4eO-Zt8U7bOv9mA=="
 										}
 									],
-									"request": {
+									"cookie": [],
+									"body": "{\n    \"message\": \"Confirmación procesada exitosamente\",\n    \"pedido_id\": \"1b0aab16-7468-4549-8d53-74ce7bb79627\"\n}"
+								},
+								{
+									"name": "Confirmar Recepción Usuario (FAIL)",
+									"originalRequest": {
 										"method": "POST",
 										"header": [
 											{
@@ -6357,895 +8245,72 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"23456789\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Lucía\",\n  \"role\": \"Despachador\",\n  \"sueldo\": 1500\n}"
+											"raw": "{\n    \"local_id\": \"{{local_id}}\",\n    \"pedido_id\": \"{{pedido_id_1}}\",\n    \"confirmado\": true\n}\n"
 										},
 										"url": {
-											"raw": "{{base_url_empleados}}/empleados",
+											"raw": "{{base_url_pedidos}}/workflow/confirmar",
 											"host": [
-												"{{base_url_empleados}}"
+												"{{base_url_pedidos}}"
 											],
 											"path": [
-												"empleados"
+												"workflow",
+												"confirmar"
 											]
-										},
-										"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
-									},
-									"response": [
-										{
-											"name": "Crear Empleado - Empaquetador",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"23456789\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Lucía\",\n  \"role\": \"Despachador\",\n  \"sueldo\": 1500\n}"
-												},
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados"
-													]
-												}
-											},
-											"status": "Created",
-											"code": 201,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "243"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 14:05:46 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921c33a-75c5986843bd74b904bd0cd7;Parent=720d70ad90f1c806;Sampled=0;Lineage=1:5047b852:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "eeb10d30-878a-4d2f-bba4-27f474bb0a84"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "UctxJFXvIAMENSg="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8e549689daceb1adfb27c798bb377b52.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "pl5EXRWRa_fii1LHSukH6wFMsPxkLzfmIbPe9MOKfa7LWvTwRNnF-g=="
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"message\": \"Empleado creado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"23456789\",\n        \"nombre\": \"Ana\",\n        \"apellido\": \"Lucía\",\n        \"role\": \"Despachador\",\n        \"calificacion_prom\": 0,\n        \"sueldo\": 1500,\n        \"ocupado\": false\n    }\n}"
 										}
-									]
-								},
-								{
-									"name": "Crear Empleado - Repartidor",
-									"event": [
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": null,
+									"header": [
 										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"var response = pm.response.json();\r",
-													"var dni = response.empleado.dni;\r",
-													"pm.collectionVariables.set(\"dni_empleado\", dni);\r",
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
+											"key": "Content-Type",
+											"value": "application/json"
 										},
 										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
+											"key": "Content-Length",
+											"value": "64"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sat, 22 Nov 2025 15:46:07 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6921dabf-4c620dee3fb60fd67a59ee95;Parent=50f729db4a34a0fd;Sampled=0;Lineage=1:e1c46525:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "1963977c-a12c-4044-a84a-d6c3a7a6080f"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Uc8eDGhsoAMEDfQ="
+										},
+										{
+											"key": "X-Cache",
+											"value": "Error from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 9c2aead96bd3177f92a03e01a6804fc6.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P2"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "53AJrhfuwHN9cadaqIU1lqmemtIXJJq3k_btG8-Pl5v07euuSIK8TA=="
 										}
 									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"34567891\",\n  \"nombre\": \"Juanito\",\n  \"apellido\": \"Limaña\",\n  \"role\": \"Repartidor\",\n  \"sueldo\": 1500\n}"
-										},
-										"url": {
-											"raw": "{{base_url_empleados}}/empleados",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"empleados"
-											]
-										},
-										"description": "Crea un nuevo empleado en el sistema. Campos requeridos: local_id, dni, nombre, apellido, role."
-									},
-									"response": [
-										{
-											"name": "Crear Empleado - Repartidor",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"dni\": \"34567891\",\n  \"nombre\": \"Juanito\",\n  \"apellido\": \"Limaña\",\n  \"role\": \"Repartidor\",\n  \"sueldo\": 1500\n}"
-												},
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados"
-													]
-												}
-											},
-											"status": "Created",
-											"code": 201,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "247"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 14:06:05 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921c34d-3c688351585d72943d1c778b;Parent=68290a8266e58eda;Sampled=0;Lineage=1:5047b852:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "364cb71b-cc88-4114-8689-c753274d4c07"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "Uct0LGnyIAMEdJw="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8e549689daceb1adfb27c798bb377b52.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "MtI6E9fbGvfMxk2cnULDsOfE-UnLQQnhJ9ieNXoerl42v63lz_knZA=="
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"message\": \"Empleado creado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"34567891\",\n        \"nombre\": \"Juanito\",\n        \"apellido\": \"Limaña\",\n        \"role\": \"Repartidor\",\n        \"calificacion_prom\": 0,\n        \"sueldo\": 1500,\n        \"ocupado\": false\n    }\n}"
-										}
-									]
-								},
-								{
-									"name": "Obtener Empleado",
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"empleados",
-												":local_id",
-												":dni"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												},
-												{
-													"key": "dni",
-													"value": "{{dni_empleado}}"
-												}
-											]
-										},
-										"description": "Obtiene la información de un empleado específico por local_id y dni."
-									},
-									"response": [
-										{
-											"name": "Obtener Empleado",
-											"originalRequest": {
-												"method": "GET",
-												"header": [],
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados",
-														":local_id",
-														":dni"
-													],
-													"variable": [
-														{
-															"key": "local_id",
-															"value": "{{local_id}}"
-														},
-														{
-															"key": "dni",
-															"value": "{{dni_empleado}}"
-														}
-													]
-												}
-											},
-											"status": "OK",
-											"code": 200,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "197"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 12:58:25 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921b370-509032bf1f23f9af3f1386ec;Parent=3e158c109767eae7;Sampled=0;Lineage=1:e769dc3f:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "39111ef2-b885-4812-bb4f-aad81e54cc17"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "Ucj5lGtBIAMENBQ="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "E9eIeohf8QUe2NajpjXGY-SU99B-2HS7ck5mI5gum0aZdnfi2H7UFg=="
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Pérez\",\n    \"role\": \"Cocinero\",\n    \"ocupado\": false,\n    \"sueldo\": 1500,\n    \"calificacion_prom\": 0,\n    \"dni\": \"12345678\"\n}"
-										}
-									]
-								},
-								{
-									"name": "Listar Empleados por Local",
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{base_url_empleados}}/empleados/local/:local_id",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"empleados",
-												"local",
-												":local_id"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												}
-											]
-										},
-										"description": "Lista todos los empleados de un local específico."
-									},
-									"response": [
-										{
-											"name": "Listar Empleados por Local",
-											"originalRequest": {
-												"method": "GET",
-												"header": [],
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados/local/:local_id",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados",
-														"local",
-														":local_id"
-													],
-													"variable": [
-														{
-															"key": "local_id",
-															"value": "{{local_id}}"
-														}
-													]
-												}
-											},
-											"status": "OK",
-											"code": 200,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "199"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 12:58:31 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921b376-6ca6dd5618fd587572899b44;Parent=028c33cc8996de2e;Sampled=0;Lineage=1:f1421045:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "7df2b560-206a-4ae5-944e-2557beadd436"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "Ucj6jHsFIAMEq5g="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "96T8rGSATDtNa3ilIKCEW5hvv-SDgM3JYipOM0Ssv1-N9RQwGGG6nw=="
-												}
-											],
-											"cookie": [],
-											"body": "[\n    {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"nombre\": \"Juan\",\n        \"apellido\": \"Pérez\",\n        \"role\": \"Cocinero\",\n        \"ocupado\": false,\n        \"sueldo\": 1500,\n        \"calificacion_prom\": 0,\n        \"dni\": \"12345678\"\n    }\n]"
-										}
-									]
-								},
-								{
-									"name": "Listar Empleados por Local y Rol",
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{base_url_empleados}}/empleados/local/:local_id/rol/:rol",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"empleados",
-												"local",
-												":local_id",
-												"rol",
-												":rol"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												},
-												{
-													"key": "rol",
-													"value": "Cocinero"
-												}
-											]
-										},
-										"description": "Lista empleados filtrados por local y rol. Roles válidos: Cocinero, Despachador, Repartidor."
-									},
-									"response": [
-										{
-											"name": "Listar Empleados por Local y Rol",
-											"originalRequest": {
-												"method": "GET",
-												"header": [],
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados/local/:local_id/rol/:rol",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados",
-														"local",
-														":local_id",
-														"rol",
-														":rol"
-													],
-													"variable": [
-														{
-															"key": "local_id",
-															"value": "{{local_id}}"
-														},
-														{
-															"key": "rol",
-															"value": "Cocinero"
-														}
-													]
-												}
-											},
-											"status": "OK",
-											"code": 200,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "199"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 12:58:38 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921b37d-1dabf04a427c875e7950a99f;Parent=6f44e32418f5d40e;Sampled=0;Lineage=1:1ee4e510:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "46776b82-b22c-4e5e-a08f-8e2098f371df"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "Ucj7oHumIAMEj1w="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "xFfeKK4PXdkHbfxfyoRpiT9jS6mJdjzxZV6JCiuoP61qHQ3KncSVEw=="
-												}
-											],
-											"cookie": [],
-											"body": "[\n    {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"nombre\": \"Juan\",\n        \"apellido\": \"Pérez\",\n        \"role\": \"Cocinero\",\n        \"ocupado\": false,\n        \"sueldo\": 1500,\n        \"calificacion_prom\": 0,\n        \"dni\": \"12345678\"\n    }\n]"
-										}
-									]
-								},
-								{
-									"name": "Actualizar Empleado",
-									"request": {
-										"method": "PUT",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Perez\",\n  \"calificacion_prom\": 4.5,\n  \"sueldo\": 1800\n}"
-										},
-										"url": {
-											"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"empleados",
-												":local_id",
-												":dni"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												},
-												{
-													"key": "dni",
-													"value": "{{dni_empleado}}"
-												}
-											]
-										},
-										"description": "Actualiza la información de un empleado. Solo se actualizan los campos enviados en el body."
-									},
-									"response": [
-										{
-											"name": "Actualizar Empleado",
-											"originalRequest": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"nombre\": \"Juan Carlos\",\n  \"apellido\": \"Perez\",\n  \"calificacion_prom\": 4.5,\n  \"sueldo\": 1800\n}"
-												},
-												"url": {
-													"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
-													"host": [
-														"{{base_url_empleados}}"
-													],
-													"path": [
-														"empleados",
-														":local_id",
-														":dni"
-													],
-													"variable": [
-														{
-															"key": "local_id",
-															"value": "{{local_id}}"
-														},
-														{
-															"key": "dni",
-															"value": "{{dni_empleado}}"
-														}
-													]
-												}
-											},
-											"status": "OK",
-											"code": 200,
-											"_postman_previewlanguage": "",
-											"header": [
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "248"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Date",
-													"value": "Sat, 22 Nov 2025 12:58:45 GMT"
-												},
-												{
-													"key": "X-Amzn-Trace-Id",
-													"value": "Root=1-6921b383-58f62eeb163c03a46fd1d8f6;Parent=5cb8a3919a70c04e;Sampled=0;Lineage=1:4157f5f0:0"
-												},
-												{
-													"key": "x-amzn-RequestId",
-													"value": "a52489f3-af3e-40f6-ac5e-2f1eb9b2a3fd"
-												},
-												{
-													"key": "x-amz-apigw-id",
-													"value": "Ucj8pHIVIAMEXNg="
-												},
-												{
-													"key": "X-Cache",
-													"value": "Miss from cloudfront"
-												},
-												{
-													"key": "Via",
-													"value": "1.1 8753a5890eda67f9db56cde3f25f5a28.cloudfront.net (CloudFront)"
-												},
-												{
-													"key": "X-Amz-Cf-Pop",
-													"value": "LIM50-P1"
-												},
-												{
-													"key": "X-Amz-Cf-Id",
-													"value": "sJ6yQCH_-2DkytpVWPdFYmS3d0o9kpXBlDK4lbpI_xlVbra_n8C7DQ=="
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"message\": \"Empleado actualizado\",\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"nombre\": \"Juan Carlos\",\n        \"apellido\": \"Perez\",\n        \"role\": \"Cocinero\",\n        \"ocupado\": false,\n        \"sueldo\": 1800,\n        \"calificacion_prom\": 4.5,\n        \"dni\": \"12345678\"\n    }\n}"
-										}
-									]
-								},
-								{
-									"name": "Eliminar Empleado",
-									"request": {
-										"method": "DELETE",
-										"header": [],
-										"url": {
-											"raw": "{{base_url_empleados}}/empleados/:local_id/:dni",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"empleados",
-												":local_id",
-												":dni"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												},
-												{
-													"key": "dni",
-													"value": "{{dni_empleado}}"
-												}
-											]
-										},
-										"description": "Elimina un empleado del sistema."
-									},
-									"response": []
+									"cookie": [],
+									"body": "{\n    \"error\": \"No hay confirmación pendiente para este pedido\"\n}"
 								}
-							],
-							"description": "Endpoints para la gestión CRUD de empleados"
-						},
-						{
-							"name": "Reseñas",
-							"item": [
-								{
-									"name": "Registrar Reseña de Pedido",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"var response = pm.response.json();\r",
-													"var resena_id = response.resena.id;\r",
-													"pm.collectionVariables.set(\"resena_id\", resena_id);\r",
-													""
-												],
-												"type": "text/javascript",
-												"packages": {},
-												"requests": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"local_id\": \"{{local_id}}\",\n  \"pedido_id\": \"{{pedido_id}}\",\n  \"calificacion\": 5,\n  \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\"\n}"
-										},
-										"url": {
-											"raw": "{{base_url_empleados}}/resenas",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"resenas"
-											]
-										},
-										"description": "Registra una reseña de pedido. Los DNIs de empleados (cocinero, despachador, repartidor) se extraen automáticamente del historial de estados del pedido. Valida que el local y pedido existan en DynamoDB."
-									},
-									"response": []
-								},
-								{
-									"name": "Obtener Reseñas por Local",
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{base_url_empleados}}/resenas/local/:local_id",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"resenas",
-												"local",
-												":local_id"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												}
-											]
-										},
-										"description": "Obtiene todas las reseñas de un local específico."
-									},
-									"response": []
-								},
-								{
-									"name": "Obtener Reseñas de Empleado",
-									"request": {
-										"method": "GET",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "{{base_url_empleados}}/resenas/empleado/:local_id/:dni",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"resenas",
-												"empleado",
-												":local_id",
-												":dni"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												},
-												{
-													"key": "dni",
-													"value": "{{dni_empleado}}"
-												}
-											]
-										},
-										"description": "Obtiene todas las reseñas de un empleado específico. El body puede incluir opcionalmente el campo 'rol' (cocinero, despachador, repartidor). Si no se proporciona, se busca el rol en la tabla de empleados."
-									},
-									"response": []
-								},
-								{
-									"name": "Actualizar Reseña",
-									"request": {
-										"method": "PUT",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"resena\": \"Servicio excelente, muy recomendado\",\n  \"calificacion\": 5\n}"
-										},
-										"url": {
-											"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"resenas",
-												":local_id",
-												":resena_id"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "{{local_id}}"
-												},
-												{
-													"key": "resena_id",
-													"value": "{{resena_id}}"
-												}
-											]
-										},
-										"description": "Actualiza una reseña específica. Solo se actualizan los campos 'resena' y 'calificacion'."
-									},
-									"response": []
-								},
-								{
-									"name": "Eliminar Reseña",
-									"request": {
-										"method": "DELETE",
-										"header": [],
-										"url": {
-											"raw": "{{base_url_empleados}}/resenas/:local_id/:resena_id",
-											"host": [
-												"{{base_url_empleados}}"
-											],
-											"path": [
-												"resenas",
-												":local_id",
-												":resena_id"
-											],
-											"variable": [
-												{
-													"key": "local_id",
-													"value": "4f0504f0-b708-4d44-8ed1-334a7e2d807f"
-												},
-												{
-													"key": "resena_id",
-													"value": "434ee39a-5cc1-4a23-b366-cb48d1669230"
-												}
-											]
-										},
-										"description": "Elimina una reseña específica del sistema."
-									},
-									"response": []
-								}
-							],
-							"description": "Endpoints para la gestión de reseñas de empleados por pedido"
+							]
 						}
 					]
 				}
