@@ -50,8 +50,10 @@ def lambda_handler(event, context):
         result = {
             'message': 'Pedido completado exitosamente',
             'pedido_id': pedido_id,
+            'local_id': local_id,
             'estado': 'recibido',
-            'pedido': pedido_actualizado
+            'historial_estados': pedido_actualizado.get('historial_estados', pedido.get('historial_estados', [])),
+            'pedido_completo': pedido_actualizado
         }
         
         if 'body' in event:
