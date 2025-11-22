@@ -7,26 +7,25 @@ from utils.dynamodb_helper import (
     finalizar_pedido,
     agregar_pedido_a_usuario
 )
-from utils.json_encoder import json_dumps
+from utils.cors_utils import get_cors_headers
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 stepfunctions = boto3.client('stepfunctions', region_name='us-east-1')
 
 def lambda_handler(event, context):
-    """Lambda para procesar la confirmación del usuario y liberar empleados"""
-    print(f'Procesando confirmación de recepción: {json.dumps(event)}')
-    
+    """Lambda para procesar la confirmación del usuario y liberar empleados con CORS"""
     body = json.loads(event.get('body', '{}')) if isinstance(event.get('body'), str) else event
     
     local_id = body.get('local_id')
     pedido_id = body.get('pedido_id')
     confirmado = body.get('confirmado', True)
-    repartidor_dni = body.get('repartidor_dni')  # opcional, si viene del frontend
+    repartidor_dni = body.get('repartidor_dni')  # opcional
     
     if not local_id or not pedido_id:
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'Faltan parámetros requeridos'})
+            'headers': get_cors_headers(),
+            'body': json.dumps({'message': 'Faltan parámetros requeridos'})
         }
     
     try:
@@ -35,10 +34,10 @@ def lambda_handler(event, context):
         if not pedido:
             return {
                 'statusCode': 404,
-                'body': json.dumps({'error': 'Pedido no encontrado'})
+                'headers': get_cors_headers(),
+                'body': json.dumps({'message': 'Pedido no encontrado'})
             }
         
-        usuario_correo = pedido.get('usuario_correo')
         historial = pedido.get('historial_estados', [])
         empleados_liberados = []
 
@@ -46,80 +45,57 @@ def lambda_handler(event, context):
         for estado in historial:
             if estado.get('activo') and estado.get('empleado'):
                 empleado = estado['empleado']
-                empleado_dni = empleado.get('dni')
-                empleado_rol = empleado.get('rol', '').lower()
-                
                 try:
-                    marcar_empleado_libre(local_id, empleado_dni)
-                    empleados_liberados.append({'dni': empleado_dni, 'rol': empleado_rol})
-                    print(f'Empleado {empleado_rol} {empleado_dni} liberado')
+                    marcar_empleado_libre(local_id, empleado['dni'])
+                    empleados_liberados.append(empleado['dni'])
                 except Exception as e:
-                    print(f'Error liberando empleado {empleado_dni}: {str(e)}')
-        
-        # Liberar repartidor específico si no fue liberado arriba
-        if repartidor_dni and not any(e['dni'] == repartidor_dni for e in empleados_liberados):
+                    print(f'Error liberando empleado {empleado["dni"]}: {str(e)}')
+
+        # Liberar repartidor adicional si aplica
+        if repartidor_dni and repartidor_dni not in empleados_liberados:
             try:
                 marcar_empleado_libre(local_id, repartidor_dni)
-                empleados_liberados.append({'dni': repartidor_dni, 'rol': 'repartidor'})
-                print(f'Repartidor adicional {repartidor_dni} liberado')
             except Exception as e:
                 print(f'Error liberando repartidor adicional {repartidor_dni}: {str(e)}')
-
-        if empleados_liberados:
-            print(f'Total empleados liberados: {len(empleados_liberados)}')
-        else:
-            print('Advertencia: No se encontraron empleados activos para liberar')
         
-        # Finalizar pedido
+        # Finalizar pedido y agregar al historial del usuario
         pedido_actualizado = finalizar_pedido(local_id, pedido_id)
-        
-        # Agregar pedido al historial del usuario
+        usuario_correo = pedido.get('usuario_correo')
         if usuario_correo:
             try:
                 agregar_pedido_a_usuario(usuario_correo, pedido_id)
             except Exception as e:
                 print(f'Error agregando pedido al historial del usuario: {str(e)}')
 
-        # Manejo de Step Functions
-        table = dynamodb.Table(os.environ['TABLE_PEDIDOS'])
+        # Enviar éxito a Step Functions si había taskToken
         task_token = pedido.get('task_token')
         if task_token:
             stepfunctions.send_task_success(
                 taskToken=task_token,
-                output=json.dumps({
-                    'confirmado': confirmado,
-                    'tipo': 'manual',
-                    'mensaje': 'Usuario confirmó la recepción del pedido',
-                    'empleados_liberados': empleados_liberados
-                })
+                output=json.dumps({'confirmado': confirmado})
             )
+            table = dynamodb.Table(os.environ['TABLE_PEDIDOS'])
             table.update_item(
                 Key={'local_id': local_id, 'pedido_id': pedido_id},
                 UpdateExpression='REMOVE task_token, esperando_confirmacion'
             )
-        
-        result = {
-            'message': 'Confirmación procesada y pedido completado',
-            'pedido_id': pedido_id,
-            'local_id': local_id,
-            'estado': 'recibido',
-            'empleados_liberados': empleados_liberados,
-            'historial_estados': pedido_actualizado.get('historial_estados', historial),
-            'pedido_completo': pedido_actualizado
-        }
-        
+
+        # Response simple con CORS
         return {
             'statusCode': 200,
-            'body': json_dumps(result),
-            'headers': {'Content-Type': 'application/json'}
+            'headers': get_cors_headers(),
+            'body': json.dumps({
+                'message': 'Confirmación procesada exitosamente',
+                'pedido_id': pedido_id
+            })
         }
     
     except Exception as e:
         print(f'Error al procesar confirmación: {str(e)}')
         import traceback
-        print(f'Traceback: {traceback.format_exc()}')
+        print(traceback.format_exc())
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': str(e)}),
-            'headers': {'Content-Type': 'application/json'}
+            'headers': get_cors_headers(),
+            'body': json.dumps({'message': str(e)})
         }
