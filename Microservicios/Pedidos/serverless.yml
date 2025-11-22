@@ -235,6 +235,7 @@ functions:
 
 resources:
   Resources:
+    # EventBridge Event Bus - USA LA VARIABLE DE ENTORNO
     ChinaWokPedidosEventBus:
       Type: AWS::Events::EventBus
       Properties:
@@ -276,8 +277,24 @@ resources:
             - |
               {
                 "Comment": "Workflow de procesamiento de pedidos ChinaWok con asignación de empleados",
-                "StartAt": "InicializarContadores",
+                "StartAt": "ExtraerDetail",
                 "States": {
+                  "ExtraerDetail": {
+                    "Type": "Pass",
+                    "Comment": "Extrae el contenido de 'detail' si viene de EventBridge, o usa el evento completo si viene directo",
+                    "Parameters": {
+                      "local_id.$": "$.detail.local_id",
+                      "pedido_id.$": "$.detail.pedido_id",
+                      "usuario_correo.$": "$.detail.usuario_correo",
+                      "productos.$": "$.detail.productos",
+                      "combos.$": "$.detail.combos",
+                      "costo.$": "$.detail.costo",
+                      "direccion.$": "$.detail.direccion",
+                      "estado.$": "$.detail.estado",
+                      "historial_estados.$": "$.detail.historial_estados"
+                    },
+                    "Next": "InicializarContadores"
+                  },
                   "InicializarContadores": {
                     "Type": "Pass",
                     "Result": {"intentos_cocinar": 0, "intentos_empacar": 0, "intentos_enviar": 0, "modo_realista": false},
@@ -458,4 +475,4 @@ package:
     - 'ofertas/**'
     - 'pedidos/**'
     - 'productos/**'
-    - 'workflow/**'
+    - 'worflow/**'

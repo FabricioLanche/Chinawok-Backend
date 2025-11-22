@@ -44,7 +44,7 @@
     },
     "estado": {
       "type": "string",
-      "enum": ["procesando", "cocinando", "empacando", "enviando", "recibido"]
+      "enum": ["procesando", "cocinando", "empacando", "enviando", "recibido", "cancelado"]
     },
     "historial_estados": {
       "type": "array",
