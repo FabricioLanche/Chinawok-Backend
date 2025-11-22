@@ -55,7 +55,8 @@ def lambda_handler(event, context):
             'pedido_id': pedido_id,
             'usuario_correo': pedido.get('usuario_correo'),
             'cocinero_dni': cocinero['dni'],
-            'estado': 'cocinando'
+            'estado': 'cocinando',
+            'historial_estados': pedido_actualizado.get('historial_estados', pedido.get('historial_estados', []))
         }
         
         # Si fue invocado por HTTP, devolver respuesta HTTP

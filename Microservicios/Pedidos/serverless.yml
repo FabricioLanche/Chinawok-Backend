@@ -305,7 +305,15 @@ resources:
                   },
                   "ExtractResultCocinar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "cocinero_dni.$": "$.resultado_cocinar.Payload.cocinero_dni", "estado.$": "$.resultado_cocinar.Payload.estado", "historial_estados.$": "$.resultado_cocinar.Payload.historial_estados", "contadores.$": "$.contadores"},
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "cocinero_dni.$": "$.resultado_cocinar.Payload.cocinero_dni",
+                      "estado.$": "$.resultado_cocinar.Payload.estado",
+                      "historial_estados.$": "$.resultado_cocinar.Payload.historial_estados",
+                      "contadores.$": "$.contadores"
+                    },
                     "Next": "EsperarTiempoCocinar"
                   },
                   "IncrementarIntentosCocinar": {
@@ -338,7 +346,15 @@ resources:
                   },
                   "ExtractResultEmpacar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "despachador_dni.$": "$.resultado_empacar.Payload.despachador_dni", "estado.$": "$.resultado_empacar.Payload.estado", "historial_estados.$": "$.resultado_empacar.Payload.historial_estados", "contadores.$": "$.contadores"},
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "despachador_dni.$": "$.resultado_empacar.Payload.despachador_dni",
+                      "estado.$": "$.resultado_empacar.Payload.estado",
+                      "historial_estados.$": "$.resultado_empacar.Payload.historial_estados",
+                      "contadores.$": "$.contadores"
+                    },
                     "Next": "EsperarTiempoEmpacar"
                   },
                   "IncrementarIntentosEmpacar": {
@@ -366,7 +382,15 @@ resources:
                   },
                   "ExtractResultEnviar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "repartidor_dni.$": "$.resultado_enviar.Payload.repartidor_dni", "estado.$": "$.resultado_enviar.Payload.estado", "historial_estados.$": "$.resultado_enviar.Payload.historial_estados", "contadores.$": "$.contadores"},
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "repartidor_dni.$": "$.resultado_enviar.Payload.repartidor_dni",
+                      "estado.$": "$.resultado_enviar.Payload.estado",
+                      "historial_estados.$": "$.resultado_enviar.Payload.historial_estados",
+                      "contadores.$": "$.contadores"
+                    },
                     "Next": "EsperarTiempoEnviar"
                   },
                   "IncrementarIntentosEnviar": {

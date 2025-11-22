@@ -63,7 +63,8 @@ def lambda_handler(event, context):
             'pedido_id': pedido_id,
             'usuario_correo': pedido.get('usuario_correo'),
             'despachador_dni': despachador['dni'],
-            'estado': 'empacando'
+            'estado': 'empacando',
+            'historial_estados': pedido_actualizado.get('historial_estados', pedido.get('historial_estados', []))
         }
         
         if 'body' in event:
