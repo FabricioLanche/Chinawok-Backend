@@ -20,6 +20,16 @@ from .authentication_utils import (
     require_roles
 )
 
+# Helper para headers CORS
+def get_cors_headers():
+    """Retorna headers CORS estándar para todas las respuestas"""
+    return {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
+    }
+
 __all__ = [
     # Logger
     'get_logger',
@@ -35,7 +45,7 @@ __all__ = [
     'delete_old_versions',
     # Athena
     'AthenaQueryExecutor',
-    # JWT (NO incluir Authorizer, es un Lambda handler)
+    # JWT
     'generar_token',
     'validar_token',
     'verificar_rol',
@@ -48,4 +58,6 @@ __all__ = [
     'validar_acceso_usuario',
     'validar_acceso_local',
     'require_roles',
+    # CORS
+    'get_cors_headers',
 ]

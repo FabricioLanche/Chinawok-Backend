@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 from utils.authentication_utils import obtener_usuario_autenticado, verificar_rol, verificar_rol_solicitado
+from utils import get_cors_headers
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
@@ -73,6 +74,7 @@ def lambda_handler(event, context):
         usuarios_table.delete_item(Key={"correo": correo_a_eliminar})
         return {
             "statusCode": 200,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "Usuario eliminado correctamente"})
         }
 
@@ -82,6 +84,7 @@ def lambda_handler(event, context):
             usuarios_table.delete_item(Key={"correo": correo_a_eliminar})
             return {
                 "statusCode": 200,
+                "headers": get_cors_headers(),
                 "body": json.dumps({"message": "Usuario eliminado correctamente"})
             }
         else:
@@ -95,6 +98,7 @@ def lambda_handler(event, context):
         usuarios_table.delete_item(Key={"correo": correo_a_eliminar})
         return {
             "statusCode": 200,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "Usuario eliminado correctamente"})
         }
 

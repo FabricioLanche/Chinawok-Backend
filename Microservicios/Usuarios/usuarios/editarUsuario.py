@@ -3,6 +3,7 @@ import os
 import json
 import re
 from utils.authentication_utils import obtener_usuario_autenticado, verificar_rol
+from utils import get_cors_headers
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
@@ -166,8 +167,6 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({
-            "message": "Usuario actualizado correctamente",
-            "usuario": updated_item["Attributes"]
-        }, default=str)
+        "headers": get_cors_headers(),
+        "body": json.dumps({"message": "Usuario actualizado correctamente", "usuario": updated_item["Attributes"]}, default=str)
     }

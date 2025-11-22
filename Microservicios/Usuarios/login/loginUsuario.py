@@ -2,11 +2,11 @@ import json
 import boto3
 import os
 from utils.jwt_utils import generar_token
-
-TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
+from utils import get_cors_headers
 
 dynamodb = boto3.resource("dynamodb")
-usuarios_table = dynamodb.Table(TABLE_USUARIOS_NAME)
+table_name = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
+usuarios_table = dynamodb.Table(table_name)
 
 
 def lambda_handler(event, context):
@@ -33,6 +33,7 @@ def lambda_handler(event, context):
     if not correo or not contrasena:
         return {
             "statusCode": 400,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "correo y contrasena son obligatorios"})
         }
 
@@ -40,6 +41,7 @@ def lambda_handler(event, context):
     if "Item" not in resp:
         return {
             "statusCode": 401,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "Credenciales inválidas"})
         }
 
@@ -48,6 +50,7 @@ def lambda_handler(event, context):
     if usuario.get("contrasena") != contrasena:
         return {
             "statusCode": 401,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "Credenciales inválidas"})
         }
 
@@ -59,13 +62,14 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
+        "headers": get_cors_headers(),
         "body": json.dumps({
             "message": "Login exitoso",
             "token": token,
             "usuario": {
                 "correo": usuario["correo"],
                 "nombre": usuario["nombre"],
-                "role": usuario.get("role", "Cliente")
+                "role": usuario["role"]
             }
         })
     }

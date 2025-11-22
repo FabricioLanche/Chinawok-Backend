@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 from utils.jwt_utils import verificar_rol
+from utils import get_cors_headers
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
@@ -32,6 +33,10 @@ def lambda_handler(event, context):
         usuario = resp["Item"]
         if "contrasena" in usuario:
             del usuario["contrasena"]
-        return {"statusCode": 200, "body": json.dumps({"message": "Usuario encontrado", "usuario": usuario}, default=str)}
+        return {
+            "statusCode": 200,
+            "headers": get_cors_headers(),
+            "body": json.dumps({"message": "Usuario encontrado", "usuario": usuario}, default=str)
+        }
     except Exception as e:
         return {"statusCode": 500, "body": json.dumps({"message": f"Error al buscar usuario: {str(e)}"})}

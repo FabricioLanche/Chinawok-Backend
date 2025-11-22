@@ -3,6 +3,7 @@ import boto3
 import os
 from datetime import datetime, timezone
 from utils.jwt_utils import generar_token
+from utils import get_cors_headers
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
@@ -34,6 +35,7 @@ def lambda_handler(event, context):
     if not nombre or not correo or not contrasena:
         return {
             "statusCode": 400,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "nombre, correo y contrasena son obligatorios"})
         }
 
@@ -41,6 +43,7 @@ def lambda_handler(event, context):
     if len(contrasena) < 6:
         return {
             "statusCode": 400,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "contrasena debe tener al menos 6 caracteres"})
         }
 
@@ -48,6 +51,7 @@ def lambda_handler(event, context):
     if "Item" in resp:
         return {
             "statusCode": 409,
+            "headers": get_cors_headers(),
             "body": json.dumps({"message": "Usuario ya existe"})
         }
 
@@ -72,6 +76,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 201,
+        "headers": get_cors_headers(),
         "body": json.dumps({
             "message": "Usuario creado correctamente",
             "token": token,
