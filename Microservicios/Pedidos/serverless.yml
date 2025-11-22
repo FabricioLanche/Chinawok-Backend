@@ -235,11 +235,10 @@ functions:
 
 resources:
   Resources:
-    # EventBridge Event Bus - NOMBRE ÚNICO DIFERENTE
     ChinaWokPedidosEventBus:
       Type: AWS::Events::EventBus
       Properties:
-        Name: chinawok-pedidos-workflow-events
+        Name: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
 
     # EventBridge Rule para PedidoCreado
     PedidoCreadoEventRule:
