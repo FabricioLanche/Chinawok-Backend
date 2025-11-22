@@ -2,7 +2,7 @@ import json
 import boto3
 import os
 from utils.jwt_utils import generar_token
-from utils import get_cors_headers
+from utils.cors_utils import get_cors_headers
 
 dynamodb = boto3.resource("dynamodb")
 table_name = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")

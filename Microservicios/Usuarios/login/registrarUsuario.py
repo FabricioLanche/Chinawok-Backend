@@ -3,7 +3,7 @@ import boto3
 import os
 from datetime import datetime, timezone
 from utils.jwt_utils import generar_token
-from utils import get_cors_headers
+from utils.cors_utils import get_cors_headers
 
 TABLE_USUARIOS_NAME = os.getenv("TABLE_USUARIOS", "ChinaWok-Usuarios")
 
