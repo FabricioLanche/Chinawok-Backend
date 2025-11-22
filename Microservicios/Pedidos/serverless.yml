@@ -191,6 +191,16 @@ functions:
           path: productos
           method: delete
           cors: true
+  
+  productosFiltrarPorCategoria:
+    handler: productos/filtrarProductosPorCategoria.handler
+    name: ${self:service}-productos-filtrar-por-categoria
+    description: Filtrar productos por categoría
+    events:
+      - http:
+          path: productos/filtrar
+          method: get
+          cors: true
 
   # ==================== WORKFLOW - STEP FUNCTIONS ====================
   workflowIniciar:
