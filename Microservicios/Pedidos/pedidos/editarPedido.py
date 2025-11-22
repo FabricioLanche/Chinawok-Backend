@@ -3,7 +3,7 @@ import boto3
 import os
 from botocore.exceptions import ClientError
 from decimal import Decimal
-from utils.cors_utils import build_cors_headers  # <-- agregado
+from utils.cors_utils import get_cors_headers  # <-- agregado
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -307,7 +307,7 @@ def handler(event, context):
     """
     Lambda handler para actualizar un pedido en DynamoDB
     """
-    cors_headers = build_cors_headers()
+    cors_headers = get_cors_headers()
 
     try:
         if isinstance(event.get('body'), str):
