@@ -16,7 +16,7 @@ class AthenaQueryExecutor:
         self.database = os.environ.get('ATHENA_DATABASE', 'chinawok_analytics')
         
         # Construir la URI completa de S3 a partir del path
-        output_path = os.environ.get('ATHENA_OUTPUT_LOCATION', 'chinawok-data/athena-results/')
+        output_path = os.environ.get('S3_BUCKET_NAME') + '/athena-results/'
         # Si ya comienza con s3://, usar tal cual; si no, agregar el prefijo
         if output_path.startswith('s3://'):
             self.output_location = output_path
