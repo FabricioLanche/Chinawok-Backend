@@ -3,6 +3,7 @@ import boto3
 import os
 from botocore.exceptions import ClientError
 from decimal import Decimal
+from utils.cors_utils import build_cors_headers  # <-- agregado
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -306,191 +307,152 @@ def handler(event, context):
     """
     Lambda handler para actualizar un pedido en DynamoDB
     """
+    cors_headers = build_cors_headers()
+
     try:
-        # Parsear el body del evento
         if isinstance(event.get('body'), str):
             body = json.loads(event['body'])
         else:
             body = event.get('body', event)
-        
-        # Obtener las keys
+
         local_id = body.get('local_id')
         pedido_id = body.get('pedido_id')
-        
+
         if not local_id or not pedido_id:
             return {
                 'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'headers': cors_headers,
                 'body': json.dumps({'error': 'Se requieren local_id y pedido_id'})
             }
-        
-        # Crear una copia sin las keys para validar solo los campos actualizables
+
         update_data = {k: v for k, v in body.items() if k not in ['local_id', 'pedido_id', 'usuario_correo']}
-        
+
         if not update_data:
             return {
                 'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'headers': cors_headers,
                 'body': json.dumps({'error': 'No se proporcionaron campos para actualizar'})
             }
-        
-        # Validar productos si se están actualizando
+
         if 'productos' in update_data:
             if not isinstance(update_data['productos'], list) or len(update_data['productos']) == 0:
                 return {
                     'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'headers': cors_headers,
                     'body': json.dumps({'error': 'productos debe ser un array no vacío'})
                 }
-        
-        # Validar combos si se están actualizando
+
         if 'combos' in update_data:
             if not isinstance(update_data['combos'], list) or len(update_data['combos']) == 0:
                 return {
                     'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'headers': cors_headers,
                     'body': json.dumps({'error': 'combos debe ser un array no vacío'})
                 }
-        
-        # Validar estado si se está actualizando
+
         if 'estado' in update_data:
             estados_validos = ['procesando', 'cocinando', 'empacando', 'enviando', 'recibido']
             if update_data['estado'] not in estados_validos:
                 return {
                     'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'headers': cors_headers,
                     'body': json.dumps({'error': f'estado debe ser uno de: {", ".join(estados_validos)}'})
                 }
-        
-        # Obtener el pedido actual para verificaciones
+
         try:
             pedido_actual = table.get_item(
-                Key={
-                    'local_id': local_id,
-                    'pedido_id': pedido_id
-                }
+                Key={'local_id': local_id, 'pedido_id': pedido_id}
             )
-            
+
             if 'Item' not in pedido_actual:
                 return {
                     'statusCode': 404,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'headers': cors_headers,
                     'body': json.dumps({'error': 'Pedido no encontrado'})
                 }
-            
+
             pedido = pedido_actual['Item']
             usuario_correo = pedido.get('usuario_correo')
-            
+
         except ClientError as e:
             return {
                 'statusCode': 500,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({
-                    'error': 'Error al obtener pedido',
-                    'message': str(e)
-                })
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Error al obtener pedido', 'message': str(e)})
             }
-        
-        # Verificar que el local existe
+
         exito, error_msg = verificar_local_existe(local_id)
         if not exito:
             return {
                 'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({
-                    'error': 'Error de validación de local',
-                    'message': error_msg
-                })
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Error de validación de local', 'message': error_msg})
             }
-        
-        # Verificar que el usuario existe y tiene información bancaria
+
         exito, error_msg = verificar_usuario_info_bancaria(usuario_correo)
         if not exito:
             return {
                 'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({
-                    'error': 'Error de validación de usuario',
-                    'message': error_msg
-                })
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Error de validación de usuario', 'message': error_msg})
             }
-        
-        # Verificar productos si se están actualizando
+
         if 'productos' in update_data and update_data['productos']:
             exito, error_msg = verificar_productos_stock(local_id, update_data['productos'])
             if not exito:
                 return {
                     'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({
-                        'error': 'Error de validación de productos',
-                        'message': error_msg
-                    })
+                    'headers': cors_headers,
+                    'body': json.dumps({'error': 'Error de validación de productos', 'message': error_msg})
                 }
-        
-        # Verificar combos si se están actualizando
+
         if 'combos' in update_data and update_data['combos']:
             exito, error_msg = verificar_combos(local_id, update_data['combos'])
             if not exito:
                 return {
                     'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({
-                        'error': 'Error de validación de combos',
-                        'message': error_msg
-                    })
+                    'headers': cors_headers,
+                    'body': json.dumps({'error': 'Error de validación de combos', 'message': error_msg})
                 }
-        
-        # Enriquecer empleados en historial_estados si se está actualizando
+
         if 'historial_estados' in update_data and update_data['historial_estados']:
             historial_enriquecido, error_msg = enriquecer_empleados_historial(local_id, update_data['historial_estados'])
             if historial_enriquecido is None:
                 return {
                     'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'headers': cors_headers,
                     'body': json.dumps({
                         'error': 'Error al enriquecer datos de empleados',
                         'message': error_msg
                     })
                 }
-            # Reemplazar con el historial enriquecido
             update_data['historial_estados'] = historial_enriquecido
-        
-        # Convertir floats a Decimal para DynamoDB
+
         update_data = convertir_floats_a_decimal(update_data)
-        
-        # Construir expresión de actualización
+
         update_expression = "SET " + ", ".join([f"#{k} = :{k}" for k in update_data.keys()])
         expression_attribute_names = {f"#{k}": k for k in update_data.keys()}
         expression_attribute_values = {f":{k}": v for k, v in update_data.items()}
-        
-        # Actualizar en DynamoDB
+
         response = table.update_item(
-            Key={
-                'local_id': local_id,
-                'pedido_id': pedido_id
-            },
+            Key={'local_id': local_id, 'pedido_id': pedido_id},
             UpdateExpression=update_expression,
             ExpressionAttributeNames=expression_attribute_names,
             ExpressionAttributeValues=expression_attribute_values,
             ReturnValues="ALL_NEW"
         )
-        
-        # Convertir Decimal a float para la respuesta JSON
+
         data_respuesta = convertir_decimal_a_float(response['Attributes'])
-        
+
         return {
             'statusCode': 200,
-            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({
-                'message': 'Pedido actualizado exitosamente',
-                'data': data_respuesta
-            })
+            'headers': cors_headers,
+            'body': json.dumps({'message': 'Pedido actualizado exitosamente', 'data': data_respuesta})
         }
-        
+
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'headers': cors_headers,
             'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
         }

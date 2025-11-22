@@ -33,7 +33,7 @@ def handler(event, context):
         
         query = f"""
         WITH pedidos_por_empleado AS (
-            SELECT 
+            SELECT
                 p.local_id,
                 h.empleado.dni AS empleado_dni,
                 COUNT(DISTINCT p.pedido_id) AS pedidos_atendidos,
@@ -41,18 +41,56 @@ def handler(event, context):
             FROM pedidos p
             CROSS JOIN UNNEST(p.historial_estados) AS t(h)
             WHERE p.local_id = '{local_id}'
-                AND h.empleado.dni IS NOT NULL
+            AND h.empleado IS NOT NULL
+            AND h.empleado.dni IS NOT NULL
             GROUP BY p.local_id, h.empleado.dni
         ),
+
         resenas_por_empleado AS (
+            -- Reseñas al cocinero
             SELECT 
                 local_id,
-                empleado_dni,
+                cocinero_dni AS empleado_dni,
                 COUNT(*) AS total_resenas
             FROM resenas
             WHERE local_id = '{local_id}'
+            AND cocinero_dni IS NOT NULL
+            GROUP BY local_id, cocinero_dni
+
+            UNION ALL
+
+            -- Reseñas al repartidor
+            SELECT 
+                local_id,
+                repartidor_dni AS empleado_dni,
+                COUNT(*) AS total_resenas
+            FROM resenas
+            WHERE local_id = '{local_id}'
+            AND repartidor_dni IS NOT NULL
+            GROUP BY local_id, repartidor_dni
+
+            UNION ALL
+
+            -- Reseñas al despachador
+            SELECT 
+                local_id,
+                despachador_dni AS empleado_dni,
+                COUNT(*) AS total_resenas
+            FROM resenas
+            WHERE local_id = '{local_id}'
+            AND despachador_dni IS NOT NULL
+            GROUP BY local_id, despachador_dni
+        ),
+
+        resenas_agrupadas AS (
+            SELECT
+                local_id,
+                empleado_dni,
+                SUM(total_resenas) AS total_resenas
+            FROM resenas_por_empleado
             GROUP BY local_id, empleado_dni
         )
+
         SELECT 
             e.local_id,
             e.dni,
@@ -64,7 +102,7 @@ def handler(event, context):
             COALESCE(p.pedidos_atendidos, 0) AS pedidos_atendidos,
             ROUND(COALESCE(p.revenue_generado, 0), 2) AS revenue_generado,
             ROUND(
-                (COALESCE(e.calificacion_prom, 0) * 0.6) + 
+                (COALESCE(e.calificacion_prom, 0) * 0.6) +
                 (LEAST(COALESCE(p.pedidos_atendidos, 0) / 100.0, 1) * 5 * 0.3) +
                 (LEAST(COALESCE(r.total_resenas, 0) / 20.0, 1) * 5 * 0.1),
                 2
@@ -73,7 +111,7 @@ def handler(event, context):
         LEFT JOIN pedidos_por_empleado p 
             ON e.local_id = p.local_id 
             AND e.dni = p.empleado_dni
-        LEFT JOIN resenas_por_empleado r 
+        LEFT JOIN resenas_agrupadas r 
             ON e.local_id = r.local_id 
             AND e.dni = r.empleado_dni
         WHERE e.local_id = '{local_id}'

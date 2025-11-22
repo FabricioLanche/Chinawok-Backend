@@ -1,4 +1,5 @@
 import os, json, boto3, logging
+from utils.cors_utils import get_cors_headers  # <-- importar CORS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -8,11 +9,20 @@ table_locales = dynamodb.Table(os.environ.get('TABLE_LOCALES', 'ChinaWok-Locales
 table_usuarios = dynamodb.Table(os.environ.get('TABLE_USUARIOS', 'ChinaWok-Usuarios'))
 
 def lambda_handler(event, context):
+    headers = get_cors_headers()  # <-- CORS headers
+
+    # Manejar preflight request
+    if event.get("httpMethod") == "OPTIONS":
+        return {
+            "statusCode": 200,
+            "headers": headers,
+            "body": json.dumps({"message": "CORS preflight successful"})
+        }
+
     try:
         local_id = event.get('pathParameters', {}).get('local_id')
-        
         if not local_id:
-            return _resp(400, {"message": "Falta el parámetro 'local_id' en el path"})
+            return _resp(400, {"message": "Falta el parámetro 'local_id' en el path"}, headers)
         
         logger.info(f"Eliminando local con local_id: {local_id}")
         
@@ -22,7 +32,7 @@ def lambda_handler(event, context):
             local = local_resp.get("Item")
             
             if not local:
-                return _resp(404, {"message": f"Local con id '{local_id}' no encontrado"})
+                return _resp(404, {"message": f"Local con id '{local_id}' no encontrado"}, headers)
             
             # Obtener el correo del gerente
             gerente = local.get("gerente", {})
@@ -30,7 +40,6 @@ def lambda_handler(event, context):
             
             if correo_gerente:
                 logger.info(f"Cambiando rol del gerente {correo_gerente} de Gerente a Cliente")
-                # Actualizar el rol del gerente a Cliente
                 table_usuarios.update_item(
                     Key={"correo": correo_gerente},
                     UpdateExpression="SET #role = :new_role",
@@ -43,11 +52,15 @@ def lambda_handler(event, context):
         
         # Eliminar el local
         table_locales.delete_item(Key={"local_id": local_id})
-        return _resp(200, {"message": "Local eliminado y gerente actualizado a Cliente"})
+        return _resp(200, {"message": "Local eliminado y gerente actualizado a Cliente"}, headers)
         
     except Exception as e:
         logger.exception(f"Error al eliminar local: {str(e)}")
-        return _resp(500, {"message": "Error al eliminar el local", "error": str(e)})
+        return _resp(500, {"message": "Error al eliminar el local", "error": str(e)}, headers)
 
-def _resp(status, body):
-    return {"statusCode": status, "headers": {"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}, "body": json.dumps(body, ensure_ascii=False)}
+def _resp(status, body, headers):
+    return {
+        "statusCode": status,
+        "headers": headers,
+        "body": json.dumps(body, ensure_ascii=False)
+    }

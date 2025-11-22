@@ -1,6 +1,7 @@
 import json
 import boto3
 import os
+from utils.cors_utils import get_cors_headers   # <-- CORS uniforme
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -13,11 +14,11 @@ def handler(event, context):
     Lambda handler para actualizar un combo en DynamoDB
     """
     try:
-        # Parsear el body del evento
-        if isinstance(event.get('body'), str):
-            body = json.loads(event['body'])
+        # Parseo de body con estándar del login
+        if isinstance(event.get("body"), str):
+            body = json.loads(event["body"])
         else:
-            body = event.get('body', event)
+            body = event.get("body", event)
         
         # Obtener las keys
         local_id = body.get('local_id')
@@ -26,46 +27,37 @@ def handler(event, context):
         if not local_id or not combo_id:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'error': 'Se requieren local_id y combo_id'
                 })
             }
         
-        # Crear una copia sin las keys para actualizar solo los campos permitidos
+        # Solo campos permitidos
         campos_permitidos = ['nombre', 'productos_nombres', 'descripcion']
         update_data = {k: v for k, v in body.items() if k in campos_permitidos}
         
         if not update_data:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'error': 'No se proporcionaron campos para actualizar'
                 })
             }
         
-        # Validar productos_nombres si se está actualizando
+        # Validación especial de productos_nombres
         if 'productos_nombres' in update_data:
             if not isinstance(update_data['productos_nombres'], list) or len(update_data['productos_nombres']) == 0:
                 return {
                     'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
+                    'headers': get_cors_headers(),
                     'body': json.dumps({
                         'error': 'productos_nombres debe ser un array con al menos un elemento'
                     })
                 }
         
-        # Construir expresión de actualización
+        # Expresión de actualización
         update_expression = "SET " + ", ".join([f"#{k} = :{k}" for k in update_data.keys()])
         expression_attribute_names = {f"#{k}": k for k in update_data.keys()}
         expression_attribute_values = {f":{k}": v for k, v in update_data.items()}
@@ -84,10 +76,7 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': get_cors_headers(),
             'body': json.dumps({
                 'message': 'Combo actualizado exitosamente',
                 'data': response['Attributes']
@@ -97,10 +86,7 @@ def handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': get_cors_headers(),
             'body': json.dumps({
                 'error': 'Error interno del servidor',
                 'message': str(e)

@@ -1,23 +1,24 @@
 import json
 import boto3
 import os
+from utils.cors_utils import get_cors_headers  # <-- agregado
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_PRODUCTOS', 'ChinaWok-Productos')
 table = dynamodb.Table(table_name)
 
-
 def handler(event, context):
     """
     Lambda handler para eliminar un producto de DynamoDB
     """
+    cors_headers = get_cors_headers()  # <-- agregado
+
     try:
         # Obtener parámetros
         params = event.get('queryStringParameters') or {}
         path_params = event.get('pathParameters') or {}
         
-        # Intentar obtener de body si no está en params
         body = {}
         if event.get('body'):
             if isinstance(event['body'], str):
@@ -31,49 +32,26 @@ def handler(event, context):
         if not local_id or not nombre:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Se requieren local_id y nombre'
-                })
+                'headers': cors_headers,  # <-- reemplazado
+                'body': json.dumps({'error': 'Se requieren local_id y nombre'})
             }
         
         # Verificar que el producto existe antes de eliminar
-        response = table.get_item(
-            Key={
-                'local_id': local_id,
-                'nombre': nombre
-            }
-        )
+        response = table.get_item(Key={'local_id': local_id, 'nombre': nombre})
         
         if 'Item' not in response:
             return {
                 'statusCode': 404,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Producto no encontrado'
-                })
+                'headers': cors_headers,  # <-- reemplazado
+                'body': json.dumps({'error': 'Producto no encontrado'})
             }
         
         # Eliminar el producto
-        table.delete_item(
-            Key={
-                'local_id': local_id,
-                'nombre': nombre
-            }
-        )
+        table.delete_item(Key={'local_id': local_id, 'nombre': nombre})
         
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': cors_headers,  # <-- reemplazado
             'body': json.dumps({
                 'message': 'Producto eliminado exitosamente',
                 'data': {
@@ -86,12 +64,6 @@ def handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error interno del servidor',
-                'message': str(e)
-            })
+            'headers': cors_headers,  # <-- reemplazado
+            'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
         }

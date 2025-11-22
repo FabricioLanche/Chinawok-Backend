@@ -1,6 +1,7 @@
 import boto3, json, os, re
 from decimal import Decimal
 from botocore.exceptions import ClientError
+from utils.cors_utils import get_cors_headers  # <-- agregado
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['TABLE_EMPLEADOS'])
@@ -13,21 +14,16 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
-    # Headers CORS
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
-    }
+    cors_headers = get_cors_headers()  # <-- reemplaza headers manuales
     
     # Manejar preflight request
     if event.get('httpMethod') == 'OPTIONS':
         return {
             'statusCode': 200,
-            'headers': headers,
+            'headers': cors_headers,
             'body': json.dumps({'message': 'CORS preflight successful'})
         }
-    
+
     body = json.loads(event['body'])
 
     required = ["local_id", "dni", "nombre", "apellido", "role", "sueldo"]
@@ -35,7 +31,7 @@ def lambda_handler(event, context):
         if field not in body:
             return {
                 'statusCode': 400,
-                'headers': headers,
+                'headers': cors_headers,  # <-- reemplazado
                 'body': json.dumps({'error': f"Falta el campo requerido: {field}"})
             }
 
@@ -45,13 +41,13 @@ def lambda_handler(event, context):
         if 'Item' not in response:
             return {
                 'statusCode': 400,
-                'headers': headers,
+                'headers': cors_headers,  # <-- reemplazado
                 'body': json.dumps({'error': 'El local_id no existe en la tabla de locales'})
             }
     except ClientError as e:
         return {
             'statusCode': 500,
-            'headers': headers,
+            'headers': cors_headers,  # <-- reemplazado
             'body': json.dumps({'error': f"Error al verificar local: {str(e)}"})
         }
 
@@ -59,7 +55,7 @@ def lambda_handler(event, context):
     if not re.match(r'^\d{8}$', body['dni']):
         return {
             'statusCode': 400,
-            'headers': headers,
+            'headers': cors_headers,  # <-- reemplazado
             'body': json.dumps({'error': 'El DNI debe tener exactamente 8 dígitos numéricos'})
         }
 
@@ -68,7 +64,7 @@ def lambda_handler(event, context):
     if body['role'] not in roles_validos:
         return {
             'statusCode': 400,
-            'headers': headers,
+            'headers': cors_headers,  # <-- reemplazado
             'body': json.dumps({'error': f"El rol debe ser uno de: {', '.join(roles_validos)}"})
         }
 
@@ -77,7 +73,7 @@ def lambda_handler(event, context):
     if sueldo < 0:
         return {
             'statusCode': 400,
-            'headers': headers,
+            'headers': cors_headers,  # <-- reemplazado
             'body': json.dumps({'error': 'El sueldo no puede ser negativo'})
         }
 
@@ -95,6 +91,6 @@ def lambda_handler(event, context):
     table.put_item(Item=item)
     return {
         'statusCode': 201,
-        'headers': headers,
+        'headers': cors_headers,  # <-- reemplazado
         'body': json.dumps({'message': 'Empleado creado', 'empleado': item}, cls=DecimalEncoder)
     }

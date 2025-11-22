@@ -3,17 +3,28 @@ import json
 import uuid
 import boto3
 import logging
+from utils.cors_utils import get_cors_headers  # <-- importar CORS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TABLE_LOCALES = os.environ.get("TABLE_LOCALES", "ChinaWok-Locales")
 TABLE_USUARIOS = os.environ.get("TABLE_USUARIOS", "ChinaWok-Usuarios")
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("boto3")
 table_locales = dynamodb.Table(TABLE_LOCALES)
 table_usuarios = dynamodb.Table(TABLE_USUARIOS)
 
 def lambda_handler(event, context):
+    headers = get_cors_headers()  # <-- aplicar CORS
+
+    # Manejar preflight request
+    if event.get("httpMethod") == "OPTIONS":
+        return {
+            "statusCode": 200,
+            "headers": headers,
+            "body": json.dumps({"message": "CORS preflight successful"})
+        }
+
     try:
         # Parseo seguro del body (API GW o tests)
         body_raw = event.get("body")
@@ -36,7 +47,7 @@ def lambda_handler(event, context):
 
         gerente = body.get("gerente")
         if not isinstance(gerente, dict) or "correo" not in gerente:
-            return _resp(400, {"message": "Falta 'gerente.correo' en el body."})
+            return _resp(400, {"message": "Falta 'gerente.correo' en el body."}, headers)
 
         correo_gerente = str(gerente["correo"]).strip().lower()
         
@@ -46,16 +57,13 @@ def lambda_handler(event, context):
             user = user_resp.get("Item")
             
             if not user:
-                return _resp(400, {"message": f"El usuario con correo '{correo_gerente}' no existe."})
+                return _resp(400, {"message": f"El usuario con correo '{correo_gerente}' no existe."}, headers)
             
-            # Validar que el usuario sea Gerente o Cliente
             user_role = user.get("role")
             if user_role not in ["Gerente", "Cliente"]:
-                return _resp(400, {"message": f"El usuario '{correo_gerente}' debe tener rol 'Gerente' o 'Cliente'."})
+                return _resp(400, {"message": f"El usuario '{correo_gerente}' debe tener rol 'Gerente' o 'Cliente'."}, headers)
             
-            # Si es Gerente, verificar que no tenga ya un local asignado
             if user_role == "Gerente":
-                # Escanear la tabla de locales para verificar si ya está asignado
                 scan_resp = table_locales.scan(
                     FilterExpression="gerente.correo = :correo",
                     ExpressionAttributeValues={":correo": correo_gerente}
@@ -65,9 +73,8 @@ def lambda_handler(event, context):
                     return _resp(400, {
                         "message": f"El gerente '{correo_gerente}' ya tiene un local asignado.",
                         "local_id": local_existente.get("local_id")
-                    })
+                    }, headers)
             
-            # Si es Cliente, actualizar su rol a Gerente
             if user_role == "Cliente":
                 logger.info(f"Actualizando rol de Cliente a Gerente para: {correo_gerente}")
                 table_usuarios.update_item(
@@ -77,7 +84,6 @@ def lambda_handler(event, context):
                     ExpressionAttributeValues={":new_role": "Gerente"}
                 )
             
-            # Construir el objeto gerente completo con datos del usuario
             gerente_completo = {
                 "nombre": user.get("nombre"),
                 "correo": correo_gerente,
@@ -86,21 +92,17 @@ def lambda_handler(event, context):
             
         except Exception as e:
             logger.error(f"Error al validar gerente: {str(e)}")
-            return _resp(500, {"message": "Error al validar el gerente", "error": str(e)})
+            return _resp(500, {"message": "Error al validar el gerente", "error": str(e)}, headers)
 
-        # Validación mínima
         if not direccion:
-            return _resp(400, {"message": "El campo 'direccion' es obligatorio."})
+            return _resp(400, {"message": "El campo 'direccion' es obligatorio."}, headers)
 
-        # Normalizaciones
         if telefono is not None:
             telefono = str(telefono).strip()
 
-        # Verificar tabla
         _ = table_locales.table_status
         logger.info(f"Key schema de tabla locales: {table_locales.key_schema}")
 
-        # Construir item (local_id siempre generado automáticamente con UUID)
         item = {
             "local_id": str(uuid.uuid4()),
             "direccion": direccion,
@@ -110,30 +112,27 @@ def lambda_handler(event, context):
             "gerente": gerente_completo,
         }
 
-        # Quitar None para dejar el item limpio
         item = _prune_nones(item)
 
         logger.info(f"Creando local con local_id: {item.get('local_id')}")
         table_locales.put_item(Item=item)
-        return _resp(201, item)
+        return _resp(201, item, headers)
 
     except Exception as e:
         logger.exception("Fallo en local/crear")
-        return _resp(500, {"message": "Error interno", "error": str(e)})
+        return _resp(500, {"message": "Error interno", "error": str(e)}, headers)
 
-def _resp(status, body):
+
+def _resp(status, body, headers):
     return {
         "statusCode": status,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
+        "headers": headers,
         "body": json.dumps(body, ensure_ascii=False) if body != "" else ""
     }
 
 def _mask_password(body: dict):
     try:
-        b = json.loads(json.dumps(body))  # deep copy
+        b = json.loads(json.dumps(body))
         if isinstance(b.get("gerente"), dict) and "contrasena" in b["gerente"]:
             b["gerente"]["contrasena"] = "***"
         return b

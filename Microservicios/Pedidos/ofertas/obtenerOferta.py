@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 from boto3.dynamodb.conditions import Key
+from utils.cors_utils import get_cors_headers
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -27,10 +28,7 @@ def handler(event, context):
         if not local_id:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'error': 'Parámetro requerido: local_id'
                 })
@@ -48,10 +46,7 @@ def handler(event, context):
             if 'Item' not in response:
                 return {
                     'statusCode': 404,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
+                    'headers': get_cors_headers(),
                     'body': json.dumps({
                         'error': 'Oferta no encontrada'
                     })
@@ -59,10 +54,7 @@ def handler(event, context):
             
             return {
                 'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'data': response['Item']
                 }, default=str)
@@ -76,10 +68,7 @@ def handler(event, context):
             
             return {
                 'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'data': response['Items'],
                     'count': len(response['Items'])
@@ -89,10 +78,7 @@ def handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': get_cors_headers(),
             'body': json.dumps({
                 'error': 'Error interno del servidor',
                 'message': str(e)

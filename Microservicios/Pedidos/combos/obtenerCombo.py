@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 from boto3.dynamodb.conditions import Key
+from utils.cors_utils import get_cors_headers   # <<< CORS unificado
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -26,13 +27,10 @@ def handler(event, context):
         
         if not local_id:
             return {
-                'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'error': 'Parámetro requerido: local_id'
+                "statusCode": 400,
+                "headers": get_cors_headers(),
+                "body": json.dumps({
+                    "error": "Parámetro requerido: local_id"
                 })
             }
         
@@ -40,61 +38,49 @@ def handler(event, context):
         if combo_id:
             response = table.get_item(
                 Key={
-                    'local_id': local_id,
-                    'combo_id': combo_id
+                    "local_id": local_id,
+                    "combo_id": combo_id
                 }
             )
             
-            if 'Item' not in response:
+            if "Item" not in response:
                 return {
-                    'statusCode': 404,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': json.dumps({
-                        'error': 'Combo no encontrado'
+                    "statusCode": 404,
+                    "headers": get_cors_headers(),
+                    "body": json.dumps({
+                        "error": "Combo no encontrado"
                     })
                 }
             
             return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'data': response['Item']
+                "statusCode": 200,
+                "headers": get_cors_headers(),
+                "body": json.dumps({
+                    "data": response["Item"]
                 }, default=str)
             }
         
         # Si solo se proporciona local_id, obtener todos los combos del local
         else:
             response = table.query(
-                KeyConditionExpression=Key('local_id').eq(local_id)
+                KeyConditionExpression=Key("local_id").eq(local_id)
             )
             
             return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'data': response['Items'],
-                    'count': len(response['Items'])
+                "statusCode": 200,
+                "headers": get_cors_headers(),
+                "body": json.dumps({
+                    "data": response["Items"],
+                    "count": len(response["Items"])
                 }, default=str)
             }
             
     except Exception as e:
         return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({
-                'error': 'Error interno del servidor',
-                'message': str(e)
+            "statusCode": 500,
+            "headers": get_cors_headers(),
+            "body": json.dumps({
+                "error": "Error interno del servidor",
+                "message": str(e)
             })
         }

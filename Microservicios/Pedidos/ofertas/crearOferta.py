@@ -3,6 +3,7 @@ import boto3
 import os
 import uuid
 from botocore.exceptions import ClientError
+from utils.cors_utils import get_cors_headers   # <<< CORS unificado
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -73,26 +74,26 @@ def handler(event, context):
         for campo in campos_requeridos:
             if campo not in body:
                 return {
-                    'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'error': f'Campo requerido faltante: {campo}'})
+                    "statusCode": 400,
+                    "headers": get_cors_headers(),
+                    "body": json.dumps({"error": f"Campo requerido faltante: {campo}"})
                 }
         
         # Validar que tenga producto_nombre o combo_id
         if 'producto_nombre' not in body and 'combo_id' not in body:
             return {
-                'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'error': 'Debe especificar producto_nombre o combo_id'})
+                "statusCode": 400,
+                "headers": get_cors_headers(),
+                "body": json.dumps({"error": "Debe especificar producto_nombre o combo_id"})
             }
         
         # Validar porcentaje_descuento
         porcentaje = body.get('porcentaje_descuento')
         if not isinstance(porcentaje, (int, float)) or porcentaje < 0 or porcentaje > 100:
             return {
-                'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'error': 'porcentaje_descuento debe estar entre 0 y 100'})
+                "statusCode": 400,
+                "headers": get_cors_headers(),
+                "body": json.dumps({"error": "porcentaje_descuento debe estar entre 0 y 100"})
             }
         
         local_id = body.get('local_id')
@@ -101,29 +102,29 @@ def handler(event, context):
         exito, error_msg = verificar_local_existe(local_id)
         if not exito:
             return {
-                'statusCode': 400,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'error': 'Error de validación de local', 'message': error_msg})
+                "statusCode": 400,
+                "headers": get_cors_headers(),
+                "body": json.dumps({"error": "Error de validación de local", "message": error_msg})
             }
         
-        # Verificar que el producto existe si se especificó
+        # Verificar producto si se especificó
         if 'producto_nombre' in body:
             exito, error_msg = verificar_producto_existe(local_id, body['producto_nombre'])
             if not exito:
                 return {
-                    'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'error': 'Error de validación de producto', 'message': error_msg})
+                    "statusCode": 400,
+                    "headers": get_cors_headers(),
+                    "body": json.dumps({"error": "Error de validación de producto", "message": error_msg})
                 }
         
-        # Verificar que el combo existe si se especificó
+        # Verificar combo si se especificó
         if 'combo_id' in body:
             exito, error_msg = verificar_combo_existe(local_id, body['combo_id'])
             if not exito:
                 return {
-                    'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'error': 'Error de validación de combo', 'message': error_msg})
+                    "statusCode": 400,
+                    "headers": get_cors_headers(),
+                    "body": json.dumps({"error": "Error de validación de combo", "message": error_msg})
                 }
         
         # Generar oferta_id automáticamente con UUID
@@ -133,14 +134,14 @@ def handler(event, context):
         table.put_item(Item=body)
         
         return {
-            'statusCode': 201,
-            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'message': 'Oferta creada exitosamente', 'data': body})
+            "statusCode": 201,
+            "headers": get_cors_headers(),
+            "body": json.dumps({"message": "Oferta creada exitosamente", "data": body})
         }
         
     except Exception as e:
         return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': 'Error interno del servidor', 'message': str(e)})
+            "statusCode": 500,
+            "headers": get_cors_headers(),
+            "body": json.dumps({"error": "Error interno del servidor", "message": str(e)})
         }

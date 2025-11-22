@@ -1,6 +1,7 @@
 import json
 import boto3
 import os
+from utils.cors_utils import get_cors_headers
 
 # Cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -25,16 +26,22 @@ def handler(event, context):
             else:
                 body = event['body']
         
-        local_id = params.get('local_id') or path_params.get('local_id') or body.get('local_id')
-        oferta_id = params.get('oferta_id') or path_params.get('oferta_id') or body.get('oferta_id')
+        local_id = (
+            params.get('local_id')
+            or path_params.get('local_id')
+            or body.get('local_id')
+        )
+
+        oferta_id = (
+            params.get('oferta_id')
+            or path_params.get('oferta_id')
+            or body.get('oferta_id')
+        )
         
         if not local_id or not oferta_id:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'error': 'Se requieren local_id y oferta_id'
                 })
@@ -51,10 +58,7 @@ def handler(event, context):
         if 'Item' not in response:
             return {
                 'statusCode': 404,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                'headers': get_cors_headers(),
                 'body': json.dumps({
                     'error': 'Oferta no encontrada'
                 })
@@ -70,10 +74,7 @@ def handler(event, context):
         
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': get_cors_headers(),
             'body': json.dumps({
                 'message': 'Oferta eliminada exitosamente',
                 'data': {
@@ -86,10 +87,7 @@ def handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': get_cors_headers(),
             'body': json.dumps({
                 'error': 'Error interno del servidor',
                 'message': str(e)
