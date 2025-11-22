@@ -13,7 +13,7 @@ provider:
     TABLE_LOCALES: ${env:TABLE_LOCALES, 'ChinaWok-Locales'}
     TABLE_USUARIOS: ${env:TABLE_USUARIOS, 'ChinaWok-Usuarios'}
     ATHENA_OUTPUT_LOCATION: ${env:ATHENA_OUTPUT_LOCATION, 'chinawok-data'}
-    ATHENA_WORKGROUP: 'development'
+    ATHENA_WORKGROUP: 'primary'
     # Variables para Ingesta
     S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, 'chinawok-data'}
     S3_INGESTION_PREFIX: ${env:S3_INGESTION_PREFIX, 'data-ingestion'}

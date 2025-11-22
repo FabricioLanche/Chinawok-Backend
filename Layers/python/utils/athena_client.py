@@ -25,7 +25,7 @@ class AthenaQueryExecutor:
             output_path = output_path.strip('/')
             self.output_location = f's3://{output_path}/'
         
-        self.workgroup = 'development'
+        self.workgroup = 'primary'
         
         print(f"Athena Client inicializado - Region: {region}, Database: {self.database}, Workgroup: {self.workgroup}")
         print(f"Output Location: {self.output_location}")
