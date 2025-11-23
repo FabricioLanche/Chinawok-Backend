@@ -287,8 +287,17 @@ resources:
             - |
               {
                 "Comment": "Workflow de procesamiento de pedidos ChinaWok con asignación de empleados",
-                "StartAt": "InicializarContadores",
+                "StartAt": "ExtraerDetail",
                 "States": {
+                  "ExtraerDetail": {
+                    "Type": "Pass",
+                    "Comment": "Extrae el contenido completo de 'detail' si viene de EventBridge",
+                    "Parameters": {
+                      "pedido.$": "$.detail"
+                    },
+                    "OutputPath": "$.pedido",
+                    "Next": "InicializarContadores"
+                  },
                   "InicializarContadores": {
                     "Type": "Pass",
                     "Result": {"intentos_cocinar": 0, "intentos_empacar": 0, "intentos_enviar": 0, "modo_realista": false},
@@ -318,7 +327,7 @@ resources:
                   "VerificarMaximoIntentosCocinar": {
                     "Type": "Choice",
                     "Choices": [{"Variable": "$.contadores.intentos_cocinar", "NumericLessThan": 5, "Next": "EsperarReintentoEmpleadoCocinar"}],
-                    "Default": "ServicioSaturado"
+                    "Default": "ErrorFatal"
                   },
                   "EsperarReintentoEmpleadoCocinar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarCocinar"},
                   "EsperarTiempoCocinar": {
@@ -407,18 +416,18 @@ resources:
                     "Next": "PedidoCompletado"
                   },
                   "PedidoCompletado": {"Type": "Succeed", "OutputPath": "$.resultado_final.Payload"},
-                  "ServicioSaturado": {
+                  "ErrorFatal": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
-                    "Parameters": {"FunctionName": "${LiberarPedidoArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "motivo": "servicio_saturado"}},
+                    "Parameters": {"FunctionName": "${LiberarPedidoArn}", "Payload": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "motivo": "error_fatal", "resetear_estado": false}},
                     "ResultPath": "$.limpieza",
-                    "Next": "ServicioSaturadoFinal",
-                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "ServicioSaturadoFinal"}]
+                    "Next": "ErrorFatalFinal",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "ErrorFatalFinal"}]
                   },
-                  "ServicioSaturadoFinal": {
+                  "ErrorFatalFinal": {
                     "Type": "Fail",
-                    "Error": "ServicioSaturado",
-                    "Cause": "No se encontraron empleados disponibles después de 5 intentos. El servicio está saturado."
+                    "Error": "ErrorFatal",
+                    "Cause": "No se pudo completar el pedido después de múltiples reintentos. Empleados liberados."
                   }
                 }
               }
