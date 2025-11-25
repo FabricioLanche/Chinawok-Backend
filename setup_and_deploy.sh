@@ -531,6 +531,93 @@ EOF
     log_success "✅ Bucket configurado completamente"
 }
 
+# Función para configurar notificaciones S3 después del deploy
+configure_s3_notifications() {
+    local bucket_name="$1"
+    
+    log ""
+    log "📬 Configurando notificaciones S3 para Lambda..."
+    
+    # Leer variables del .env
+    source .env
+    
+    # Obtener el ARN de la Lambda s3TriggerCrawler desplegada
+    local lambda_arn=$(aws lambda get-function \
+        --function-name "chinawok-locales-s3-trigger-crawler" \
+        --query 'Configuration.FunctionArn' \
+        --output text 2>/dev/null)
+    
+    if [ -z "$lambda_arn" ] || [ "$lambda_arn" == "None" ]; then
+        log_warning "⚠️  No se pudo obtener ARN de Lambda s3TriggerCrawler"
+        log_info "Las notificaciones S3 se configurarán manualmente"
+        return 1
+    fi
+    
+    log_info "Lambda ARN: $lambda_arn"
+    
+    # Dar permisos a S3 para invocar la Lambda
+    log "🔐 Configurando permisos de invocación..."
+    aws lambda add-permission \
+        --function-name "chinawok-locales-s3-trigger-crawler" \
+        --statement-id "s3-trigger-permission" \
+        --action "lambda:InvokeFunction" \
+        --principal s3.amazonaws.com \
+        --source-arn "arn:aws:s3:::${bucket_name}" \
+        --region us-east-1 2>/dev/null
+    
+    if [ $? -eq 0 ]; then
+        log_success "✅ Permisos configurados"
+    else
+        log_info "ℹ️  Permisos ya existían o no se pudieron configurar"
+    fi
+    
+    # Configurar la notificación S3
+    log "📨 Configurando notificación de eventos S3..."
+    
+    cat > /tmp/s3-notification.json << EOF
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "chinawok-s3-trigger",
+      "LambdaFunctionArn": "$lambda_arn",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "${S3_INGESTION_PREFIX}/"
+            },
+            {
+              "Name": "suffix",
+              "Value": ".jsonl"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+EOF
+    
+    aws s3api put-bucket-notification-configuration \
+        --bucket "$bucket_name" \
+        --notification-configuration file:///tmp/s3-notification.json \
+        --region us-east-1 2>/dev/null
+    
+    if [ $? -eq 0 ]; then
+        log_success "✅ Notificaciones S3 configuradas correctamente"
+        log_info "   Eventos: s3:ObjectCreated:*"
+        log_info "   Prefijo: ${S3_INGESTION_PREFIX}/"
+        log_info "   Sufijo: .jsonl"
+    else
+        log_warning "⚠️  No se pudieron configurar las notificaciones S3"
+        log_info "Puedes configurarlas manualmente en la consola de AWS"
+    fi
+    
+    rm -f /tmp/s3-notification.json
+}
+
 # Menú de opciones
 echo ""
 echo "═══════════════════════════════════════════════════════"
@@ -582,7 +669,16 @@ case $opcion in
         serverless deploy
         
         if [ $? -eq 0 ]; then
-            log_success "🎉 Despliegue completo exitoso"
+            log_success "🎉 Despliegue de microservicios exitoso"
+            
+            # Paso 5: Configurar notificaciones S3
+            log ""
+            log "═══════════════════════════════════════════════════════"
+            log "📬 PASO 5/5: Configurando notificaciones S3"
+            log "═══════════════════════════════════════════════════════"
+            
+            source .env
+            configure_s3_notifications "$BUCKET_NAME"
             
             # Mostrar endpoints
             show_endpoints
@@ -595,6 +691,7 @@ case $opcion in
             log_info "✅ Streams habilitados en todas las tablas"
             log_info "✅ Lambda streamProcessor desplegado"
             log_info "✅ Lambda s3TriggerCrawler desplegado"
+            log_info "✅ Notificaciones S3 configuradas"
             log_info "📊 Los datos se sincronizarán automáticamente con S3"
         else
             log_error "Error en despliegue de microservicios"
@@ -636,6 +733,11 @@ case $opcion in
         
         if [ $? -eq 0 ]; then
             log_success "Microservicios desplegados exitosamente"
+            
+            # Configurar notificaciones S3
+            log ""
+            source .env
+            configure_s3_notifications "$BUCKET_NAME"
             
             # Mostrar endpoints
             show_endpoints

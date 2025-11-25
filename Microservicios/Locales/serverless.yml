@@ -208,13 +208,8 @@ functions:
     handler: analitica-workflow.s3TriggerCrawler.handler
     name: ${self:service}-s3-trigger-crawler
     description: Detecta cambios en S3 y ejecuta el crawler de Glue
-    events:
-      - s3:
-          bucket: ${env:S3_BUCKET_NAME}
-          event: s3:ObjectCreated:*
-          rules:
-            - prefix: ${env:S3_INGESTION_PREFIX}/
-            - suffix: .jsonl
+    # NOTA: El bucket S3 debe existir previamente
+    # La notificación S3 se configura en setup_and_deploy.sh
 
   # ============================================================
   # WORKFLOW DE ANALÍTICA - FUNCIONES AUXILIARES
