@@ -142,8 +142,7 @@ functions:
       # Stream para Locales
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt: [LocalesTable, StreamArn]
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_LOCALES}/stream/*
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
