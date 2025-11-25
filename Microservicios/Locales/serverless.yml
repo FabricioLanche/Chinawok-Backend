@@ -23,10 +23,9 @@ provider:
     TABLE_PEDIDOS: ${env:TABLE_PEDIDOS, 'ChinaWok-Pedidos'}
     TABLE_OFERTAS: ${env:TABLE_OFERTAS, 'ChinaWok-Ofertas'}
     TABLE_RESENAS: ${env:TABLE_RESENAS, 'ChinaWok-Resenas'}
-    # Variables para Workflow de Analítica
-    STEP_FUNCTION_ANALITICA_NAME: ${env:STEP_FUNCTION_ANALITICA_NAME, 'ChinaWok-Analitica-Processor'}
+    # Variables para Crawler
     GLUE_CRAWLER_NAME: ${env:GLUE_CRAWLER_NAME, 'chinawok-analytics-crawler'}
-    EVENT_BUS_ANALITICA_NAME: ${env:EVENT_BUS_ANALITICA_NAME, 'chinawok-analitica-events'}
+    ATHENA_DATABASE: ${env:ATHENA_DATABASE, 'chinawok_analytics'}
     AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
 
   iam:
@@ -133,42 +132,95 @@ functions:
           cors: true
 
   # ============================================================
-  # INGESTA DE DATOS - DYNAMODB A S3
+  # INGESTA BASADA EN EVENTOS - DYNAMODB STREAMS
   # ============================================================
-  ingestAllTables:
-    handler: analitica-consultas.ingestarTablas.handler
-    name: ${self:service}-ingest-all-tables
-    description: Ingesta datos de todas las tablas de DynamoDB a S3
+  streamProcessor:
+    handler: analitica-workflow.streamProcessor.handler
+    name: ${self:service}-stream-processor
+    description: Procesa eventos de DynamoDB Streams y actualiza S3
     events:
-      - http:
-          path: ingest/all
-          method: post
-          cors: true
-      - schedule:
-          rate: cron(0 2 * * ? *)
-          enabled: false
-          description: Ejecuta ingesta diaria a las 2 AM UTC
+      # Stream para Locales
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [LocalesTable, StreamArn]
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Usuarios
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_USUARIOS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Productos
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_PRODUCTOS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Empleados
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_EMPLEADOS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Combos
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_COMBOS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Pedidos
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_PEDIDOS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Ofertas
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_OFERTAS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+      # Stream para Reseñas
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_RESENAS}/stream/*
+          batchSize: 100
+          startingPosition: LATEST
+          maximumRetryAttempts: 2
+          enabled: true
+
+  s3TriggerCrawler:
+    handler: analitica-workflow.s3TriggerCrawler.handler
+    name: ${self:service}-s3-trigger-crawler
+    description: Detecta cambios en S3 y ejecuta el crawler de Glue
+    events:
+      - s3:
+          bucket: ${env:S3_BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: ${env:S3_INGESTION_PREFIX}/
+            - suffix: .jsonl
+          existing: true
 
   # ============================================================
-  # WORKFLOW DE ANALÍTICA - STEP FUNCTIONS
+  # WORKFLOW DE ANALÍTICA - FUNCIONES AUXILIARES
   # ============================================================
-  workflowAnaliticaActivar:
-    handler: analitica-workflow.activarWorkflow.handler
-    name: ${self:service}-workflow-analitica-activar
-    description: Activa el workflow de analítica (ingesta + crawler)
-    environment:
-      STEP_FUNCTION_ANALITICA_ARN: !GetAtt ChinaWokAnaliticaStateMachine.Arn
-    events:
-      - http:
-          path: workflow/analitica/activar
-          method: post
-          cors: true
-  
-  workflowAnaliticaIngestar:
-    handler: analitica-workflow.ingestarTablas.handler
-    name: ${self:service}-workflow-analitica-ingestar
-    description: Ingesta todas las tablas de DynamoDB a S3
-  
   workflowAnaliticaCrawler:
     handler: analitica-workflow.ejecutarCrawler.handler
     name: ${self:service}-workflow-analitica-crawler
@@ -181,203 +233,13 @@ functions:
 
 resources:
   Resources:
-    # EventBridge Event Bus para Analítica (para eventos custom)
-    ChinaWokAnaliticaEventBus:
-      Type: AWS::Events::EventBus
+    # Tabla Locales con DynamoDB Stream habilitado
+    LocalesTable:
+      Type: AWS::DynamoDB::Table
       Properties:
-        Name: ${env:EVENT_BUS_ANALITICA_NAME, 'chinawok-analitica-events'}
-
-    # EventBridge Rule - Ejecución diaria a las 3 AM (usa el bus por defecto)
-    AnaliticaDiariaRule:
-      Type: AWS::Events::Rule
-      Properties:
-        Name: ${self:service}-analitica-diaria-rule
-        Description: Ejecuta el workflow de analítica diariamente a las 3 AM UTC
-        ScheduleExpression: 'cron(0 3 * * ? *)'
-        State: ENABLED
-        Targets:
-          - Arn: !GetAtt ChinaWokAnaliticaStateMachine.Arn
-            Id: AnaliticaDiariaStepFunction
-            RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-            Input: |
-              {
-                "trigger": "scheduled",
-                "message": "Ejecución programada diaria"
-              }
-
-    # Step Functions State Machine para Analítica
-    ChinaWokAnaliticaStateMachine:
-      Type: AWS::StepFunctions::StateMachine
-      Properties:
-        StateMachineName: ${env:STEP_FUNCTION_ANALITICA_NAME, 'ChinaWok-Analitica-Processor'}
-        RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-        DefinitionString:
-          Fn::Sub: |
-            {
-              "Comment": "Workflow de analítica con polling dinámico: Ingesta datos de DynamoDB a S3 y ejecuta Glue Crawler",
-              "StartAt": "IngestablasDynamoDB",
-              "States": {
-                "IngestablasDynamoDB": {
-                  "Type": "Task",
-                  "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-workflow-analitica-ingestar",
-                  "Comment": "Ingesta todas las tablas de DynamoDB a S3",
-                  "ResultPath": "$.ingesta_result",
-                  "Next": "VerificarIngestaExitosa",
-                  "Retry": [
-                    {
-                      "ErrorEquals": ["States.TaskFailed"],
-                      "IntervalSeconds": 5,
-                      "MaxAttempts": 2,
-                      "BackoffRate": 2.0
-                    }
-                  ],
-                  "Catch": [
-                    {
-                      "ErrorEquals": ["States.ALL"],
-                      "ResultPath": "$.error_info",
-                      "Next": "NotificarErrorIngesta"
-                    }
-                  ]
-                },
-                "VerificarIngestaExitosa": {
-                  "Type": "Choice",
-                  "Comment": "Verificar si la ingesta fue exitosa",
-                  "Choices": [
-                    {
-                      "Variable": "$.ingesta_result.statusCode",
-                      "NumericEquals": 200,
-                      "Next": "EsperarAntesDelCrawler"
-                    }
-                  ],
-                  "Default": "NotificarErrorIngesta"
-                },
-                "EsperarAntesDelCrawler": {
-                  "Type": "Wait",
-                  "Seconds": 5,
-                  "Comment": "Esperar que S3 complete la escritura de archivos",
-                  "Next": "EjecutarCrawler"
-                },
-                "EjecutarCrawler": {
-                  "Type": "Task",
-                  "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-workflow-analitica-crawler",
-                  "Comment": "Ejecuta el crawler de Glue para crear/actualizar tablas",
-                  "ResultPath": "$.crawler_start_result",
-                  "Next": "IniciarEsperaDelCrawler",
-                  "Retry": [
-                    {
-                      "ErrorEquals": ["States.TaskFailed"],
-                      "IntervalSeconds": 5,
-                      "MaxAttempts": 2,
-                      "BackoffRate": 2.0
-                    }
-                  ],
-                  "Catch": [
-                    {
-                      "ErrorEquals": ["States.ALL"],
-                      "ResultPath": "$.error_info",
-                      "Next": "NotificarErrorCrawler"
-                    }
-                  ]
-                },
-                "IniciarEsperaDelCrawler": {
-                  "Type": "Pass",
-                  "Comment": "Inicializar contador de intentos de polling",
-                  "Result": {
-                    "attempt": 0,
-                    "max_attempts": 60
-                  },
-                  "ResultPath": "$.polling_config",
-                  "Next": "EsperarPolling"
-                },
-                "EsperarPolling": {
-                  "Type": "Wait",
-                  "Seconds": 10,
-                  "Comment": "Esperar 10 segundos antes de verificar estado del crawler",
-                  "Next": "VerificarEstadoCrawler"
-                },
-                "VerificarEstadoCrawler": {
-                  "Type": "Task",
-                  "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-workflow-analitica-verificar-crawler",
-                  "Comment": "Verificar estado actual del crawler",
-                  "ResultPath": "$.crawler_status",
-                  "Next": "EvaluarEstadoCrawler",
-                  "Retry": [
-                    {
-                      "ErrorEquals": ["States.TaskFailed"],
-                      "IntervalSeconds": 3,
-                      "MaxAttempts": 3,
-                      "BackoffRate": 2.0
-                    }
-                  ],
-                  "Catch": [
-                    {
-                      "ErrorEquals": ["States.ALL"],
-                      "ResultPath": "$.error_info",
-                      "Next": "NotificarErrorCrawler"
-                    }
-                  ]
-                },
-                "EvaluarEstadoCrawler": {
-                  "Type": "Choice",
-                  "Comment": "Decidir siguiente acción basado en el estado del crawler",
-                  "Choices": [
-                    {
-                      "Variable": "$.crawler_status.crawler_status",
-                      "StringEquals": "COMPLETED",
-                      "Next": "WorkflowCompletadoExitosamente"
-                    },
-                    {
-                      "Variable": "$.crawler_status.crawler_status",
-                      "StringEquals": "FAILED",
-                      "Next": "NotificarErrorCrawler"
-                    },
-                    {
-                      "And": [
-                        {
-                          "Variable": "$.crawler_status.continue_waiting",
-                          "BooleanEquals": true
-                        },
-                        {
-                          "Variable": "$.polling_config.attempt",
-                          "NumericLessThan": 60
-                        }
-                      ],
-                      "Next": "IncrementarContador"
-                    }
-                  ],
-                  "Default": "TimeoutEsperandoCrawler"
-                },
-                "IncrementarContador": {
-                  "Type": "Pass",
-                  "Comment": "Incrementar contador de intentos",
-                  "Parameters": {
-                    "attempt.$": "States.MathAdd($.polling_config.attempt, 1)",
-                    "max_attempts.$": "$.polling_config.max_attempts"
-                  },
-                  "ResultPath": "$.polling_config",
-                  "Next": "EsperarPolling"
-                },
-                "WorkflowCompletadoExitosamente": {
-                  "Type": "Succeed",
-                  "Comment": "Workflow de analítica completado exitosamente - Tablas creadas/actualizadas"
-                },
-                "TimeoutEsperandoCrawler": {
-                  "Type": "Fail",
-                  "Error": "CrawlerTimeout",
-                  "Cause": "El crawler excedió el tiempo máximo de espera (10 minutos). Verifica el estado del crawler manualmente."
-                },
-                "NotificarErrorIngesta": {
-                  "Type": "Fail",
-                  "Error": "IngestaError",
-                  "Cause": "Error durante la ingesta de tablas DynamoDB a S3. Revisa los logs de CloudWatch para más detalles."
-                },
-                "NotificarErrorCrawler": {
-                  "Type": "Fail",
-                  "Error": "CrawlerError",
-                  "Cause": "Error durante la ejecución o verificación del crawler de Glue. Revisa los logs de CloudWatch y el estado del crawler."
-                }
-              }
-            }
+        TableName: ${env:TABLE_LOCALES}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 
     # Glue Database para Analítica
     ChinaWokGlueDatabase:
@@ -389,23 +251,17 @@ resources:
           Description: Base de datos de analítica para ChinaWok con tablas de Glue
 
   Outputs:
-    AnaliticaEventBusName:
-      Description: Nombre del Event Bus de Analítica
-      Value: !Ref ChinaWokAnaliticaEventBus
-      Export:
-        Name: ChinaWok-Analitica-EventBus-Name
-    
-    AnaliticaStateMachineArn:
-      Description: ARN del Step Function de analítica
-      Value: !GetAtt ChinaWokAnaliticaStateMachine.Arn
-      Export:
-        Name: ChinaWok-Analitica-StateMachine-Arn
-    
     GlueDatabaseName:
       Description: Nombre de la base de datos de Glue
       Value: !Ref ChinaWokGlueDatabase
       Export:
         Name: ChinaWok-Glue-Database-Name
+    
+    StreamProcessorFunctionArn:
+      Description: ARN de la función que procesa DynamoDB Streams
+      Value: !GetAtt StreamProcessorLambdaFunction.Arn
+      Export:
+        Name: ChinaWok-Stream-Processor-Arn
 
 package:
   individually: false
@@ -416,4 +272,3 @@ package:
     - __pycache__/**
     - "*.pyc"
     - "**/requirements.txt"
-

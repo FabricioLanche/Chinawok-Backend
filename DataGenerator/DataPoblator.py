@@ -10,13 +10,10 @@ from threading import Lock
 import random as random_module
 
 # Cargar variables de entorno desde .env en la raíz del proyecto
-# Buscar el archivo .env un nivel arriba (en la raíz)
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=env_path)
 
 # Configuración de AWS DynamoDB
-# Las credenciales se toman de ~/.aws/credentials automáticamente
-# Solo necesitamos especificar la región
 AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
 
 dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
@@ -74,7 +71,7 @@ TABLE_MAPPING = {
     },
     "resenas.json": {
         "table_name": TABLE_RESENAS,
-        "pk": "local_id",  # Cambiado de "pk" a "local_id"
+        "pk": "local_id",
         "sk": "resena_id"
     }
 }
@@ -107,10 +104,6 @@ def get_dynamodb_client():
     Crea y retorna un cliente de DynamoDB usando credenciales de ~/.aws/credentials
     """
     try:
-        # boto3 automáticamente busca credenciales en:
-        # 1. Variables de entorno
-        # 2. ~/.aws/credentials
-        # 3. ~/.aws/config
         dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
         
         # Verificar conexión intentando listar tablas
@@ -142,9 +135,46 @@ def table_exists(table_name):
             raise
 
 
+def enable_streams_on_existing_table(table_name):
+    """
+    Habilita DynamoDB Streams en una tabla existente si no están habilitados
+    """
+    try:
+        # Verificar estado actual de los streams
+        response = dynamodb_client.describe_table(TableName=table_name)
+        stream_spec = response['Table'].get('StreamSpecification', {})
+        
+        if stream_spec.get('StreamEnabled', False):
+            print(f"   ✅ Streams ya están habilitados en '{table_name}'")
+            return True
+        
+        # Habilitar streams
+        print(f"   🔄 Habilitando DynamoDB Streams en '{table_name}'...")
+        dynamodb_client.update_table(
+            TableName=table_name,
+            StreamSpecification={
+                'StreamEnabled': True,
+                'StreamViewType': 'NEW_AND_OLD_IMAGES'
+            }
+        )
+        
+        # Esperar a que la tabla se actualice
+        waiter = dynamodb_client.get_waiter('table_exists')
+        waiter.wait(TableName=table_name)
+        
+        print(f"   ✅ Streams habilitados exitosamente en '{table_name}'")
+        return True
+        
+    except ClientError as e:
+        print(f"   ⚠️  Error habilitando streams: {e.response['Error']['Message']}")
+        return False
+
+
 def create_table(table_name, pk_name, sk_name=None):
-    """Crea una tabla en DynamoDB con las claves especificadas"""
-    print(f"   📋 Tabla '{table_name}' no existe. Creándola...")
+    """
+    Crea una tabla en DynamoDB con DynamoDB Streams habilitados
+    """
+    print(f"   📋 Tabla '{table_name}' no existe. Creándola con Streams habilitados...")
     
     # Configuración de claves
     key_schema = [{'AttributeName': pk_name, 'KeyType': 'HASH'}]
@@ -159,7 +189,12 @@ def create_table(table_name, pk_name, sk_name=None):
             'TableName': table_name,
             'KeySchema': key_schema,
             'AttributeDefinitions': attribute_definitions,
-            'BillingMode': 'PAY_PER_REQUEST'  # On-demand pricing (sin necesidad de configurar capacidad)
+            'BillingMode': 'PAY_PER_REQUEST',
+            # 🆕 HABILITAR DYNAMODB STREAMS
+            'StreamSpecification': {
+                'StreamEnabled': True,
+                'StreamViewType': 'NEW_AND_OLD_IMAGES'
+            }
         }
         
         table = dynamodb.create_table(**table_config)
@@ -167,7 +202,7 @@ def create_table(table_name, pk_name, sk_name=None):
         print(f"   ⏳ Esperando a que la tabla '{table_name}' esté activa...")
         table.wait_until_exists()
         
-        print(f"   ✅ Tabla '{table_name}' creada exitosamente")
+        print(f"   ✅ Tabla '{table_name}' creada exitosamente con Streams habilitados")
         return True
         
     except ClientError as e:
@@ -183,7 +218,6 @@ def load_json_file(filename):
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            # Convertir floats a Decimal
             return convert_float_to_decimal(data)
     except FileNotFoundError:
         print(f"⚠️  Archivo no encontrado: {filepath}")
@@ -245,17 +279,11 @@ def batch_write_items(table, items, table_name):
     error_count = 0
     total_items = len(items)
     
-    # Tamaño del lote (máximo 25 en DynamoDB)
     batch_size = 25
-    
-    # Lock para actualizar contadores de forma segura entre threads
     count_lock = Lock()
-    
-    # Dividir items en lotes
     batches = [items[i:i + batch_size] for i in range(0, total_items, batch_size)]
     
     def process_batch_with_retry(batch, max_retries=5):
-        """Procesa un lote de items con retry y backoff exponencial"""
         local_success = 0
         local_errors = 0
         
@@ -268,22 +296,17 @@ def batch_write_items(table, items, table_name):
                             local_success += 1
                         except ClientError as e:
                             if e.response['Error']['Code'] == 'ProvisionedThroughputExceededException':
-                                # No contar como error aún, se reintentará
                                 raise
                             else:
                                 local_errors += 1
-                                if local_errors <= 3:  # Mostrar más detalles
+                                if local_errors <= 3:
                                     error_msg = e.response['Error']['Message']
                                     print(f"      ⚠️  Error ValidationException: {error_msg}")
-                                    # Imprimir el item problemático (solo claves)
-                                    if 'local_id' in item and 'resena_id' in item:
-                                        print(f"         Item: local_id={item['local_id']}, resena_id={item['resena_id']}")
                         except Exception as e:
                             local_errors += 1
                             if local_errors <= 3:
                                 print(f"      ⚠️  Error inesperado: {str(e)[:100]}")
                 
-                # Si llegamos aquí, el batch fue exitoso
                 return local_success, local_errors
                 
             except ClientError as e:
@@ -291,23 +314,18 @@ def batch_write_items(table, items, table_name):
                 
                 if error_code == 'ProvisionedThroughputExceededException':
                     if attempt < max_retries - 1:
-                        # Backoff exponencial con jitter
                         wait_time = (2 ** attempt) + random_module.uniform(0, 1)
                         time.sleep(wait_time)
-                        # Resetear contadores para reintentar
                         local_success = 0
                         local_errors = 0
                         continue
                 else:
-                    # Otro tipo de error
                     local_errors += len(batch)
                     return 0, local_errors
         
-        # Si se agotaron los reintentos
         return local_success, local_errors
     
     try:
-        # Usar ThreadPoolExecutor para procesamiento paralelo
         num_threads = min(10, len(batches))
         
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -320,7 +338,6 @@ def batch_write_items(table, items, table_name):
                         success_count += local_success
                         error_count += local_errors
                         
-                        # Mostrar progreso cada 5% o cada 500 items
                         if (success_count % 500 == 0) or (success_count + error_count >= total_items):
                             porcentaje = ((success_count + error_count) / total_items) * 100
                             print(f"      📊 Progreso: {success_count}/{total_items} ({porcentaje:.1f}%) - Errores: {error_count}")
@@ -341,7 +358,6 @@ def ask_user_action_global():
     """
     Pregunta al usuario qué hacer con los datos existentes (aplica a todas las tablas)
     """
-    # Verificar si hay variable de entorno para modo automático
     auto_replace = os.getenv('AUTO_REPLACE', 'false').lower() == 'true'
     
     if auto_replace:
@@ -388,9 +404,11 @@ def populate_table(dynamodb, filename, table_config, global_action=None):
     else:
         print(f"   ✅ Tabla '{table_name}' existe")
         
+        # 🆕 HABILITAR STREAMS SI NO ESTÁN HABILITADOS
+        enable_streams_on_existing_table(table_name)
+        
         # Si hay una acción global definida y es "replace", limpiar la tabla
         if global_action == "replace":
-            # Verificar si la tabla tiene datos antes de limpiar
             try:
                 table = dynamodb.Table(table_name)
                 response = table.scan(Limit=1)
@@ -448,7 +466,6 @@ def verify_credentials():
     Verifica que las credenciales de AWS estén disponibles
     """
     try:
-        # Intentar obtener credenciales de la sesión de boto3
         session = boto3.Session()
         credentials = session.get_credentials()
         
@@ -490,7 +507,7 @@ def main():
     Función principal que ejecuta la población de todas las tablas
     """
     print("=" * 60)
-    print("🚀 CHINA WOK - DATA POBLATOR")
+    print("🚀 CHINA WOK - DATA POBLATOR (con DynamoDB Streams)")
     print("=" * 60)
 
     # Verificar credenciales
@@ -521,7 +538,7 @@ def main():
 
     # Poblar cada tabla
     print("\n" + "=" * 60)
-    print("📊 INICIANDO POBLACIÓN DE TABLAS")
+    print("📊 INICIANDO POBLACIÓN DE TABLAS (con Streams habilitados)")
     print("=" * 60)
 
     results = {}
@@ -541,6 +558,9 @@ def main():
     print(f"\n✅ Tablas pobladas exitosamente: {successful}")
     if failed > 0:
         print(f"❌ Tablas con errores: {failed}")
+    
+    print(f"\n🔄 DynamoDB Streams habilitados en todas las tablas")
+    print(f"   Las actualizaciones se sincronizarán automáticamente con S3")
 
     print("\n" + "=" * 60)
     print("🎉 PROCESO COMPLETADO")

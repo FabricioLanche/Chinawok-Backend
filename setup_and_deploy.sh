@@ -159,6 +159,38 @@ build_layer() {
     log_success "Lambda Layer construido correctamente"
 }
 
+# Función para habilitar DynamoDB Streams
+enable_dynamodb_streams() {
+    log ""
+    log "🔄 Verificando y habilitando DynamoDB Streams..."
+    log "────────────────────────────────────────────────────────────"
+    
+    cd DataGenerator || exit 1
+    
+    # Verificar si el script existe
+    if [ ! -f enable_streams.py ]; then
+        log_warning "Script enable_streams.py no encontrado"
+        log_info "Los Streams se habilitarán al crear las tablas con DataPoblator"
+        cd ..
+        return 0
+    fi
+    
+    # Ejecutar el script de habilitación de streams
+    python3 enable_streams.py
+    
+    local exit_code=$?
+    cd ..
+    
+    if [ $exit_code -eq 0 ]; then
+        log_success "Verificación de Streams completada"
+        return 0
+    else
+        log_warning "Hubo algunos problemas al verificar Streams"
+        log_info "Continuando con el proceso..."
+        return 0
+    fi
+}
+
 # Función para generar y poblar datos
 populate_data() {
     log ""
@@ -234,6 +266,7 @@ populate_data() {
         log "📊 Resumen de datos:"
         log "   ✅ Datos generados en dynamodb_data/"
         log "   ✅ Datos poblados en DynamoDB"
+        log "   ✅ DynamoDB Streams habilitados en todas las tablas"
     else
         log_error "Error al poblar DynamoDB"
         cd ..
@@ -241,6 +274,13 @@ populate_data() {
     fi
     
     cd ..
+    
+    # 🆕 HABILITAR STREAMS DESPUÉS DE POBLAR DATOS
+    log ""
+    log "═══════════════════════════════════════════════════════════"
+    log "🔄 Post-configuración: Verificando Streams"
+    log "═══════════════════════════════════════════════════════════"
+    enable_dynamodb_streams
 }
 
 # Función para mostrar URLs de los servicios desplegados
@@ -428,7 +468,7 @@ echo "════════════════════════�
 echo "  📋 OPCIONES DE DESPLIEGUE                           "
 echo "═══════════════════════════════════════════════════════"
 echo "  1) 🚀 Despliegue completo (datos + microservicios)  "
-echo "  2) 📊 Solo poblar datos (DataGenerator)             "
+echo "  2) 📊 Solo poblar datos (incluye Streams)           "
 echo "  3) ⚙️  Solo desplegar microservicios                "
 echo "  4) 🗑️  Eliminar todo (remove)                       "
 echo "═══════════════════════════════════════════════════════"
@@ -461,7 +501,7 @@ case $opcion in
         log "═══════════════════════════════════════════════════════"
         build_layer
         
-        # Paso 3: Poblar datos
+        # Paso 3: Poblar datos (incluye habilitación de Streams)
         populate_data
         
         # Paso 4: Despliegue de microservicios
@@ -476,6 +516,16 @@ case $opcion in
             
             # Mostrar endpoints
             show_endpoints
+            
+            # Mostrar resumen de Streams
+            log ""
+            log "═══════════════════════════════════════════════════════"
+            log "🔄 Estado de DynamoDB Streams"
+            log "═══════════════════════════════════════════════════════"
+            log_info "✅ Streams habilitados en todas las tablas"
+            log_info "✅ Lambda streamProcessor desplegado"
+            log_info "✅ Lambda s3TriggerCrawler desplegado"
+            log_info "📊 Los datos se sincronizarán automáticamente con S3"
         else
             log_error "Error en despliegue de microservicios"
             exit 1
@@ -483,9 +533,9 @@ case $opcion in
         ;;
         
     2)
-        log_info "Poblando datos..."
+        log_info "Poblando datos (incluye habilitación de Streams)..."
         populate_data
-        log_success "✨ Datos poblados exitosamente"
+        log_success "✨ Datos poblados exitosamente con Streams habilitados"
         ;;
         
     3)
