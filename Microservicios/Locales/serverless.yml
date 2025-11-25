@@ -231,14 +231,15 @@ functions:
     description: Verifica el estado del crawler de Glue
 
 resources:
-  # Glue Database para Analítica
-  ChinaWokGlueDatabase:
-    Type: AWS::Glue::Database
-    Properties:
-      CatalogId: !Ref AWS::AccountId
-      DatabaseInput:
-        Name: ${env:ATHENA_DATABASE, 'chinawok_analytics'}
-        Description: Base de datos de analítica para ChinaWok con tablas de Glue
+  Resources:
+    # Glue Database para Analítica
+    ChinaWokGlueDatabase:
+      Type: AWS::Glue::Database
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        DatabaseInput:
+          Name: ${env:ATHENA_DATABASE, 'chinawok_analytics'}
+          Description: Base de datos de analítica para ChinaWok con tablas de Glue
 
   Outputs:
     GlueDatabaseName:
