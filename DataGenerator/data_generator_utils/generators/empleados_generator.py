@@ -30,10 +30,27 @@ class EmpleadosGenerator:
         cls._dnis_generados.clear()
         
         for local_id in locales_ids:
-            # Cada local tiene entre 3-7 empleados
-            num_empleados_local = random.randint(3, 7)
+            # Garantizar mínimo 2 empleados de cada tipo (6 total)
+            # Primero crear los empleados obligatorios
+            roles_requeridos = ["Repartidor", "Repartidor", "Cocinero", "Cocinero", "Despachador", "Despachador"]
             
-            for _ in range(num_empleados_local):
+            for role in roles_requeridos:
+                empleado = cls._crear_empleado(local_id, role)
+                empleados.append(empleado)
+                
+                # Guardar DNI en lista por rol ESPECÍFICO DEL LOCAL
+                empleados_por_local[local_id][empleado["role"].lower()].append(empleado["dni"])
+                
+                # Guardar información completa del empleado ESPECÍFICO DEL LOCAL
+                empleados_por_local[local_id]["info_empleados"][empleado["dni"]] = {
+                    "nombre": empleado["nombre"],
+                    "apellido": empleado["apellido"],
+                    "calificacion_prom": empleado.get("calificacion_prom")
+                }
+            
+            # Agregar 0-3 empleados adicionales aleatorios
+            num_empleados_extra = random.randint(0, 3)
+            for _ in range(num_empleados_extra):
                 empleado = cls._crear_empleado(local_id)
                 empleados.append(empleado)
                 
@@ -54,15 +71,17 @@ class EmpleadosGenerator:
         return empleados, empleados_por_local
     
     @classmethod
-    def _crear_empleado(cls, local_id):
-        """Crea un empleado individual"""
+    def _crear_empleado(cls, local_id, role=None):
+        """Crea un empleado individual con rol específico u opcional"""
         nombre = random.choice(SampleData.NOMBRES)
         apellido = random.choice(SampleData.APELLIDOS)
         
         # Generar DNI peruano único (8 dígitos)
         dni = cls._generar_dni_unico()
         
-        role = random.choice(["Repartidor", "Cocinero", "Despachador"])
+        # Si no se especifica role, elegir uno aleatorio
+        if role is None:
+            role = random.choice(["Repartidor", "Cocinero", "Despachador"])
         
         return {
             "local_id": local_id,

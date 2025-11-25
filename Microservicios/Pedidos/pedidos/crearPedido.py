@@ -221,9 +221,26 @@ def handler(event, context):
                     'body': json.dumps({'error': 'Error validación combos', 'message': err})
                 }
 
-        # Guardar
+        # Guardar pedido
         body = convertir_floats_a_decimal(body)
         table.put_item(Item=body)
+        
+        # Actualizar historial_pedidos del usuario
+        try:
+            usuario_correo = body['usuario_correo']
+            pedido_id = body['pedido_id']
+            
+            usuarios_table.update_item(
+                Key={'correo': usuario_correo},
+                UpdateExpression='SET historial_pedidos = list_append(if_not_exists(historial_pedidos, :empty_list), :pedido)',
+                ExpressionAttributeValues={
+                    ':pedido': [pedido_id],
+                    ':empty_list': []
+                }
+            )
+        except Exception as e:
+            # Log error pero no fallar la creación del pedido
+            print(f"Warning: No se pudo actualizar historial de usuario: {str(e)}")
 
         try:
             eventbridge.put_events(Entries=[{

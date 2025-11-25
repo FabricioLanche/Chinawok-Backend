@@ -24,7 +24,8 @@ class UsuariosGenerator:
         if locales_data:
             for local in locales_data:
                 gerente_data = local["gerente"]
-                gerente = cls._crear_gerente_desde_local(gerente_data)
+                local_id = local["local_id"]  # Obtener local_id del local
+                gerente = cls._crear_gerente_desde_local(gerente_data, local_id)
                 usuarios.append(gerente)
                 usuarios_ids.append(gerente["correo"])
                 num_gerentes += 1
@@ -54,7 +55,7 @@ class UsuariosGenerator:
         }
     
     @classmethod
-    def _crear_gerente_desde_local(cls, gerente_data):
+    def _crear_gerente_desde_local(cls, gerente_data, local_id):
         """Crea un usuario Gerente a partir de los datos del local"""
         return {
             "nombre": gerente_data["nombre"].split()[0],  # Primer nombre
@@ -62,6 +63,7 @@ class UsuariosGenerator:
             "correo": gerente_data["correo"],
             "contrasena": gerente_data["contrasena"],
             "role": "Gerente",
+            "local_id": local_id,  # Asociar gerente con su local
             "historial_pedidos": []
         }
     

@@ -8,6 +8,10 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('TABLE_PEDIDOS', 'ChinaWok-Pedidos')
 table = dynamodb.Table(table_name)
 
+# Tabla de usuarios
+usuarios_table_name = os.environ.get('TABLE_USUARIOS', 'ChinaWok-Usuarios')
+usuarios_table = dynamodb.Table(usuarios_table_name)
+
 
 def handler(event, context):
     """
@@ -65,6 +69,10 @@ def handler(event, context):
                     'error': 'Pedido no encontrado'
                 })
             }
+        
+        # Obtener datos del pedido antes de eliminar
+        pedido = response['Item']
+        usuario_correo = pedido.get('usuario_correo')
 
         # Eliminar el pedido
         table.delete_item(
@@ -73,6 +81,29 @@ def handler(event, context):
                 'pedido_id': pedido_id
             }
         )
+        
+        # Eliminar del historial del usuario
+        if usuario_correo:
+            try:
+                # Obtener usuario actual
+                user_response = usuarios_table.get_item(Key={'correo': usuario_correo})
+                if 'Item' in user_response:
+                    usuario = user_response['Item']
+                    historial = usuario.get('historial_pedidos', [])
+                    
+                    # Remover pedido_id del historial
+                    if pedido_id in historial:
+                        historial.remove(pedido_id)
+                        
+                        # Actualizar usuario
+                        usuarios_table.update_item(
+                            Key={'correo': usuario_correo},
+                            UpdateExpression='SET historial_pedidos = :historial',
+                            ExpressionAttributeValues={':historial': historial}
+                        )
+            except Exception as e:
+                # Log error pero no fallar la eliminación del pedido
+                print(f"Warning: No se pudo actualizar historial de usuario: {str(e)}")
 
         return {
             'statusCode': 200,
