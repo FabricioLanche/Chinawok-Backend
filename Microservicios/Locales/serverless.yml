@@ -142,7 +142,7 @@ functions:
       # Stream para Locales
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_LOCALES}/stream/*
+          arn: ${env:STREAM_ARN_LOCALES}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -150,7 +150,7 @@ functions:
       # Stream para Usuarios
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_USUARIOS}/stream/*
+          arn: ${env:STREAM_ARN_USUARIOS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -158,7 +158,7 @@ functions:
       # Stream para Productos
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_PRODUCTOS}/stream/*
+          arn: ${env:STREAM_ARN_PRODUCTOS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -166,7 +166,7 @@ functions:
       # Stream para Empleados
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_EMPLEADOS}/stream/*
+          arn: ${env:STREAM_ARN_EMPLEADOS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -174,7 +174,7 @@ functions:
       # Stream para Combos
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_COMBOS}/stream/*
+          arn: ${env:STREAM_ARN_COMBOS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -182,7 +182,7 @@ functions:
       # Stream para Pedidos
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_PEDIDOS}/stream/*
+          arn: ${env:STREAM_ARN_PEDIDOS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -190,7 +190,7 @@ functions:
       # Stream para Ofertas
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_OFERTAS}/stream/*
+          arn: ${env:STREAM_ARN_OFERTAS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2
@@ -198,7 +198,7 @@ functions:
       # Stream para Reseñas
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:${aws:region}:${env:AWS_ACCOUNT_ID}:table/${env:TABLE_RESENAS}/stream/*
+          arn: ${env:STREAM_ARN_RESENAS}
           batchSize: 100
           startingPosition: LATEST
           maximumRetryAttempts: 2

@@ -159,6 +159,72 @@ build_layer() {
     log_success "Lambda Layer construido correctamente"
 }
 
+# 🆕 NUEVA FUNCIÓN: Obtener ARNs de streams y actualizar .env
+get_stream_arns() {
+    log ""
+    log "═══════════════════════════════════════════════════════════"
+    log "🔍 Obteniendo ARNs de DynamoDB Streams"
+    log "═══════════════════════════════════════════════════════════"
+    
+    # Leer nombres de tablas del .env
+    source .env
+    
+    declare -A tables=(
+        ["LOCALES"]="$TABLE_LOCALES"
+        ["USUARIOS"]="$TABLE_USUARIOS"
+        ["PRODUCTOS"]="$TABLE_PRODUCTOS"
+        ["EMPLEADOS"]="$TABLE_EMPLEADOS"
+        ["COMBOS"]="$TABLE_COMBOS"
+        ["PEDIDOS"]="$TABLE_PEDIDOS"
+        ["OFERTAS"]="$TABLE_OFERTAS"
+        ["RESENAS"]="$TABLE_RESENAS"
+    )
+    
+    # Crear archivo temporal para nuevas variables
+    temp_env=$(mktemp)
+    
+    # Copiar .env existente
+    cp .env "$temp_env"
+    
+    # Remover variables antiguas de stream si existen
+    sed -i '/^STREAM_ARN_/d' "$temp_env"
+    
+    log_info "Consultando ARNs de streams en AWS..."
+    
+    for key in "${!tables[@]}"; do
+        table_name="${tables[$key]}"
+        
+        if [ -z "$table_name" ]; then
+            log_warning "⚠️  Tabla $key no está configurada, saltando..."
+            continue
+        fi
+        
+        log "   📊 Obteniendo stream ARN para: $table_name"
+        
+        # Obtener el ARN del stream usando AWS CLI
+        stream_arn=$(aws dynamodb describe-table \
+            --table-name "$table_name" \
+            --query 'Table.LatestStreamArn' \
+            --output text 2>/dev/null)
+        
+        if [ $? -eq 0 ] && [ "$stream_arn" != "None" ] && [ -n "$stream_arn" ]; then
+            log_success "   ✅ Stream ARN obtenido: ${stream_arn:0:60}..."
+            
+            # Agregar al archivo temporal
+            echo "STREAM_ARN_${key}=${stream_arn}" >> "$temp_env"
+        else
+            log_warning "   ⚠️  No se pudo obtener stream ARN para $table_name"
+            log_warning "   ℹ️  Asegúrate de que la tabla existe y tiene streams habilitados"
+        fi
+    done
+    
+    # Reemplazar .env con el nuevo archivo
+    mv "$temp_env" .env
+    
+    log_success "✅ ARNs de streams guardados en .env"
+    log ""
+}
+
 # Función para habilitar DynamoDB Streams
 enable_dynamodb_streams() {
     log ""
@@ -281,6 +347,9 @@ populate_data() {
     log "🔄 Post-configuración: Verificando Streams"
     log "═══════════════════════════════════════════════════════════"
     enable_dynamodb_streams
+    
+    # 🆕 OBTENER ARNs DE STREAMS
+    get_stream_arns
 }
 
 # Función para mostrar URLs de los servicios desplegados
@@ -470,10 +539,11 @@ echo "════════════════════════�
 echo "  1) 🚀 Despliegue completo (datos + microservicios)  "
 echo "  2) 📊 Solo poblar datos (incluye Streams)           "
 echo "  3) ⚙️  Solo desplegar microservicios                "
-echo "  4) 🗑️  Eliminar todo (remove)                       "
+echo "  4) 🔄 Solo actualizar ARNs de Streams               "
+echo "  5) 🗑️  Eliminar todo (remove)                       "
 echo "═══════════════════════════════════════════════════════"
 echo ""
-read -p "Selecciona una opción (1-4): " opcion
+read -p "Selecciona una opción (1-5): " opcion
 
 case $opcion in
     1)
@@ -482,7 +552,7 @@ case $opcion in
         # Paso 1: Verificar/crear bucket S3
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "🪣 PASO 1/4: Verificando infraestructura S3"
+        log "🪣 PASO 1/5: Verificando infraestructura S3"
         log "═══════════════════════════════════════════════════════"
         
         # Leer nombre del bucket del .env
@@ -497,17 +567,17 @@ case $opcion in
         # Paso 2: Construir Lambda Layer
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "🔧 PASO 2/4: Construyendo Lambda Layer compartido"
+        log "🔧 PASO 2/5: Construyendo Lambda Layer compartido"
         log "═══════════════════════════════════════════════════════"
         build_layer
         
-        # Paso 3: Poblar datos (incluye habilitación de Streams)
+        # Paso 3: Poblar datos (incluye habilitación de Streams y obtención de ARNs)
         populate_data
         
         # Paso 4: Despliegue de microservicios
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "⚙️  PASO 4/4: Despliegue de microservicios"
+        log "⚙️  PASO 4/5: Despliegue de microservicios"
         log "═══════════════════════════════════════════════════════"
         serverless deploy
         
@@ -533,7 +603,7 @@ case $opcion in
         ;;
         
     2)
-        log_info "Poblando datos (incluye habilitación de Streams)..."
+        log_info "Poblando datos (incluye habilitación de Streams y obtención de ARNs)..."
         populate_data
         log_success "✨ Datos poblados exitosamente con Streams habilitados"
         ;;
@@ -576,6 +646,13 @@ case $opcion in
         ;;
         
     4)
+        log_info "Actualizando ARNs de Streams..."
+        get_stream_arns
+        log_success "✨ ARNs actualizados en .env"
+        log_info "💡 Ahora puedes desplegar con la opción 3"
+        ;;
+        
+    5)
         log_warning "⚠️  ADVERTENCIA: Esto eliminará TODOS los recursos"
         read -p "¿Estás seguro? (s/n): " confirmar
         if [ "$confirmar" = "s" ] || [ "$confirmar" = "S" ]; then
