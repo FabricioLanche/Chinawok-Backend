@@ -713,14 +713,13 @@ echo ""
 echo "═══════════════════════════════════════════════════════"
 echo "  📋 OPCIONES DE DESPLIEGUE                           "
 echo "═══════════════════════════════════════════════════════"
-echo "  1) 🚀 Despliegue completo (datos + microservicios)  "
-echo "  2) 📊 Solo poblar datos (incluye Streams)           "
-echo "  3) ⚙️  Solo desplegar microservicios                "
-echo "  4) 🔄 Solo actualizar ARNs de Streams               "
-echo "  5) 🗑️  Eliminar todo (remove)                       "
+echo "  1) 🚀 Despliegue completo (infraestructura + apps)  "
+echo "  2) 🏗️  Solo infraestructura (S3 + datos + Glue)     "
+echo "  3) ⚙️  Solo microservicios (Lambda + APIs)          "
+echo "  4) 🗑️  Eliminar todo (remove)                       "
 echo "═══════════════════════════════════════════════════════"
 echo ""
-read -p "Selecciona una opción (1-5): " opcion
+read -p "Selecciona una opción (1-4): " opcion
 
 case $opcion in
     1)
@@ -799,35 +798,56 @@ case $opcion in
         ;;
         
     2)
-        log_info "Poblando datos (incluye habilitación de Streams y obtención de ARNs)..."
+        log_info "Desplegando solo infraestructura de datos..."
+        
+        # Paso 1: Verificar/crear bucket S3
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "🪣 PASO 1/3: Verificando infraestructura S3"
+        log "═══════════════════════════════════════════════════════"
+        
+        BUCKET_NAME=$(grep '^S3_BUCKET_NAME=' .env | cut -d '=' -f2)
+        BUCKET_NAME=${BUCKET_NAME:-chinawok-data}
+        
+        if ! ensure_s3_bucket "$BUCKET_NAME"; then
+            log_error "No se pudo configurar el bucket S3"
+            exit 1
+        fi
+        
+        # Paso 2: Poblar datos (incluye habilitación de Streams y obtención de ARNs)
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "📊 PASO 2/3: Poblando datos y configurando Streams"
+        log "═══════════════════════════════════════════════════════"
         populate_data
-        log_success "✨ Datos poblados exitosamente con Streams habilitados"
+        
+        # Paso 3: Inicializar Glue Crawler
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "🔍 PASO 3/3: Inicializando Glue Crawler"
+        log "═══════════════════════════════════════════════════════"
+        initialize_glue_crawler
+        
+        log_success "✨ Infraestructura de datos lista"
+        log_info "📊 Datos poblados con Streams habilitados"
+        log_info "🎯 Glue Crawler ejecutado - Athena listo"
         ;;
         
     3)
         log_info "Desplegando microservicios..."
         
-        # Verificar bucket S3 primero
-        log ""
-        log "🪣 Verificando infraestructura S3..."
-        BUCKET_NAME=$(grep '^S3_BUCKET_NAME=' .env | cut -d '=' -f2)
-        BUCKET_NAME=${BUCKET_NAME:-chinawok-data}
-        
-        if ! ensure_s3_bucket "$BUCKET_NAME"; then
-            log_warning "⚠️  No se pudo configurar el bucket S3"
-            read -p "¿Continuar de todos modos? (s/n): " continuar
-            if [ "$continuar" != "s" ] && [ "$continuar" != "S" ]; then
-                log_info "Despliegue cancelado"
-                exit 0
-            fi
-        fi
-        
         # Construir layer primero
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "🔧 PASO 1/3: Construyendo Lambda Layer compartido"
+        log "═══════════════════════════════════════════════════════"
         build_layer
         
         # Desplegar todo
         log ""
-        log "Desplegando servicios..."
+        log "═══════════════════════════════════════════════════════"
+        log "⚙️  PASO 2/3: Desplegando servicios"
+        log "═══════════════════════════════════════════════════════"
         serverless deploy
         
         if [ $? -eq 0 ]; then
@@ -835,6 +855,9 @@ case $opcion in
             
             # Configurar notificaciones S3
             log ""
+            log "═══════════════════════════════════════════════════════"
+            log "📬 PASO 3/3: Configurando notificaciones S3"
+            log "═══════════════════════════════════════════════════════"
             source .env
             configure_s3_notifications "$BUCKET_NAME"
             
@@ -845,15 +868,7 @@ case $opcion in
             exit 1
         fi
         ;;
-        
     4)
-        log_info "Actualizando ARNs de Streams..."
-        get_stream_arns
-        log_success "✨ ARNs actualizados en .env"
-        log_info "💡 Ahora puedes desplegar con la opción 3"
-        ;;
-        
-    5)
         log_warning "⚠️  ADVERTENCIA: Esto eliminará TODOS los recursos"
         read -p "¿Estás seguro? (s/n): " confirmar
         if [ "$confirmar" = "s" ] || [ "$confirmar" = "S" ]; then
