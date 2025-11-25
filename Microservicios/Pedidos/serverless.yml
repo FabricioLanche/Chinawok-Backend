@@ -1,5 +1,4 @@
 service: chinawok-pedidos
-
 provider:
   name: aws
   runtime: python3.12
@@ -20,10 +19,8 @@ provider:
     STEP_FUNCTION_PEDIDOS_NAME: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
     EVENT_BUS_NAME: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
     MODO_REALISTA: ${env:MODO_REALISTA, 'false'}
-
   layers:
     - ${cf:chinawok-shared-layer-${param:stage}.PythonDependenciesLayerExport}
-
   iam:
     role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
 
@@ -150,7 +147,16 @@ functions:
           path: pedidos
           method: delete
           cors: true
-  
+
+  productosFiltrarPorCategoria:
+    handler: productos/filtrarProductosPorCategoria.handler
+    name: ${self:service}-productos-filtrar-por-categoria
+    description: Filtrar productos por categoría
+    events:
+      - http:
+          path: productos/filtrar
+          method: get
+          cors: true
   # ==================== PRODUCTOS ====================
   productosCrear:
     handler: productos/crearProducto.handler
@@ -191,67 +197,60 @@ functions:
           path: productos
           method: delete
           cors: true
-
-  productosFiltrarPorCategoria:
-    handler: productos/filtrarProductosPorCategoria.handler
-    name: ${self:service}-productos-filtrar-por-categoria
-    description: Filtrar productos por categoría
-    events:
-      - http:
-          path: productos/filtrar
-          method: get
-          cors: true
-
+  
   # ==================== WORKFLOW - STEP FUNCTIONS ====================
   workflowIniciar:
-    handler: worflow/iniciarWorkflow.handler
+    handler: workflow/iniciarWorkflow.lambda_handler
     name: ${self:service}-workflow-iniciar
     description: Iniciar el workflow de procesamiento de pedidos
   
   workflowStepConfirmar:
-    handler: worflow/stepConfirmar.handler
+    handler: workflow/stepConfirmar.lambda_handler
     name: ${self:service}-workflow-step-confirmar
     description: Step 1 - Confirmar pedido
   
   workflowStepCocinar:
-    handler: worflow/stepCocinar.handler
+    handler: workflow/stepCocinar.lambda_handler
     name: ${self:service}-workflow-step-cocinar
     description: Step 2 - Cocinar pedido
   
   workflowStepEmpacar:
-    handler: worflow/stepEmpacar.handler
+    handler: workflow/stepEmpacar.lambda_handler
     name: ${self:service}-workflow-step-empacar
     description: Step 3 - Empacar pedido
   
   workflowStepEnviar:
-    handler: worflow/stepEnviar.handler
+    handler: workflow/stepEnviar.lambda_handler
     name: ${self:service}-workflow-step-enviar
     description: Step 4 - Enviar pedido
   
   workflowConfirmarRecepcion:
-    handler: worflow/confirmarRecepcion.handler
+    handler: workflow/confirmarRecepcion.lambda_handler
     name: ${self:service}-workflow-confirmar-recepcion
     description: Step 5 - Confirmar recepción del pedido
+    events:
+      - http:
+          path: workflow/confirmar
+          method: post
+          cors: true
   
   workflowLiberarPedido:
-    handler: worflow/liberarPedido.handler
+    handler: workflow/liberarPedido.lambda_handler
     name: ${self:service}-workflow-liberar-pedido
     description: Liberar empleados asignados al pedido
   
   workflowNotificarUsuario:
-    handler: worflow/notificarUsuario.handler
+    handler: workflow/notificarUsuario.lambda_handler
     name: ${self:service}-workflow-notificar-usuario
     description: Notificar usuario sobre el estado del pedido
 
 resources:
   Resources:
-    # EventBridge Event Bus - NOMBRE ÚNICO DIFERENTE
     ChinaWokPedidosEventBus:
       Type: AWS::Events::EventBus
       Properties:
-        Name: chinawok-pedidos-workflow-events
-
-    # EventBridge Rule para PedidoCreado
+        Name: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
+    
     PedidoCreadoEventRule:
       Type: AWS::Events::Rule
       Properties:
@@ -268,8 +267,7 @@ resources:
           - Arn: !GetAtt ChinaWokPedidosStateMachine.Arn
             Id: PedidoCreadoStepFunction
             RoleArn: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/LabRole
-
-    # Step Functions State Machine - EXACTO AL MODELO ORIGINAL
+    
     ChinaWokPedidosStateMachine:
       Type: AWS::StepFunctions::StateMachine
       DependsOn:
@@ -315,13 +313,31 @@ resources:
                   },
                   "ExtractResultCocinar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "cocinero_dni.$": "$.resultado_cocinar.Payload.cocinero_dni", "estado.$": "$.resultado_cocinar.Payload.estado", "historial_estados.$": "$.resultado_cocinar.Payload.historial_estados", "contadores.$": "$.contadores"},
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "cocinero_dni.$": "$.resultado_cocinar.Payload.cocinero_dni",
+                      "estado.$": "$.resultado_cocinar.Payload.estado",
+                      "historial_estados.$": "$.resultado_cocinar.Payload.historial_estados",
+                      "contadores.$": "$.contadores"
+                    },
                     "Next": "EsperarTiempoCocinar"
                   },
                   "IncrementarIntentosCocinar": {
                     "Type": "Pass",
-                    "Parameters": {"intentos_cocinar.$": "States.MathAdd($.contadores.intentos_cocinar, 1)", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "$.contadores.intentos_enviar"},
-                    "ResultPath": "$.contadores",
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "contadores": {
+                        "intentos_cocinar.$": "States.MathAdd($.contadores.intentos_cocinar, 1)",
+                        "intentos_empacar.$": "$.contadores.intentos_empacar",
+                        "intentos_enviar.$": "$.contadores.intentos_enviar",
+                        "modo_realista.$": "$.contadores.modo_realista"
+                      },
+                      "error.$": "$.error"
+                    },
                     "Next": "VerificarMaximoIntentosCocinar"
                   },
                   "VerificarMaximoIntentosCocinar": {
@@ -332,7 +348,7 @@ resources:
                   "EsperarReintentoEmpleadoCocinar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarCocinar"},
                   "EsperarTiempoCocinar": {
                     "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaCocinar"}],
+                    "Choices": [{"Variable": "$.contadores.modo_realista", "BooleanEquals": true, "Next": "EsperaRealistaCocinar"}],
                     "Default": "EsperaDemoCocinar"
                   },
                   "EsperaRealistaCocinar": {"Type": "Wait", "Seconds": 900, "Next": "IntentarEmpacar"},
@@ -348,19 +364,42 @@ resources:
                   },
                   "ExtractResultEmpacar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "despachador_dni.$": "$.resultado_empacar.Payload.despachador_dni", "estado.$": "$.resultado_empacar.Payload.estado", "historial_estados.$": "$.resultado_empacar.Payload.historial_estados", "contadores.$": "$.contadores"},
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "despachador_dni.$": "$.resultado_empacar.Payload.despachador_dni",
+                      "estado.$": "$.resultado_empacar.Payload.estado",
+                      "historial_estados.$": "$.resultado_empacar.Payload.historial_estados",
+                      "contadores.$": "$.contadores"
+                    },
                     "Next": "EsperarTiempoEmpacar"
                   },
                   "IncrementarIntentosEmpacar": {
                     "Type": "Pass",
-                    "Parameters": {"intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "States.MathAdd($.contadores.intentos_empacar, 1)", "intentos_enviar.$": "$.contadores.intentos_enviar"},
-                    "ResultPath": "$.contadores",
-                    "Next": "EsperarReintentoEmpleadoEmpacar"
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "contadores": {
+                        "intentos_cocinar.$": "$.contadores.intentos_cocinar",
+                        "intentos_empacar.$": "States.MathAdd($.contadores.intentos_empacar, 1)",
+                        "intentos_enviar.$": "$.contadores.intentos_enviar",
+                        "modo_realista.$": "$.contadores.modo_realista"
+                      },
+                      "error.$": "$.error"
+                    },
+                    "Next": "VerificarMaximoIntentosEmpacar"
+                  },
+                  "VerificarMaximoIntentosEmpacar": {
+                    "Type": "Choice",
+                    "Choices": [{"Variable": "$.contadores.intentos_empacar", "NumericLessThan": 5, "Next": "EsperarReintentoEmpleadoEmpacar"}],
+                    "Default": "ErrorFatal"
                   },
                   "EsperarReintentoEmpleadoEmpacar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEmpacar"},
                   "EsperarTiempoEmpacar": {
                     "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaEmpacar"}],
+                    "Choices": [{"Variable": "$.contadores.modo_realista", "BooleanEquals": true, "Next": "EsperaRealistaEmpacar"}],
                     "Default": "EsperaDemoEmpacar"
                   },
                   "EsperaRealistaEmpacar": {"Type": "Wait", "Seconds": 300, "Next": "IntentarEnviar"},
@@ -376,19 +415,42 @@ resources:
                   },
                   "ExtractResultEnviar": {
                     "Type": "Pass",
-                    "Parameters": {"local_id.$": "$.local_id", "pedido_id.$": "$.pedido_id", "usuario_correo.$": "$.usuario_correo", "repartidor_dni.$": "$.resultado_enviar.Payload.repartidor_dni", "estado.$": "$.resultado_enviar.Payload.estado", "historial_estados.$": "$.resultado_enviar.Payload.historial_estados", "contadores.$": "$.contadores"},
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "repartidor_dni.$": "$.resultado_enviar.Payload.repartidor_dni",
+                      "estado.$": "$.resultado_enviar.Payload.estado",
+                      "historial_estados.$": "$.resultado_enviar.Payload.historial_estados",
+                      "contadores.$": "$.contadores"
+                    },
                     "Next": "EsperarTiempoEnviar"
                   },
                   "IncrementarIntentosEnviar": {
                     "Type": "Pass",
-                    "Parameters": {"intentos_cocinar.$": "$.contadores.intentos_cocinar", "intentos_empacar.$": "$.contadores.intentos_empacar", "intentos_enviar.$": "States.MathAdd($.contadores.intentos_enviar, 1)"},
-                    "ResultPath": "$.contadores",
-                    "Next": "EsperarReintentoEmpleadoEnviar"
+                    "Parameters": {
+                      "local_id.$": "$.local_id",
+                      "pedido_id.$": "$.pedido_id",
+                      "usuario_correo.$": "$.usuario_correo",
+                      "contadores": {
+                        "intentos_cocinar.$": "$.contadores.intentos_cocinar",
+                        "intentos_empacar.$": "$.contadores.intentos_empacar",
+                        "intentos_enviar.$": "States.MathAdd($.contadores.intentos_enviar, 1)",
+                        "modo_realista.$": "$.contadores.modo_realista"
+                      },
+                      "error.$": "$.error"
+                    },
+                    "Next": "VerificarMaximoIntentosEnviar"
+                  },
+                  "VerificarMaximoIntentosEnviar": {
+                    "Type": "Choice",
+                    "Choices": [{"Variable": "$.contadores.intentos_enviar", "NumericLessThan": 5, "Next": "EsperarReintentoEmpleadoEnviar"}],
+                    "Default": "ErrorFatal"
                   },
                   "EsperarReintentoEmpleadoEnviar": {"Type": "Wait", "Seconds": 30, "Next": "IntentarEnviar"},
                   "EsperarTiempoEnviar": {
                     "Type": "Choice",
-                    "Choices": [{"Variable": "$.contadores.modo_realista", "StringEquals": "true", "Next": "EsperaRealistaEnviar"}],
+                    "Choices": [{"Variable": "$.contadores.modo_realista", "BooleanEquals": true, "Next": "EsperaRealistaEnviar"}],
                     "Default": "EsperaDemoEnviar"
                   },
                   "EsperaRealistaEnviar": {"Type": "Wait", "Seconds": 1800, "Next": "EsperarConfirmacionUsuario"},
@@ -437,7 +499,7 @@ resources:
               NotificarUsuarioArn: !GetAtt WorkflowNotificarUsuarioLambdaFunction.Arn
               ConfirmarArn: !GetAtt WorkflowConfirmarRecepcionLambdaFunction.Arn
               LiberarPedidoArn: !GetAtt WorkflowLiberarPedidoLambdaFunction.Arn
-
+  
   Outputs:
     PedidosEventBusName:
       Description: Nombre del Event Bus de Pedidos
@@ -478,4 +540,4 @@ package:
     - 'ofertas/**'
     - 'pedidos/**'
     - 'productos/**'
-    - 'worflow/**'
+    - 'workflow/**'
