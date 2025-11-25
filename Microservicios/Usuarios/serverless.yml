@@ -96,9 +96,9 @@ functions:
             identitySource: method.request.header.Authorization
             resultTtlInSeconds: 0
             
-  obtenerMiHistorialPedidos:
-    handler: usuarios/obtenerMiHistorialPedidos.lambda_handler
-    name: ${self:service}-obtener-mi-historial-pedidos
+  obtenerHistorialPedidos:
+    handler: usuarios/obtenerHistorialPedidos.lambda_handler
+    name: ${self:service}-obtener-historial-pedidos
     description: Obtener historial de pedidos del usuario autenticado (GET /usuario/me/historial-pedidos)
     events:
       - http:
