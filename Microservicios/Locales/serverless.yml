@@ -231,23 +231,14 @@ functions:
     description: Verifica el estado del crawler de Glue
 
 resources:
-  Resources:
-    # Tabla Locales con DynamoDB Stream habilitado
-    LocalesTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${env:TABLE_LOCALES}
-        StreamSpecification:
-          StreamViewType: NEW_AND_OLD_IMAGES
-
-    # Glue Database para Analítica
-    ChinaWokGlueDatabase:
-      Type: AWS::Glue::Database
-      Properties:
-        CatalogId: !Ref AWS::AccountId
-        DatabaseInput:
-          Name: ${env:ATHENA_DATABASE, 'chinawok_analytics'}
-          Description: Base de datos de analítica para ChinaWok con tablas de Glue
+  # Glue Database para Analítica
+  ChinaWokGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: ${env:ATHENA_DATABASE, 'chinawok_analytics'}
+        Description: Base de datos de analítica para ChinaWok con tablas de Glue
 
   Outputs:
     GlueDatabaseName:
