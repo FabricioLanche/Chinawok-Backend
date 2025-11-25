@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 TABLE_LOCALES = os.environ.get("TABLE_LOCALES", "ChinaWok-Locales")
 TABLE_USUARIOS = os.environ.get("TABLE_USUARIOS", "ChinaWok-Usuarios")
-dynamodb = boto3.resource("boto3")
+dynamodb = boto3.resource("dynamodb")
 table_locales = dynamodb.Table(TABLE_LOCALES)
 table_usuarios = dynamodb.Table(TABLE_USUARIOS)
 
