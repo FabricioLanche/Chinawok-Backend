@@ -59,6 +59,17 @@ def lambda_handler(event, context):
         role=usuario.get("role", "Cliente"),
         nombre=usuario.get("nombre", "")
     )
+    
+    # Construir objeto de usuario para la respuesta
+    usuario_response = {
+        "correo": usuario["correo"],
+        "nombre": usuario["nombre"],
+        "role": usuario["role"]
+    }
+    
+    # Agregar local_id solo si existe (gerentes)
+    if "local_id" in usuario:
+        usuario_response["local_id"] = usuario["local_id"]
 
     return {
         "statusCode": 200,
@@ -66,11 +77,6 @@ def lambda_handler(event, context):
         "body": json.dumps({
             "message": "Login exitoso",
             "token": token,
-            "usuario": {
-                "correo": usuario["correo"],
-                "nombre": usuario["nombre"],
-                "role": usuario["role"],
-                **({{"local_id": usuario["local_id"]}} if "local_id" in usuario else {})
-            }
+            "usuario": usuario_response
         })
     }
