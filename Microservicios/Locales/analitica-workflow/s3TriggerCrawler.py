@@ -9,6 +9,14 @@ glue = boto3.client('glue')
 dynamodb = boto3.resource('dynamodb')
 
 CRAWLER_NAME = os.environ.get('GLUE_CRAWLER_NAME', 'chinawok-analytics-crawler')
+ATHENA_DATABASE = os.environ.get('ATHENA_DATABASE', 'chinawok_analytics')
+
+# Lista de tablas esperadas
+EXPECTED_TABLES = [
+    'locales', 'usuarios', 'productos', 'empleados',
+    'combos', 'pedidos', 'ofertas', 'resenas'
+]
+
 COOLDOWN_MINUTES = 5  # Tiempo mínimo entre ejecuciones del crawler
 
 # Tabla para control de cooldown (usamos una tabla existente con un item especial)
@@ -37,6 +45,19 @@ def get_last_crawler_execution():
         logger.error(f'Error obteniendo última ejecución: {str(e)}')
         return None
 
+def check_table_exists(table_name):
+    """Verifica si la tabla ya existe en Glue Data Catalog"""
+    try:
+        glue.get_table(
+            DatabaseName=ATHENA_DATABASE,
+            Name=table_name
+        )
+        return True
+    except glue.exceptions.EntityNotFoundException:
+        return False
+    except Exception as e:
+        logger.error(f'Error verificando tabla {table_name}: {str(e)}')
+        return False
 
 def update_last_crawler_execution():
     """
@@ -81,14 +102,14 @@ def should_execute_crawler():
     logger.info(f'✅ Cooldown expirado. Última ejecución: {time_since_last} atrás')
     return True
 
-
 def handler(event, context):
     """
     Lambda disparado por eventos S3 cuando se actualiza un archivo .jsonl
-    Ejecuta el crawler de Glue con un mecanismo de cooldown para evitar ejecuciones múltiples
     
-    Cooldown: Solo ejecuta el crawler si han pasado al menos 5 minutos desde la última ejecución
-    Esto evita que múltiples actualizaciones de tablas disparen el crawler simultáneamente
+    LÓGICA INTELIGENTE:
+    - Solo ejecuta el crawler si alguna tabla NO existe en Glue
+    - Una vez que todas las tablas existen, deja que Athena lea los archivos actualizados
+    - Athena es schema-on-read, no necesita crawler después de la primera vez
     """
     try:
         # Extraer información del evento S3
@@ -106,6 +127,29 @@ def handler(event, context):
             
             logger.info(f'📦 S3 Event: {event_name} → s3://{bucket}/{key}')
         
+        # Verificar qué tablas faltan en Glue
+        missing_tables = []
+        for table in EXPECTED_TABLES:
+            if not check_table_exists(table):
+                missing_tables.append(table)
+        
+        # Si todas las tablas existen, no ejecutar crawler
+        if not missing_tables:
+            logger.info('✅ Todas las tablas ya existen en Glue Data Catalog')
+            logger.info('📊 Athena detectará automáticamente los datos actualizados')
+            
+            return {
+                'statusCode': 200,
+                'message': 'No crawler needed - all tables exist',
+                'action': 'skipped',
+                'reason': 'schemas_already_created',
+                's3_events': s3_events
+            }
+        
+        # Hay tablas faltantes, ejecutar crawler
+        logger.info(f'🆕 Tablas faltantes detectadas: {missing_tables}')
+        logger.info(f'🚀 Ejecutando Crawler para crear schemas...')
+        
         # Verificar cooldown antes de ejecutar
         if not should_execute_crawler():
             logger.info('🚫 Crawler no ejecutado debido al cooldown')
@@ -113,6 +157,7 @@ def handler(event, context):
                 'statusCode': 200,
                 'message': 'Crawler skipped due to cooldown',
                 'cooldown_minutes': COOLDOWN_MINUTES,
+                'missing_tables': missing_tables,
                 's3_events': s3_events
             }
         
@@ -139,7 +184,7 @@ def handler(event, context):
         
         # Iniciar el crawler
         glue.start_crawler(Name=CRAWLER_NAME)
-        logger.info(f'✅ Crawler iniciado: {CRAWLER_NAME}')
+        logger.info(f'✅ Crawler iniciado para crear {len(missing_tables)} tablas: {CRAWLER_NAME}')
         
         # Actualizar timestamp de última ejecución
         update_last_crawler_execution()
@@ -149,6 +194,7 @@ def handler(event, context):
             'message': 'Crawler started successfully',
             'crawler_name': CRAWLER_NAME,
             'triggered_by': 's3_event',
+            'missing_tables': missing_tables,
             's3_events': s3_events,
             'cooldown_minutes': COOLDOWN_MINUTES
         }
