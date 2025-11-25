@@ -69,7 +69,8 @@ def lambda_handler(event, context):
             "usuario": {
                 "correo": usuario["correo"],
                 "nombre": usuario["nombre"],
-                "role": usuario["role"]
+                "role": usuario["role"],
+                **({{"local_id": usuario["local_id"]}} if "local_id" in usuario else {})
             }
         })
     }
