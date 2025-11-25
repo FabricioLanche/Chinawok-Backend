@@ -135,7 +135,7 @@ functions:
   # INGESTA BASADA EN EVENTOS - DYNAMODB STREAMS
   # ============================================================
   streamProcessor:
-    handler: analitica-workflow.streamProcessor.handler
+    handler: analitica-consultas.streamProcessor.handler
     name: ${self:service}-stream-processor
     description: Procesa eventos de DynamoDB Streams y actualiza S3
     events:
@@ -203,26 +203,6 @@ functions:
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
-
-  s3TriggerCrawler:
-    handler: analitica-workflow.s3TriggerCrawler.handler
-    name: ${self:service}-s3-trigger-crawler
-    description: Detecta cambios en S3 y ejecuta el crawler de Glue
-    # NOTA: El bucket S3 debe existir previamente
-    # La notificación S3 se configura en setup_and_deploy.sh
-
-  # ============================================================
-  # WORKFLOW DE ANALÍTICA - FUNCIONES AUXILIARES
-  # ============================================================
-  workflowAnaliticaCrawler:
-    handler: analitica-workflow.ejecutarCrawler.handler
-    name: ${self:service}-workflow-analitica-crawler
-    description: Ejecuta el crawler de Glue para crear tablas
-  
-  workflowAnaliticaVerificarCrawler:
-    handler: analitica-workflow.verificarEstadoCrawler.handler
-    name: ${self:service}-workflow-analitica-verificar-crawler
-    description: Verifica el estado del crawler de Glue
 
 resources:
   Resources:

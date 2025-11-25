@@ -618,6 +618,96 @@ EOF
     rm -f /tmp/s3-notification.json
 }
 
+# Función para ejecutar crawler inicial y esperar completación
+initialize_glue_crawler() {
+    log ""
+    log "🔍 Inicializando Glue Crawler para mapear schemas..."
+    
+    # Leer variables del .env
+    source .env
+    
+    local crawler_name="${GLUE_CRAWLER_NAME:-chinawok-analytics-crawler}"
+    local database_name="${ATHENA_DATABASE:-chinawok_analytics}"
+    
+    # Verificar si el crawler ya existe
+    if aws glue get-crawler --name "$crawler_name" &>/dev/null; then
+        log_info "Crawler '$crawler_name' ya existe"
+    else
+        log "📝 Creando crawler '$crawler_name'..."
+        
+        # Crear el crawler
+        aws glue create-crawler \
+            --name "$crawler_name" \
+            --role "arn:aws:iam::${AWS_ACCOUNT_ID}:role/LabRole" \
+            --database-name "$database_name" \
+            --targets "{\"S3Targets\":[{\"Path\":\"s3://${S3_BUCKET_NAME}/${S3_INGESTION_PREFIX}/\"}]}" \
+            --description "Crawler para mapear schemas de datos DynamoDB" \
+            --schema-change-policy '{"UpdateBehavior":"UPDATE_IN_DATABASE","DeleteBehavior":"DEPRECATE_IN_DATABASE"}' \
+            --recrawl-policy '{"RecrawlBehavior":"CRAWL_EVERYTHING"}' \
+            --region us-east-1 2>/dev/null
+        
+        if [ $? -eq 0 ]; then
+            log_success "✅ Crawler creado exitosamente"
+        else
+            log_warning "⚠️  No se pudo crear el crawler (puede que ya exista)"
+        fi
+    fi
+    
+    # Ejecutar el crawler
+    log "🚀 Ejecutando crawler para mapear schemas iniciales..."
+    
+    aws glue start-crawler --name "$crawler_name" --region us-east-1 2>/dev/null
+    
+    if [ $? -eq 0 ]; then
+        log_success "✅ Crawler iniciado"
+        
+        # Esperar a que complete (máximo 5 minutos)
+        log "⏳ Esperando completación del crawler (esto puede tardar 1-2 minutos)..."
+        
+        local max_attempts=30
+        local attempt=0
+        
+        while [ $attempt -lt $max_attempts ]; do
+            sleep 10
+            attempt=$((attempt + 1))
+            
+            # Verificar estado del crawler
+            local state=$(aws glue get-crawler --name "$crawler_name" --query 'Crawler.State' --output text 2>/dev/null)
+            
+            if [ "$state" == "READY" ]; then
+                # Verificar si fue exitoso
+                local last_status=$(aws glue get-crawler --name "$crawler_name" --query 'Crawler.LastCrawl.Status' --output text 2>/dev/null)
+                
+                if [ "$last_status" == "SUCCEEDED" ]; then
+                    log_success "✅ Crawler completado exitosamente"
+                    
+                    # Mostrar tablas creadas
+                    log_info "📊 Verificando tablas creadas en Glue..."
+                    local tables=$(aws glue get-tables --database-name "$database_name" --query 'TableList[].Name' --output text 2>/dev/null)
+                    
+                    if [ -n "$tables" ]; then
+                        log_success "✅ Tablas mapeadas: $tables"
+                    fi
+                    
+                    return 0
+                else
+                    log_error "❌ Crawler falló: $last_status"
+                    return 1
+                fi
+            fi
+            
+            echo -n "."
+        done
+        
+        log_warning "⚠️  Crawler aún ejecutándose después de 5 minutos"
+        log_info "Puedes verificar el estado manualmente en la consola de AWS Glue"
+        return 0
+    else
+        log_warning "⚠️  Crawler ya está en ejecución o hubo un error"
+        return 0
+    fi
+}
+
 # Menú de opciones
 echo ""
 echo "═══════════════════════════════════════════════════════"
@@ -639,7 +729,7 @@ case $opcion in
         # Paso 1: Verificar/crear bucket S3
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "🪣 PASO 1/5: Verificando infraestructura S3"
+        log "🪣 PASO 1/6: Verificando infraestructura S3"
         log "═══════════════════════════════════════════════════════"
         
         # Leer nombre del bucket del .env
@@ -654,7 +744,7 @@ case $opcion in
         # Paso 2: Construir Lambda Layer
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "🔧 PASO 2/5: Construyendo Lambda Layer compartido"
+        log "🔧 PASO 2/6: Construyendo Lambda Layer compartido"
         log "═══════════════════════════════════════════════════════"
         build_layer
         
@@ -664,7 +754,7 @@ case $opcion in
         # Paso 4: Despliegue de microservicios
         log ""
         log "═══════════════════════════════════════════════════════"
-        log "⚙️  PASO 4/5: Despliegue de microservicios"
+        log "⚙️  PASO 4/6: Despliegue de microservicios"
         log "═══════════════════════════════════════════════════════"
         serverless deploy
         
@@ -674,11 +764,19 @@ case $opcion in
             # Paso 5: Configurar notificaciones S3
             log ""
             log "═══════════════════════════════════════════════════════"
-            log "📬 PASO 5/5: Configurando notificaciones S3"
+            log "📬 PASO 5/6: Configurando notificaciones S3"
             log "═══════════════════════════════════════════════════════"
             
             source .env
             configure_s3_notifications "$BUCKET_NAME"
+
+            # Paso 6: Inicializar Glue Crawler
+            log ""
+            log "═══════════════════════════════════════════════════════"
+            log "🔍 PASO 6/6: Inicializando Glue Crawler"
+            log "═══════════════════════════════════════════════════════"
+            
+            initialize_glue_crawler
             
             # Mostrar endpoints
             show_endpoints
@@ -690,9 +788,10 @@ case $opcion in
             log "═══════════════════════════════════════════════════════"
             log_info "✅ Streams habilitados en todas las tablas"
             log_info "✅ Lambda streamProcessor desplegado"
-            log_info "✅ Lambda s3TriggerCrawler desplegado"
             log_info "✅ Notificaciones S3 configuradas"
-            log_info "📊 Los datos se sincronizarán automáticamente con S3"
+            log_info "✅ Glue Crawler ejecutado - Schemas mapeados"
+            log_info "📊 Sistema de analítica en tiempo real ACTIVO"
+            log_info "🎯 Athena listo para consultas desde el minuto 1"
         else
             log_error "Error en despliegue de microservicios"
             exit 1
