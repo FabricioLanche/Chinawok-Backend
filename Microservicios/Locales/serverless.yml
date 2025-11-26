@@ -138,20 +138,14 @@ functions:
     handler: analitica-consultas.streamProcessor.handler
     name: ${self:service}-stream-processor
     description: Procesa eventos de DynamoDB Streams y actualiza S3
+    reservedConcurrency: 2
     events:
       # Stream para Locales
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_LOCALES}
-          batchSize: 100
-          startingPosition: LATEST
-          maximumRetryAttempts: 2
-          enabled: true
-      # Stream para Usuarios
-      - stream:
-          type: dynamodb
-          arn: ${env:STREAM_ARN_USUARIOS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
@@ -159,7 +153,8 @@ functions:
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_PRODUCTOS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
@@ -167,7 +162,8 @@ functions:
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_EMPLEADOS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
@@ -175,7 +171,8 @@ functions:
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_COMBOS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10 
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
@@ -183,7 +180,8 @@ functions:
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_PEDIDOS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
@@ -191,7 +189,8 @@ functions:
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_OFERTAS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
@@ -199,7 +198,8 @@ functions:
       - stream:
           type: dynamodb
           arn: ${env:STREAM_ARN_RESENAS}
-          batchSize: 100
+          batchSize: 750
+          maximumBatchingWindowInMilliseconds: 10
           startingPosition: LATEST
           maximumRetryAttempts: 2
           enabled: true
