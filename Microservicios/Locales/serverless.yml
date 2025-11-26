@@ -209,6 +209,8 @@ resources:
     # Glue Database para Analítica
     ChinaWokGlueDatabase:
       Type: AWS::Glue::Database
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         CatalogId: !Ref AWS::AccountId
         DatabaseInput:
