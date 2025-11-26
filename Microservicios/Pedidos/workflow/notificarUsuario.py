@@ -6,7 +6,6 @@ from websockets.notificador import enviar_notificacion_pedido
 # Este lambda se encarga de notificar al usuario que su pedido ha llegado
 # y guarda el taskToken para que pueda ser usado cuando el usuario confirme
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-sns = boto3.client('sns', region_name='us-east-1')
 
 def lambda_handler(event, context):
     """Lambda para notificar al usuario sobre la entrega y esperar confirmación"""
