@@ -138,7 +138,7 @@ functions:
     handler: analitica-consultas.streamProcessor.handler
     name: ${self:service}-stream-processor
     description: Procesa eventos de DynamoDB Streams y actualiza S3
-    reservedConcurrency: 2
+    reservedConcurrency: 1
     events:
       # Stream para Locales
       - stream:
