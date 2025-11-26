@@ -750,22 +750,29 @@ case $opcion in
         # Paso 3: Poblar datos (incluye habilitación de Streams y obtención de ARNs)
         populate_data
         
+        # Paso 4: Despliegue de microservicios
+        log ""
+        log "═══════════════════════════════════════════════════════"
+        log "⚙️  PASO 4/6: Despliegue de microservicios"
+        log "═══════════════════════════════════════════════════════"
+        serverless deploy
+        
         if [ $? -eq 0 ]; then
             log_success "🎉 Despliegue de microservicios exitoso"
             
-            # Paso 4: Configurar notificaciones S3
+            # Paso 5: Configurar notificaciones S3
             log ""
             log "═══════════════════════════════════════════════════════"
-            log "📬 PASO 4/6: Configurando notificaciones S3"
+            log "📬 PASO 5/6: Configurando notificaciones S3"
             log "═══════════════════════════════════════════════════════"
             
             source .env
             configure_s3_notifications "$BUCKET_NAME"
 
-            # Paso 5: Inicializar Glue Crawler
+            # Paso 6: Inicializar Glue Crawler
             log ""
             log "═══════════════════════════════════════════════════════"
-            log "🔍 PASO 5/6: Inicializando Glue Crawler"
+            log "🔍 PASO 6/6: Inicializando Glue Crawler"
             log "═══════════════════════════════════════════════════════"
             
             initialize_glue_crawler
@@ -788,14 +795,6 @@ case $opcion in
             log_error "Error en despliegue de microservicios"
             exit 1
         fi
-
-        # Paso 4: Despliegue de microservicios
-        log ""
-        log "═══════════════════════════════════════════════════════"
-        log "⚙️  PASO 6/6: Despliegue de microservicios"
-        log "═══════════════════════════════════════════════════════"
-        serverless deploy
-
         ;;
         
     2)
