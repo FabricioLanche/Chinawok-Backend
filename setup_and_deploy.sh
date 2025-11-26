@@ -171,7 +171,6 @@ get_stream_arns() {
     
     declare -A tables=(
         ["LOCALES"]="$TABLE_LOCALES"
-        ["USUARIOS"]="$TABLE_USUARIOS"
         ["PRODUCTOS"]="$TABLE_PRODUCTOS"
         ["EMPLEADOS"]="$TABLE_EMPLEADOS"
         ["COMBOS"]="$TABLE_COMBOS"
