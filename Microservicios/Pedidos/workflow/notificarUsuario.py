@@ -21,7 +21,13 @@ def lambda_handler(event, context):
     try:
         # Guardar el taskToken en DynamoDB para recuperarlo cuando el usuario confirme
         table = dynamodb.Table(os.environ['TABLE_PEDIDOS'])
-        table.update_item(
+        
+        print(f'🔍 Intentando actualizar pedido en DynamoDB:')
+        print(f'   - Table: {os.environ["TABLE_PEDIDOS"]}')
+        print(f'   - local_id: {event.get("local_id")}')
+        print(f'   - pedido_id: {pedido_id}')
+        
+        update_response = table.update_item(
             Key={
                 'local_id': event.get('local_id'),
                 'pedido_id': pedido_id
@@ -30,8 +36,18 @@ def lambda_handler(event, context):
             ExpressionAttributeValues={
                 ':token': task_token,
                 ':true': True
-            }
+            },
+            ReturnValues='ALL_NEW'
         )
+        
+        print(f'✅ DynamoDB Update exitoso!')
+        print(f'📊 Atributos actualizados: {list(update_response.get("Attributes", {}).keys())}')
+        
+        # Verificar que los campos se guardaron
+        if 'task_token' in update_response.get('Attributes', {}):
+            print(f'✅ task_token CONFIRMADO en DynamoDB')
+        else:
+            print(f'⚠️ WARNING: task_token NO aparece en Attributes')
         
         # Aquí podrías enviar una notificación al usuario (SNS, SES, etc.)
         mensaje = f"""
