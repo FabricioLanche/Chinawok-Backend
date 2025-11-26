@@ -28,6 +28,7 @@ TABLE_COMBOS = os.getenv('TABLE_COMBOS')
 TABLE_PEDIDOS = os.getenv('TABLE_PEDIDOS')
 TABLE_OFERTAS = os.getenv('TABLE_OFERTAS')
 TABLE_RESENAS = os.getenv('TABLE_RESENAS')
+TABLE_CONEXIONES = os.getenv('TABLE_CONEXIONES')
 
 # Carpeta con los datos JSON
 DATA_DIR = "dynamodb_data"
@@ -73,6 +74,11 @@ TABLE_MAPPING = {
         "table_name": TABLE_RESENAS,
         "pk": "local_id",
         "sk": "resena_id"
+    },
+    "conexiones.json": {
+        "table_name": TABLE_CONEXIONES,
+        "pk": "usuario_correo",
+        "sk": "pedido_id"
     }
 }
 
@@ -201,6 +207,21 @@ def create_table(table_name, pk_name, sk_name=None):
         
         print(f"   ⏳ Esperando a que la tabla '{table_name}' esté activa...")
         table.wait_until_exists()
+
+        # Habilitar TTL si es la tabla de conexiones WebSocket
+        if table_name == TABLE_CONEXIONES:
+            try:
+                print(f"   ⏰ Habilitando TTL para auto-eliminación de conexiones antiguas...")
+                dynamodb_client.update_time_to_live(
+                    TableName=table_name,
+                    TimeToLiveSpecification={
+                        'Enabled': True,
+                        'AttributeName': 'ttl'
+                    }
+                )
+                print(f"   ✅ TTL habilitado en '{table_name}' (atributo: ttl)")
+            except Exception as e:
+                print(f"   ⚠️  No se pudo habilitar TTL: {str(e)}")
         
         print(f"   ✅ Tabla '{table_name}' creada exitosamente con Streams habilitados")
         return True

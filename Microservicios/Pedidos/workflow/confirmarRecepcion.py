@@ -8,6 +8,7 @@ from utils.dynamodb_helper import (
     agregar_pedido_a_usuario
 )
 from utils.cors_utils import get_cors_headers
+from websockets.notificador import enviar_notificacion_pedido
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 stepfunctions = boto3.client('stepfunctions', region_name='us-east-1')
@@ -79,6 +80,17 @@ def lambda_handler(event, context):
                 Key={'local_id': local_id, 'pedido_id': pedido_id},
                 UpdateExpression='REMOVE task_token, esperando_confirmacion'
             )
+
+        # Enviar notificación WebSocket
+        enviar_notificacion_pedido(
+            pedido_id=pedido_id,
+            usuario_correo=pedido.get('usuario_correo'),
+            tipo_evento='PEDIDO_COMPLETADO',
+            datos={
+                'estado': 'recibido',
+                'mensaje': '¡Gracias por confirmar! Disfruta tu pedido 🥡'
+            }
+        )
 
         # Response simple con CORS
         return {

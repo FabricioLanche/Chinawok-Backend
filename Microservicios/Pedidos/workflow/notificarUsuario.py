@@ -1,6 +1,7 @@
 import json
 import boto3
 import os
+from websockets.notificador import enviar_notificacion_pedido
 
 # Este lambda se encarga de notificar al usuario que su pedido ha llegado
 # y guarda el taskToken para que pueda ser usado cuando el usuario confirme
@@ -49,21 +50,26 @@ def lambda_handler(event, context):
         else:
             print(f'⚠️ WARNING: task_token NO aparece en Attributes')
         
-        # Aquí podrías enviar una notificación al usuario (SNS, SES, etc.)
-        mensaje = f"""
-        ¡Tu pedido {pedido_id} ha llegado a su destino!
+        # Enviar notificación WebSocket al usuario
+        notificacion_enviada = enviar_notificacion_pedido(
+            pedido_id=pedido_id,
+            usuario_correo=usuario_correo,
+            tipo_evento='PEDIDO_ENTREGADO',
+            datos={
+                'estado': 'entregado',
+                'mensaje': '¡Tu pedido ha llegado a su destino!',
+                'accion_requerida': 'CONFIRMAR_RECEPCION',
+                'texto_boton': 'Confirmar Recepción',
+                'repartidor_dni': event.get('repartidor_dni')
+            }
+        )
         
-        Por favor confirma la recepción accediendo a:
-        https://tu-app.com/confirmar-pedido/{pedido_id}
+        if notificacion_enviada:
+            print(f'✅ Notificación WebSocket enviada a {usuario_correo}')
+        else:
+            print(f'⚠️  Usuario no conectado por WebSocket, notificación no enviada')
         
-        O responde a este mensaje con 'CONFIRMAR'.
-        """
-        
-        print(f'Notificación enviada al usuario {usuario_correo}')
-        print(f'TaskToken guardado: {task_token[:20]}...')
-        
-        # El Step Function esperará aquí hasta que se llame a SendTaskSuccess
-        # con el taskToken guardado
+        print(f'🔑 TaskToken guardado: {task_token[:20]}...')
         
         return {
             'statusCode': 200,

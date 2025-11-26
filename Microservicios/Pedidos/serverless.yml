@@ -6,6 +6,9 @@ provider:
   timeout: 300
   region: us-east-1
   stage: ${param:stage}
+
+  websocketsApiName: chinawok-pedidos-ws
+  websocketsApiRouteSelectionExpression: $request.body.action
   
   environment:
     TABLE_LOCALES: ${env:TABLE_LOCALES, 'ChinaWok-Locales'}
@@ -15,6 +18,7 @@ provider:
     TABLE_PRODUCTOS: ${env:TABLE_PRODUCTOS, 'ChinaWok-Productos'}
     TABLE_USUARIOS: ${env:TABLE_USUARIOS, 'ChinaWok-Usuarios'}
     TABLE_EMPLEADOS: ${env:TABLE_EMPLEADOS, 'ChinaWok-Empleados'}
+    TABLE_CONEXIONES: ${env:TABLE_CONEXIONES, 'ChinaWok-WebSocket-Conexiones'}
     AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
     STEP_FUNCTION_PEDIDOS_NAME: ${env:STEP_FUNCTION_PEDIDOS_NAME, 'ChinaWok-Pedidos-Processor'}
     EVENT_BUS_NAME: ${env:EVENT_BUS_NAME, 'chinawok-pedidos-events'}
@@ -241,6 +245,32 @@ functions:
     handler: workflow/notificarUsuario.lambda_handler
     name: ${self:service}-workflow-notificar-usuario
     description: Notificar usuario sobre el estado del pedido
+
+  # ==================== WEBSOCKET HANDLERS ====================
+  wsConnect:
+    handler: websockets/pedidoEnVivo.handler
+    name: ${self:service}-ws-connect
+    description: WebSocket connect handler
+    events:
+      - websocket:
+          route: $connect
+  
+  wsDisconnect:
+    handler: websocket/disconnect.handler
+    name: ${self:service}-ws-disconnect
+    description: WebSocket disconnect handler
+    events:
+      - websocket:
+          route: $disconnect
+  
+  wsDefault:
+    handler: websocket/default.handler
+    name: ${self:service}-ws-default
+    description: WebSocket default handler
+    events:
+      - websocket:
+          route: $default
+
 resources:
   Resources:
     ChinaWokPedidosEventBus:

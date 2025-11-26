@@ -7,6 +7,7 @@ from utils.dynamodb_helper import (
     actualizar_estado_pedido_con_empleado
 )
 from utils.json_encoder import json_dumps
+from websockets.notificador import enviar_notificacion_pedido
 
 def lambda_handler(event, context):
     """Lambda para asignar despachador y empacar el pedido"""
@@ -66,6 +67,22 @@ def lambda_handler(event, context):
             'estado': 'empacando',
             'historial_estados': pedido_actualizado.get('historial_estados', pedido.get('historial_estados', []))
         }
+
+        # Enviar notificación WebSocket
+        enviar_notificacion_pedido(
+            pedido_id=pedido_id,
+            usuario_correo=event.get('usuario_correo'),
+            tipo_evento='ESTADO_CAMBIADO',
+            datos={
+                'estado': 'empacando',
+                'empleado': {
+                    'dni': despachador['dni'],
+                    'nombre': despachador.get('nombre', ''),
+                    'role': 'Despachador'
+                },
+                'mensaje': f'Tu pedido está siendo empacado por {despachador.get("nombre", "un despachador")}'
+            }
+        )
         
         if 'body' in event:
             return {
