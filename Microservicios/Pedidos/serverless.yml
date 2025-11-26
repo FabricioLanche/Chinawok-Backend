@@ -256,7 +256,7 @@ functions:
           route: $connect
   
   wsDisconnect:
-    handler: websocket/disconnect.handler
+    handler: websockets/disconnect.handler
     name: ${self:service}-ws-disconnect
     description: WebSocket disconnect handler
     events:
@@ -264,7 +264,7 @@ functions:
           route: $disconnect
   
   wsDefault:
-    handler: websocket/default.handler
+    handler: websockets/default.handler
     name: ${self:service}-ws-default
     description: WebSocket default handler
     events:
