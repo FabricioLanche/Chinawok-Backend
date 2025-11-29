@@ -78,7 +78,7 @@ def lambda_handler(event, context):
         correo = body.get("correo")
 
     if not correo:
-        return {"statusCode": 400, "body": json.dumps({"message": "correo es obligatorio (path /usuarios/{correo} o body)")}}
+       return {"statusCode": 400, "body": json.dumps({"message": "correo es obligatorio (path /usuarios/{correo} o body)"})}
 
     # 🔒 Verificar permisos: Admin puede modificar a cualquiera, otros solo a sí mismos
     es_admin = verificar_rol(usuario_autenticado, ["Admin"])
