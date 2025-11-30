@@ -1135,7 +1135,7 @@
 									},
 									"status": "Forbidden",
 									"code": 403,
-									"_postman_previewlanguage": "",
+									"_postman_previewlanguage": null,
 									"header": [
 										{
 											"key": "Content-Type",
@@ -1232,7 +1232,7 @@
 									},
 									"status": "OK",
 									"code": 200,
-									"_postman_previewlanguage": "",
+									"_postman_previewlanguage": null,
 									"header": [
 										{
 											"key": "Content-Type",
@@ -1364,7 +1364,7 @@
 									},
 									"status": "OK",
 									"code": 200,
-									"_postman_previewlanguage": "",
+									"_postman_previewlanguage": null,
 									"header": [
 										{
 											"key": "Content-Type",
@@ -1491,7 +1491,7 @@
 									},
 									"status": "Forbidden",
 									"code": 403,
-									"_postman_previewlanguage": "",
+									"_postman_previewlanguage": null,
 									"header": [
 										{
 											"key": "Content-Type",
@@ -2162,7 +2162,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url_usuarios}}/usuario/me/historial-pedidos",
+									"raw": "{{base_url_usuarios}}/usuario/me/historial-pedidos?correo",
 									"host": [
 										"{{base_url_usuarios}}"
 									],
@@ -2170,6 +2170,12 @@
 										"usuario",
 										"me",
 										"historial-pedidos"
+									],
+									"query": [
+										{
+											"key": "correo",
+											"value": null
+										}
 									]
 								}
 							},
@@ -4853,6 +4859,206 @@
 									],
 									"cookie": [],
 									"body": "{\n    \"empleado\": {\n        \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n        \"dni\": \"34567891\",\n        \"rol\": \"repartidor\"\n    },\n    \"total_resenas\": 1,\n    \"resenas\": [\n        {\n            \"local_id\": \"3bc3528d-3f75-4c69-a550-e73568060955\",\n            \"calificacion\": 5,\n            \"pedido_id\": \"501e7405-f14f-4d48-bf32-7251249ed933\",\n            \"cocinero_dni\": \"12345678\",\n            \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n            \"repartidor_dni\": \"34567891\",\n            \"despachador_dni\": \"23456789\",\n            \"resena_id\": \"ec6a9b5d-3bc7-427b-905e-b723c6d66ca4\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Obtener Reseñas por Pedido",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_empleados}}/resenas/pedido/:pedido_id",
+									"host": [
+										"{{base_url_empleados}}"
+									],
+									"path": [
+										"resenas",
+										"pedido",
+										":pedido_id"
+									],
+									"variable": [
+										{
+											"key": "pedido_id",
+											"value": "{{pedido_id_1}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Response 200 OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas/pedido/:pedido_id",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas",
+												"pedido",
+												":pedido_id"
+											],
+											"variable": [
+												{
+													"key": "pedido_id",
+													"value": "{{pedido_id_1}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "428"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sun, 30 Nov 2025 11:21:48 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-692c28ca-0a48158a77fdd9072486c9d3;Parent=3dc94322016fc8a2;Sampled=0;Lineage=1:e497e682:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e323d1fb-8ace-4287-b3ca-82865c1750b9"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "U2tPsGHVIAMEjOg="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 964da52e14c89b6a2599939d4d62af10.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "GwbybGobasTu7DyjyKJuhY7z0n5MYKarcI_dy6otgdjxY0mvKCRGyg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"pedido_id\": \"718feae5-6266-4444-837e-f8595e7133bd\",\n    \"total_resenas\": 1,\n    \"resenas\": [\n        {\n            \"local_id\": \"3699e377-9257-4978-a2e0-71e888a17d9c\",\n            \"calificacion\": 5,\n            \"pedido_id\": \"718feae5-6266-4444-837e-f8595e7133bd\",\n            \"cocinero_dni\": \"12345678\",\n            \"resena\": \"Excelente servicio, comida deliciosa y entrega rápida\",\n            \"repartidor_dni\": \"34567891\",\n            \"resena_id\": \"fabc0a76-18a7-4521-bbc9-d698c5b4c89f\",\n            \"despachador_dni\": \"23456789\"\n        }\n    ]\n}"
+								},
+								{
+									"name": "No encontrado - Sin reseñas",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url_empleados}}/resenas/pedido/:pedido_id",
+											"host": [
+												"{{base_url_empleados}}"
+											],
+											"path": [
+												"resenas",
+												"pedido",
+												":pedido_id"
+											],
+											"variable": [
+												{
+													"key": "pedido_id",
+													"value": ""
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "62"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Date",
+											"value": "Sun, 30 Nov 2025 11:22:02 GMT"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-692c28da-4a5c4e8f515618b24ff654c4;Parent=36b222ab458cc89f;Sampled=0;Lineage=1:e497e682:0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "6b332ba2-54d4-44bb-a030-b00481ab23f2"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "U2tSQEIUoAMEq1Q="
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "GET,POST,PUT,DELETE,OPTIONS"
+										},
+										{
+											"key": "X-Cache",
+											"value": "Miss from cloudfront"
+										},
+										{
+											"key": "Via",
+											"value": "1.1 964da52e14c89b6a2599939d4d62af10.cloudfront.net (CloudFront)"
+										},
+										{
+											"key": "X-Amz-Cf-Pop",
+											"value": "LIM50-P3"
+										},
+										{
+											"key": "X-Amz-Cf-Id",
+											"value": "03q8BtaGJ6vYTNNgbh-qbSPQqVlE1tVwIr8Eanc9CBkyo-f9XzWsfg=="
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"pedido_id\": \":pedido_id\",\n    \"total_resenas\": 0,\n    \"resenas\": []\n}"
 								}
 							]
 						},
