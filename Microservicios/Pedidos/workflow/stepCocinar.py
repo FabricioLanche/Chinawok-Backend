@@ -32,14 +32,34 @@ def lambda_handler(event, context):
         if pedido.get('estado') != 'procesando':
             raise ValueError(f'El pedido debe estar en estado "procesando", actualmente está en "{pedido.get("estado")}"')
         
-        # Buscar cocinero disponible
-        cocinero = buscar_empleado_disponible(local_id, 'Cocinero')
+        # Buscar e intentar asignar cocinero disponible con fallback
+        cocinero = None
+        cocineros_disponibles = buscar_empleado_disponible(local_id, 'Cocinero')
         
-        if not cocinero:
+        if not cocineros_disponibles:
             raise Exception('No hay cocineros disponibles en este momento')
         
-        # Marcar cocinero como ocupado
-        marcar_empleado_ocupado(local_id, cocinero['dni'])
+        # Si buscar_empleado_disponible retorna un solo empleado, convertir a lista
+        if not isinstance(cocineros_disponibles, list):
+            cocineros_disponibles = [cocineros_disponibles]
+        
+        # Intentar asignar cada cocinero en orden de calificación
+        ultimo_error = None
+        for candidato in cocineros_disponibles:
+            try:
+                # Intentar marcar como ocupado
+                marcar_empleado_ocupado(local_id, candidato['dni'])
+                cocinero = candidato
+                print(f'Cocinero {candidato["dni"]} asignado exitosamente')
+                break
+            except Exception as e:
+                print(f'Error asignando cocinero {candidato["dni"]}: {str(e)}. Intentando con siguiente...')
+                ultimo_error = e
+                continue
+        
+        # Si ningún cocinero pudo ser asignado
+        if not cocinero:
+            raise Exception(f'No se pudo asignar ningún cocinero disponible. Último error: {str(ultimo_error)}')
         
         # Actualizar estado del pedido
         pedido_actualizado = actualizar_estado_pedido_con_empleado(

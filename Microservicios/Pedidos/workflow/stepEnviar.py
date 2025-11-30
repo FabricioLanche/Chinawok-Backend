@@ -34,14 +34,34 @@ def lambda_handler(event, context):
         if pedido.get('estado') != 'empacando':
             raise ValueError(f'El pedido debe estar en estado "empacando", actualmente está en "{pedido.get("estado")}"')
         
-        # Buscar repartidor disponible
-        repartidor = buscar_empleado_disponible(local_id, 'Repartidor')
+        # Buscar e intentar asignar repartidor disponible con fallback
+        repartidor = None
+        repartidores_disponibles = buscar_empleado_disponible(local_id, 'Repartidor')
         
-        if not repartidor:
+        if not repartidores_disponibles:
             raise Exception('No hay repartidores disponibles en este momento')
         
-        # Marcar repartidor como ocupado
-        marcar_empleado_ocupado(local_id, repartidor['dni'])
+        # Si buscar_empleado_disponible retorna un solo empleado, convertir a lista
+        if not isinstance(repartidores_disponibles, list):
+            repartidores_disponibles = [repartidores_disponibles]
+        
+        # Intentar asignar cada repartidor en orden de calificación
+        ultimo_error = None
+        for candidato in repartidores_disponibles:
+            try:
+                # Intentar marcar como ocupado
+                marcar_empleado_ocupado(local_id, candidato['dni'])
+                repartidor = candidato
+                print(f'Repartidor {candidato["dni"]} asignado exitosamente')
+                break
+            except Exception as e:
+                print(f'Error asignando repartidor {candidato["dni"]}: {str(e)}. Intentando con siguiente...')
+                ultimo_error = e
+                continue
+        
+        # Si ningún repartidor pudo ser asignado
+        if not repartidor:
+            raise Exception(f'No se pudo asignar ningún repartidor disponible. Último error: {str(ultimo_error)}')
         
         # Actualizar estado del pedido (esto liberará automáticamente al despachador)
         pedido_actualizado = actualizar_estado_pedido_con_empleado(

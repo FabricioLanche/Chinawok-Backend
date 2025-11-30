@@ -585,7 +585,7 @@ resources:
                       }
                     },
                     "ResultPath": "$.confirmacion_usuario",
-                    "TimeoutSeconds": 3600,
+                    "TimeoutSeconds": 180,
                     "Catch": [
                       {
                         "ErrorEquals": ["States.Timeout"],

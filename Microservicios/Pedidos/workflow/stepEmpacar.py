@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     
     # Manejar invocación desde API Gateway (HTTP) o Step Functions (directo)
     if 'body' in event:
-        body = json.loads(event['body']) if isinstance(event['body'], str) else event['body']
+        body = json.loads(event['body']) if isinstance(event['body'], str) else event['body'']
     else:
         body = event
     
@@ -34,14 +34,34 @@ def lambda_handler(event, context):
         if pedido.get('estado') != 'cocinando':
             raise ValueError(f'El pedido debe estar en estado "cocinando", actualmente está en "{pedido.get("estado")}"')
         
-        # Buscar despachador disponible
-        despachador = buscar_empleado_disponible(local_id, 'Despachador')
+        # Buscar e intentar asignar despachador disponible con fallback
+        despachador = None
+        despachadores_disponibles = buscar_empleado_disponible(local_id, 'Despachador')
         
-        if not despachador:
+        if not despachadores_disponibles:
             raise Exception('No hay despachadores disponibles en este momento')
         
-        # Marcar despachador como ocupado
-        marcar_empleado_ocupado(local_id, despachador['dni'])
+        # Si buscar_empleado_disponible retorna un solo empleado, convertir a lista
+        if not isinstance(despachadores_disponibles, list):
+            despachadores_disponibles = [despachadores_disponibles]
+        
+        # Intentar asignar cada despachador en orden de calificación
+        ultimo_error = None
+        for candidato in despachadores_disponibles:
+            try:
+                # Intentar marcar como ocupado
+                marcar_empleado_ocupado(local_id, candidato['dni'])
+                despachador = candidato
+                print(f'Despachador {candidato["dni"]} asignado exitosamente')
+                break
+            except Exception as e:
+                print(f'Error asignando despachador {candidato["dni"]}: {str(e)}. Intentando con siguiente...')
+                ultimo_error = e
+                continue
+        
+        # Si ningún despachador pudo ser asignado
+        if not despachador:
+            raise Exception(f'No se pudo asignar ningún despachador disponible. Último error: {str(ultimo_error)}')
         
         # Actualizar estado del pedido (esto liberará automáticamente al cocinero)
         pedido_actualizado = actualizar_estado_pedido_con_empleado(
