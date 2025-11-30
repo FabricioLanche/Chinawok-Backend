@@ -53,7 +53,8 @@ class PedidosGenerator:
         
         pedidos_ids = [p["pedido_id"] for p in pedidos]
         print(f"  ✅ {len(pedidos)} pedidos generados")
-        print(f"  ℹ️  Empleados asignados solo en estados: cocinando, empacando, enviando")
+        print(f"  ℹ️  Solo pedidos completados (recibido) o cancelados")
+        print(f"  ℹ️  Empleados asignados en estados: cocinando, empacando, enviando")
         
         return pedidos, pedidos_ids
     
@@ -128,23 +129,42 @@ class PedidosGenerator:
         # Agregar costo de delivery
         costo_total += random.uniform(3.0, 8.0)
         
-        # Determinar estado actual del pedido
-        estado_actual = random.choices(
-            cls.ESTADOS,
-            weights=[10, 20, 15, 25, 30],
+        # Determinar estado final del pedido: solo "recibido" o "cancelado"
+        # 85% recibido (completado exitosamente)
+        # 15% cancelado (cancelado en alguna etapa)
+        estado_final = random.choices(
+            ["recibido", "cancelado"],
+            weights=[85, 15],
             k=1
         )[0]
         
-        fecha_base = datetime.now() - timedelta(hours=random.randint(0, 72))
+        # Fecha de creación del pedido (hace 1-72 horas)
+        fecha_creacion = datetime.now() - timedelta(hours=random.randint(1, 72))
         
-        # Calcular fecha de entrega aproximada
-        total_items = len(productos_pedido) + len(combos_pedido)
-        fecha_entrega_aproximada = cls._calcular_fecha_entrega(fecha_base, total_items)
+        # Si el pedido fue cancelado, determinar en qué estado se canceló
+        estado_cancelacion = None
+        if estado_final == "cancelado":
+            # Puede cancelarse en cualquiera de las etapas intermedias
+            estados_posibles_cancelacion = ["procesando", "cocinando", "empacando", "enviando"]
+            estado_cancelacion = random.choice(estados_posibles_cancelacion)
         
-        # Generar historial de estados
-        historial_estados = cls._generar_historial_estados(
-            estado_actual, fecha_base, local_id, empleados_por_local
+        # Generar historial de estados completo
+        historial_estados = cls._generar_historial_completo(
+            estado_final, estado_cancelacion, fecha_creacion, local_id, empleados_por_local
         )
+        
+        # Calcular fecha de entrega aproximada basada en el historial
+        total_items = len(productos_pedido) + len(combos_pedido)
+        if estado_final == "recibido":
+            # Si fue recibido, calcular basado en la última hora_fin
+            ultima_hora = historial_estados[-1]["hora_fin"]
+            fecha_entrega_aproximada = ultima_hora
+        else:
+            # Si fue cancelado, calcular estimación desde inicio
+            tiempo_preparacion = 30 + max(0, (total_items - 1) * 5)
+            tiempo_delivery = random.randint(20, 30)
+            tiempo_total = tiempo_preparacion + tiempo_delivery
+            fecha_entrega_aproximada = (fecha_creacion + timedelta(minutes=tiempo_total)).isoformat()
         
         # IMPORTANTE: Direccion SIEMPRE presente (requerida por schema)
         # Usar direccion_delivery del usuario o una aleatoria
@@ -157,9 +177,10 @@ class PedidosGenerator:
             "pedido_id": pedido_id,
             "usuario_correo": usuario["correo"],
             "costo": round(costo_total, 2),
+            "fecha_creacion": fecha_creacion.isoformat(),
             "fecha_entrega_aproximada": fecha_entrega_aproximada,
             "direccion": direccion_pedido,
-            "estado": estado_actual,
+            "estado": estado_final,
             "historial_estados": historial_estados
         }
         
@@ -173,25 +194,17 @@ class PedidosGenerator:
         
         return pedido
     
-    @classmethod
-    def _calcular_fecha_entrega(cls, fecha_base, num_productos):
-        """Calcula fecha de entrega aproximada basada en número de productos"""
-        tiempo_preparacion = 30 + max(0, (num_productos - 1) * 5)
-        tiempo_delivery = random.randint(20, 30)
-        tiempo_total = tiempo_preparacion + tiempo_delivery
-        
-        fecha_entrega = fecha_base + timedelta(minutes=tiempo_total)
-        return fecha_entrega.isoformat()
     
     @classmethod
-    def _generar_historial_estados(cls, estado_actual, fecha_base, local_id, empleados_por_local):
+    def _generar_historial_completo(cls, estado_final, estado_cancelacion, fecha_creacion, local_id, empleados_por_local):
         """
-        Genera el historial de estados como un array.
-        Solo incluye estados hasta el estado actual.
+        Genera el historial de estados completo para un pedido.
+        
+        - Si estado_final = "recibido": genera todos los estados hasta recibido (completo)
+        - Si estado_final = "cancelado": genera estados hasta el estado_cancelacion especificado
         """
         historial = []
         tiempo_acumulado = 0
-        estado_actual_index = cls.ESTADOS.index(estado_actual)
         
         # Obtener empleados DEL LOCAL específico
         empleados_del_local = empleados_por_local.get(local_id, {
@@ -201,41 +214,49 @@ class PedidosGenerator:
             "info_empleados": {}
         })
         
-        for idx, estado in enumerate(cls.ESTADOS):
-            if idx <= estado_actual_index:
-                es_estado_actual = (idx == estado_actual_index)
+        # Determinar hasta qué estado generar el historial
+        if estado_final == "recibido":
+            # Generar todos los estados
+            estados_a_generar = cls.ESTADOS
+        else:
+            # Generar hasta el estado de cancelación
+            idx_cancelacion = cls.ESTADOS.index(estado_cancelacion)
+            estados_a_generar = cls.ESTADOS[:idx_cancelacion + 1]
+        
+        for idx, estado in enumerate(estados_a_generar):
+            es_ultimo_estado = (idx == len(estados_a_generar) - 1)
+            
+            hora_inicio = fecha_creacion + timedelta(minutes=tiempo_acumulado)
+            duracion = cls._obtener_duracion_estado(estado)
+            hora_fin = hora_inicio + timedelta(minutes=duracion)
+            
+            # Crear entrada en el historial
+            entrada_historial = {
+                "estado": estado,
+                "hora_inicio": hora_inicio.isoformat(),
+                "hora_fin": hora_fin.isoformat(),
+                "activo": False  # Todos los estados están completados (no activos)
+            }
+            
+            # Agregar información del empleado si el estado lo requiere
+            if estado in cls.ESTADO_A_ROL:
+                rol = cls.ESTADO_A_ROL[estado]
+                empleado_info = cls._obtener_info_empleado(
+                    empleados_del_local, rol
+                )
                 
-                hora_inicio = fecha_base + timedelta(minutes=tiempo_acumulado)
-                duracion = cls._obtener_duracion_estado(estado)
-                hora_fin = hora_inicio + timedelta(minutes=duracion)
-                
-                # Crear entrada en el historial
-                entrada_historial = {
-                    "estado": estado,
-                    "hora_inicio": hora_inicio.isoformat(),
-                    "hora_fin": hora_fin.isoformat(),
-                    "activo": es_estado_actual
-                }
-                
-                # Agregar información del empleado si el estado lo requiere
-                if estado in cls.ESTADO_A_ROL:
-                    rol = cls.ESTADO_A_ROL[estado]
-                    empleado_info = cls._obtener_info_empleado(
-                        empleados_del_local, rol
-                    )
-                    
-                    if empleado_info:
-                        entrada_historial["empleado"] = empleado_info
-                    else:
-                        entrada_historial["empleado"] = None
+                if empleado_info:
+                    entrada_historial["empleado"] = empleado_info
                 else:
                     entrada_historial["empleado"] = None
-                
-                historial.append(entrada_historial)
-                tiempo_acumulado += duracion
+            else:
+                entrada_historial["empleado"] = None
+            
+            historial.append(entrada_historial)
+            tiempo_acumulado += duracion
         
         return historial
-    
+
     @classmethod
     def _obtener_info_empleado(cls, empleados_del_local, rol):
         """Obtiene información de un empleado del local para un rol específico"""
