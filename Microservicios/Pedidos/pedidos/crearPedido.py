@@ -225,16 +225,21 @@ def handler(event, context):
         body = convertir_floats_a_decimal(body)
         table.put_item(Item=body)
         
-        # Actualizar historial_pedidos del usuario
         try:
             usuario_correo = body['usuario_correo']
             pedido_id = body['pedido_id']
+            local_id = body['local_id']
+
+            nuevo_registro = {
+                'pedido_id': pedido_id,
+                'local_id': local_id
+            }
             
             usuarios_table.update_item(
                 Key={'correo': usuario_correo},
                 UpdateExpression='SET historial_pedidos = list_append(if_not_exists(historial_pedidos, :empty_list), :pedido)',
                 ExpressionAttributeValues={
-                    ':pedido': [pedido_id],
+                    ':pedido': [nuevo_registro],
                     ':empty_list': []
                 }
             )

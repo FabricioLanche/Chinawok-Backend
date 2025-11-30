@@ -25,6 +25,27 @@ def decimal_to_float(obj):
     return obj
 
 
+def parse_pedido_item(item):
+    """
+    Convierte un item del historial a formato estandarizado {pedido_id, local_id}
+    Soporta tanto el formato antiguo (solo string) como el nuevo (objeto)
+    """
+    if isinstance(item, dict):
+        # Formato nuevo: {"pedido_id": "xxx", "local_id": "yyy"}
+        return {
+            "pedido_id": item.get("pedido_id"),
+            "local_id": item.get("local_id")
+        }
+    elif isinstance(item, str):
+        # Formato antiguo: solo pedido_id como string
+        # Retornar con local_id null (se debe buscar con scan)
+        return {
+            "pedido_id": item,
+            "local_id": None
+        }
+    return None
+
+
 def lambda_handler(event, context):
     """
     Lambda para obtener el historial de pedidos del usuario autenticado
@@ -33,6 +54,14 @@ def lambda_handler(event, context):
     Parámetros query opcionales:
     - detallado=true: Expande los detalles completos de cada pedido
     - limite=N: Limita el número de pedidos retornados (default: todos)
+    
+    Respuesta (modo simple):
+    {
+        "pedidos": [
+            {"pedido_id": "xxx", "local_id": "yyy"},
+            {"pedido_id": "zzz", "local_id": "www"}
+        ]
+    }
     """
     try:
         # Obtener usuario autenticado del authorizer (JWT)
@@ -62,13 +91,17 @@ def lambda_handler(event, context):
             }
         
         usuario = response['Item']
-        historial_pedidos = usuario.get('historial_pedidos', [])
+        historial_pedidos_raw = usuario.get('historial_pedidos', [])
+        
+        # Parsear items a formato estandarizado
+        historial_pedidos = [parse_pedido_item(item) for item in historial_pedidos_raw]
+        historial_pedidos = [p for p in historial_pedidos if p is not None]  # Filtrar inválidos
         
         # Aplicar límite si se especificó
         if limite and limite > 0:
             historial_pedidos = historial_pedidos[-limite:]  # Últimos N pedidos
         
-        # Si no se pide detallado, solo retornar los IDs
+        # Si no se pide detallado, retornar solo las tuplas {pedido_id, local_id}
         if not detallado:
             return {
                 'statusCode': 200,
@@ -77,7 +110,7 @@ def lambda_handler(event, context):
                     'message': 'Historial de pedidos obtenido',
                     'correo': correo_autenticado,
                     'total_pedidos': len(historial_pedidos),
-                    'pedidos_ids': historial_pedidos
+                    'pedidos': historial_pedidos  # Array de {pedido_id, local_id}
                 })
             }
         
@@ -85,30 +118,42 @@ def lambda_handler(event, context):
         pedidos_detallados = []
         pedidos_no_encontrados = []
         
-        for pedido_id in historial_pedidos:
+        for pedido_info in historial_pedidos:
+            pedido_id = pedido_info.get("pedido_id")
+            local_id = pedido_info.get("local_id")
+            
             try:
-                # Nota: necesitamos el local_id para hacer get_item
-                # Si no lo tenemos, debemos usar scan con filter
-                # Por eficiencia, usamos query en el índice o scan con filter
-                
-                # Scan buscando el pedido_id específico
-                scan_response = pedidos_table.scan(
-                    FilterExpression='pedido_id = :pid',
-                    ExpressionAttributeValues={':pid': pedido_id},
-                    Limit=1
-                )
-                
-                if scan_response.get('Items'):
-                    pedido = scan_response['Items'][0]
-                    # Convertir Decimal a tipos JSON serializables
-                    pedido = decimal_to_float(pedido)
-                    pedidos_detallados.append(pedido)
-                else:
-                    pedidos_no_encontrados.append(pedido_id)
+                # Si tenemos local_id, usar get_item (eficiente)
+                if local_id:
+                    get_response = pedidos_table.get_item(
+                        Key={'local_id': local_id, 'pedido_id': pedido_id}
+                    )
                     
+                    if 'Item' in get_response:
+                        pedido = get_response['Item']
+                        pedido = decimal_to_float(pedido)
+                        pedidos_detallados.append(pedido)
+                    else:
+                        pedidos_no_encontrados.append(pedido_info)
+                
+                # Si no tenemos local_id, hacer scan (menos eficiente, retrocompatibilidad)
+                else:
+                    scan_response = pedidos_table.scan(
+                        FilterExpression='pedido_id = :pid',
+                        ExpressionAttributeValues={':pid': pedido_id},
+                        Limit=1
+                    )
+                    
+                    if scan_response.get('Items'):
+                        pedido = scan_response['Items'][0]
+                        pedido = decimal_to_float(pedido)
+                        pedidos_detallados.append(pedido)
+                    else:
+                        pedidos_no_encontrados.append(pedido_info)
+                        
             except Exception as e:
                 print(f"Error obteniendo pedido {pedido_id}: {str(e)}")
-                pedidos_no_encontrados.append(pedido_id)
+                pedidos_no_encontrados.append(pedido_info)
         
         response_body = {
             'message': 'Historial de pedidos detallado obtenido',

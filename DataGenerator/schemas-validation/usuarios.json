@@ -58,7 +58,20 @@
     "historial_pedidos": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object",
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          },
+          "local_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "pedido_id",
+          "local_id"
+        ],
+        "additionalProperties": false
       },
       "default": []
     }
