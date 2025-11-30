@@ -113,6 +113,15 @@ functions:
           cors: true
           integration: lambda-proxy
 
+  obtenerResenasPorPedido:
+    handler: resenias/obtenerResenasPorPedido.lambda_handler
+    events:
+      - http:
+          path: /resenas/pedido/{pedido_id}
+          method: get
+          cors: true
+          integration: lambda-proxy
+
   editarResena:
     handler: resenias/editarResena.lambda_handler
     events:

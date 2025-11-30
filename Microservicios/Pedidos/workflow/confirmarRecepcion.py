@@ -4,8 +4,7 @@ import os
 from utils.dynamodb_helper import (
     obtener_pedido,
     marcar_empleado_libre,
-    finalizar_pedido,
-    agregar_pedido_a_usuario
+    finalizar_pedido
 )
 from utils.cors_utils import get_cors_headers
 from websockets.notificador import enviar_notificacion_pedido
@@ -59,14 +58,8 @@ def lambda_handler(event, context):
             except Exception as e:
                 print(f'Error liberando repartidor adicional {repartidor_dni}: {str(e)}')
         
-        # Finalizar pedido y agregar al historial del usuario
+        # Finalizar pedido y liberar empleados
         pedido_actualizado = finalizar_pedido(local_id, pedido_id)
-        usuario_correo = pedido.get('usuario_correo')
-        if usuario_correo:
-            try:
-                agregar_pedido_a_usuario(usuario_correo, pedido_id)
-            except Exception as e:
-                print(f'Error agregando pedido al historial del usuario: {str(e)}')
 
         # Enviar éxito a Step Functions si había taskToken
         task_token = pedido.get('task_token')

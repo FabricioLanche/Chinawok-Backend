@@ -332,6 +332,12 @@ resources:
                       "modo_realista": false
                     },
                     "ResultPath": "$.contadores",
+                    "Next": "EsperaInicialPedido"
+                  },
+                  "EsperaInicialPedido": {
+                    "Type": "Wait",
+                    "Seconds": 5,
+                    "Comment": "Espera inicial antes de comenzar el procesamiento del pedido",
                     "Next": "IntentarCocinar"
                   },
                   "IntentarCocinar": {
@@ -676,7 +682,6 @@ resources:
               NotificarUsuarioArn: !GetAtt WorkflowNotificarUsuarioLambdaFunction.Arn
               ConfirmarArn: !GetAtt WorkflowConfirmarRecepcionLambdaFunction.Arn
               LiberarPedidoArn: !GetAtt WorkflowLiberarPedidoLambdaFunction.Arn
-  
   Outputs:
     PedidosEventBusName:
       Description: Nombre del Event Bus de Pedidos

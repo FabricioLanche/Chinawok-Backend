@@ -2,8 +2,7 @@ import json
 from utils.dynamodb_helper import (
     obtener_pedido,
     marcar_empleado_libre,
-    finalizar_pedido,
-    agregar_pedido_a_usuario
+    finalizar_pedido
 )
 from utils.json_encoder import json_dumps
 
@@ -72,14 +71,7 @@ def lambda_handler(event, context):
         
         # Finalizar pedido (actualizar estado a recibido y cerrar historial)
         pedido_actualizado = finalizar_pedido(local_id, pedido_id)
-        
-        # Agregar pedido al historial del usuario
-        if usuario_correo:
-            try:
-                agregar_pedido_a_usuario(usuario_correo, pedido_id)
-            except Exception as e:
-                print(f'Error agregando pedido al historial del usuario: {str(e)}')
-        
+
         print(f'Pedido confirmado y completado: {pedido_id}')
         
         result = {
