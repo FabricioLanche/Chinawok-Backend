@@ -177,6 +177,9 @@ def handler(event, context):
         hora_inicio = datetime.utcnow()
         hora_fin = hora_inicio + timedelta(seconds=2.5)
 
+        # Asignar fecha de creación automáticamente
+        body['fecha_creacion'] = hora_inicio.isoformat() + 'Z'
+
         body['estado'] = 'procesando'
         body['historial_estados'] = [{
             'estado': 'procesando',
@@ -225,6 +228,7 @@ def handler(event, context):
         body = convertir_floats_a_decimal(body)
         table.put_item(Item=body)
         
+        # Actualizar historial_pedidos del usuario con {pedido_id, local_id}
         try:
             usuario_correo = body['usuario_correo']
             pedido_id = body['pedido_id']
