@@ -62,18 +62,27 @@ def handler(event, context):
                 }, default=str)
             }
 
+
         # Si solo se proporciona local_id, obtener todos los pedidos del local
         else:
             response = table.query(
                 KeyConditionExpression=Key('local_id').eq(local_id)
+            )
+            
+            # Ordenar pedidos por fecha_creacion (más recientes primero)
+            pedidos = response['Items']
+            pedidos_ordenados = sorted(
+                pedidos,
+                key=lambda x: x.get('fecha_creacion', ''),
+                reverse=True  # Descendente: más recientes primero
             )
 
             return {
                 'statusCode': 200,
                 'headers': cors_headers,
                 'body': json.dumps({
-                    'data': response['Items'],
-                    'count': len(response['Items'])
+                    'data': pedidos_ordenados,
+                    'count': len(pedidos_ordenados)
                 }, default=str)
             }
 
