@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     
     # Manejar invocación desde API Gateway (HTTP) o Step Functions (directo)
     if 'body' in event:
-        body = json.loads(event['body']) if isinstance(event['body'], str) else event['body'']
+        body = json.loads(event['body']) if isinstance(event['body'], str) else event['body']
     else:
         body = event
     
